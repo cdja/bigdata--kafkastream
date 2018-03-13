@@ -1,20 +1,33 @@
 package com.chedaojunan.report.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoadInfo {
-  // 交叉点坐标
-  private String crosspoint;
-  // 道路名称
-  private String roadname;
-  // 道路经纬度坐标
-  private String polyline;
-  // 道路等级
-  private int roadlevel;
-  // 道路最高限速
-  private int maxspeed;
-  // 临近路口
-  private String intersection;
-  // 距离临近路口距离
-  private double intersectiondistance;
+
+  @JsonProperty("crosspoint")
+  private String crosspoint; // 交叉点坐标
+
+  @JsonProperty("roadname")
+  private String roadname; // 道路名称
+
+  @JsonProperty("ployline")
+  private String polyline; // 道路经纬度坐标
+
+  @JsonProperty("roadlevel")
+  private int roadlevel; // 道路等级
+
+  @JsonProperty("maxspeed")
+  private int maxspeed; // 道路最高限速
+
+  @JsonProperty("intersection")
+  private String[] intersection; // 临近路口
+
+  @JsonProperty("intersectiondistance")
+  private double intersectiondistance; // 距离临近路口距离
 
   public String getCrosspoint() {
     return crosspoint;
@@ -56,11 +69,11 @@ public class RoadInfo {
     this.maxspeed = maxspeed;
   }
 
-  public String getIntersection() {
+  public String[] getIntersection() {
     return intersection;
   }
 
-  public void setIntersection(String intersection) {
+  public void setIntersection(String[] intersection) {
     this.intersection = intersection;
   }
 

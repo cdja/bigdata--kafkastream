@@ -4,11 +4,24 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class AutoGraspResponse {
+
+  @JsonProperty("status")
   private String status;// 结果状态0,表示失败,1:表示成功
+
+  @JsonProperty("count")
   private int count;// 返回结果的数目
+
+  @JsonProperty("info")
   private String info;// 返回状态说明
+
+  @JsonProperty("infocode")
   private String infoCode; // 返回信息码
+
+  @JsonProperty("roads")
   private List<RoadInfo> roadInfoList;// 抓路服务列表
 
   public String getStatus() {
@@ -51,7 +64,7 @@ public class AutoGraspResponse {
     this.roadInfoList = roadInfoList;
   }
 
-  /*@Override
+  @Override
   public boolean equals(Object other) {
     if (other == this) {
       return true;
@@ -60,6 +73,6 @@ public class AutoGraspResponse {
       return false;
     }
     AutoGraspResponse rhs = ((AutoGraspResponse) other);
-    return new EqualsBuilder().append(data, rhs.data).append(additionalProperties, rhs.additionalProperties).isEquals();
-  }*/
+    return new EqualsBuilder().append(roadInfoList, rhs.roadInfoList).append(roadInfoList, rhs.roadInfoList).isEquals();
+  }
 }

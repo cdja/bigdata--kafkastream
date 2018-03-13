@@ -22,6 +22,7 @@ public class AutoGraspRequestParam {
   public static final String TIME = "time";
   public static final String DIRECTION = "direction";
   public static final String SPEED = "speed";
+  public static final String EXTENSIONS = "extensions";
 
   @NotNull
   private String key; // 用户唯一标识
@@ -43,15 +44,19 @@ public class AutoGraspRequestParam {
 
   @NotNull
   @Size(min = 3, max = 200)
+
   private List<Integer> speed; // 行驶速度
 
-  public AutoGraspRequestParam(String key, String carId, List<Pair<Double, Double>> locations, List<Long> time, List<Integer> direction, List<Integer> speed) {
-    setKey(key);
+  private ExtensionParamEnum extensionParamEnum; // base or all
+
+  public AutoGraspRequestParam(String apiKey, String carId, List<Pair<Double, Double>> locations, List<Long> time, List<Integer> direction, List<Integer> speed, ExtensionParamEnum extensionParamEnum) {
+    setKey(apiKey);
     setCarId(carId);
     setLocations(locations);
     setTime(time);
     setDirection(direction);
     setSpeed(speed);
+    setExtensionParamEnum(extensionParamEnum);
   }
 
   public String getKey() {
@@ -100,6 +105,14 @@ public class AutoGraspRequestParam {
 
   public void setSpeed(List<Integer> speed) {
     this.speed = speed;
+  }
+
+  public ExtensionParamEnum getExtensionParamEnum() {
+    return extensionParamEnum;
+  }
+
+  public void setExtensionParamEnum(ExtensionParamEnum extensionParamEnum) {
+    this.extensionParamEnum = extensionParamEnum;
   }
 
   @Override

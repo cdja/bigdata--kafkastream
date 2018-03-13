@@ -18,7 +18,10 @@ public abstract class Client<R> {
   private static final ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
 
   private UrlUtils urlUtils;
+
   protected String url;
+  protected String apiVersion;
+  protected String pathSegment;
   protected String apiName;
 
   public static synchronized <T extends Client> T getInstance(T instance, Class<T> clazz, String apiName){
@@ -29,6 +32,8 @@ public abstract class Client<R> {
         instance = clazz.newInstance();
         EndpointConfiguration endpointConfiguration = EndpointConfiguration.getConfiguration(clazz);
         instance.setUrl(endpointConfiguration.getBaseUrl());
+        instance.setApiVersion(endpointConfiguration.getApiVersion());
+        instance.setPathSegment(endpointConfiguration.getPathSegment());
         instance.setUrlUtils(new UrlUtils(endpointConfiguration.getReadTimeout(), endpointConfiguration.getConnectTimeout(),
             endpointConfiguration.getMaxRetries(), endpointConfiguration.getMaxIdleConnection(), endpointConfiguration.getKeepAliveDuration()));
         instance.apiName = apiName;
@@ -42,6 +47,14 @@ public abstract class Client<R> {
 
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  public void setApiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
+  }
+
+  public void setPathSegment(String pathSegment) {
+    this.pathSegment = pathSegment;
   }
 
   /*R getClientJsonPojo(String url, Class<R> classType) {
@@ -62,7 +75,7 @@ public abstract class Client<R> {
   R getClientJsonPojo(okhttp3.Request request, Class<R> classType) {
     try {
       long start = Instant.now().toEpochMilli();
-      String json = urlUtils.getJsonFromUrl(request, apiName);
+      String json = urlUtils.getJsonFromRequest(request, apiName);
       if (json == null)
         return null;
       long end = Instant.now().toEpochMilli();

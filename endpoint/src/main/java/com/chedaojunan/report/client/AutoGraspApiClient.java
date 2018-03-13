@@ -9,9 +9,8 @@ import com.chedaojunan.report.model.AutoGraspResponse;
 import com.chedaojunan.report.utils.EndpointConstants;
 import com.chedaojunan.report.utils.PrepareAutoGraspRequest;
 
-import okhttp3.FormBody;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 
 public class AutoGraspApiClient extends Client<AutoGraspResponse> {
 
@@ -42,17 +41,27 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
   }
 
   protected Request createRequest(AutoGraspRequestParam autoGraspRequestParam) {
-    RequestBody requestBody = new FormBody.Builder()
-        .add(AutoGraspRequestParam.CAR_ID, autoGraspRequestParam.getCarId())
+    HttpUrl httpUrl = new HttpUrl.Builder()
+        .scheme("http")
+        .host(url)
+        .addPathSegment(apiVersion)
+        .addPathSegment(pathSegment)
+        .addQueryParameter(AutoGraspRequestParam.KEY, autoGraspRequestParam.getKey())
+        .addQueryParameter(AutoGraspRequestParam.CAR_ID, autoGraspRequestParam.getCarId())
+        .addQueryParameter(AutoGraspRequestParam.LOCATIONS, PrepareAutoGraspRequest.convertLocationsToRequestString(autoGraspRequestParam.getLocations()))
+        .addQueryParameter(AutoGraspRequestParam.TIME, PrepareAutoGraspRequest.convertTimeToRequstString(autoGraspRequestParam.getTime()))
+        .addQueryParameter(AutoGraspRequestParam.DIRECTION, PrepareAutoGraspRequest.convertDirectionToRequestString(autoGraspRequestParam.getDirection()))
+        .addQueryParameter(AutoGraspRequestParam.SPEED, PrepareAutoGraspRequest.convertSpeedToRequestString(autoGraspRequestParam.getSpeed()))
+        .addQueryParameter(AutoGraspRequestParam.EXTENSIONS, autoGraspRequestParam.getExtensionParamEnum().toString())
         .build();
+
     Request request = new Request.Builder()
-        .url(EndpointConstants.GAODE_AUTOGRASP_API_URL)
-        .post(requestBody)
+        .url(httpUrl)
         .build();
     return request;
   }
 
-  public AutoGraspResponse getAutoGraspResponse(AutoGraspRequestParam autoGraspRequestParam){
+  public AutoGraspResponse getAutoGraspResponse(AutoGraspRequestParam autoGraspRequestParam) {
     //return getClientJsonPojo(composeUrl(autoGraspRequestParam), AutoGraspResponse.class);
     return getClientJsonPojo(createRequest(autoGraspRequestParam), AutoGraspResponse.class);
   }

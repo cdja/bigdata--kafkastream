@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.deploy.net.HttpResponse;
+
 import okhttp3.ConnectionPool;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -17,6 +19,9 @@ public class UrlUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(UrlUtils.class);
 
+  private static final int SC_OK = 200;
+  private static final int SC_PARTIAL_CONTENT = 206;
+
   private OkHttpClient httpClient;
 
   public UrlUtils(int readTimeout, int connectTimeout, int maxRetry, int maxIdleConnection, int keepAliveDuration) {
@@ -26,26 +31,9 @@ public class UrlUtils {
         .readTimeout(readTimeout, TimeUnit.SECONDS)
         .connectTimeout(connectTimeout, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
+        .addInterceptor(new RetryInterceptor(maxRetry))
         //.cache(new Cache(cacheDir, cacheSize))
         .build();
-    httpClient.interceptors().add(new Interceptor() {
-      @Override
-      public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
-
-        Response response = doRequest(chain, request);
-        int tryCount = 0;
-        while (response == null && tryCount <= maxRetry) {
-          tryCount++;
-          // retry the request
-          response = doRequest(chain, request);
-        }
-        if (response == null) {
-          throw new IOException();
-        }
-        return response;
-      }
-    });
   }
 
   private Response doRequest(Interceptor.Chain chain, Request request) {
@@ -58,16 +46,15 @@ public class UrlUtils {
     return response;
   }
 
-  public String getJsonFromUrl(Request request, String apiName) {
-    //Request request = new Request.Builder().url(url).build();
+  public String getJsonFromRequest(Request request, String apiName) {
     String url = request.url().toString();
     try (Response response = httpClient.newCall(request).execute()) {
       if (response == null || response.body() == null || !response.isSuccessful()
-          || response.code() != 200 || response.code() != 206) {
+          || (response.code() != SC_OK && response.code() != SC_PARTIAL_CONTENT)) {
         LOG.error("invalid response {}", url);
         return null;
       }
-      return response.body().toString();
+      return response.body().string();
     } catch (SocketTimeoutException ste) {
       LOG.error("Socket Timeout Exception occurred while getting {} to API {} ", url, apiName);
       return null;
@@ -76,4 +63,43 @@ public class UrlUtils {
       return null;
     }
   }
+
+  public String getJsonFromUrl(String url, String apiName) {
+    Request request = new Request.Builder().url(url).build();
+    return getJsonFromRequest(request, apiName);
+  }
+
+  class RetryInterceptor implements Interceptor{
+    private int maxRetry;
+    public RetryInterceptor(int maxRetry){
+      setMaxRetry(maxRetry);
+    }
+
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+      Request request = chain.request();
+
+      Response response = doRequest(chain, request);
+      int tryCount = 0;
+      while (response == null && tryCount <= maxRetry) {
+        tryCount++;
+        // retry the request
+        response = doRequest(chain, request);
+      }
+      if (response == null) {
+        throw new IOException();
+      }
+      return response;
+    }
+
+    public int getMaxRetry() {
+      return maxRetry;
+    }
+
+    public void setMaxRetry(int maxRetry) {
+      this.maxRetry = maxRetry;
+    }
+  }
 }
+
+
