@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.chedaojunan.report.model.AutoGraspRequestParam;
+import com.chedaojunan.report.model.AutoGraspResponse;
 import com.chedaojunan.report.model.ExtensionParamEnum;
 import com.chedaojunan.report.utils.EndpointConstants;
 import com.chedaojunan.report.utils.EndpointUtils;
@@ -22,15 +24,12 @@ public class AutoGraspApiClientTest {
 
   private AutoGraspApiClient autoGraspApiClient;
   private AutoGraspRequestParam autoGraspRequestParam;
-  private ObjectMapper objectMapper;
 
   private UrlUtils urlUtils;
 
   @Before
   public void init() throws IOException {
     autoGraspApiClient = AutoGraspApiClient.getInstance();
-    objectMapper = ObjectMapperUtils.getObjectMapper();
-    //autoGraspApiClient.setUrlUtils(urlUtils);
     String apiKey = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_KEY);
     String carId = "abcd123456";
     long time1 = 1434077500;
@@ -61,12 +60,13 @@ public class AutoGraspApiClientTest {
     locations.add(location1);
     locations.add(location2);
     locations.add(location3);
-    autoGraspRequestParam = new AutoGraspRequestParam(apiKey, carId, locations, time, directions, speed, ExtensionParamEnum.ALL);
+    autoGraspRequestParam = new AutoGraspRequestParam(apiKey, carId, locations, time, directions, speed, ExtensionParamEnum.BASE);
   }
 
   @Test
   public void testGetAutoGraspResponse() throws Exception {
-    autoGraspApiClient.getAutoGraspResponse(autoGraspRequestParam);
-
+    AutoGraspResponse response = autoGraspApiClient.getAutoGraspResponse(autoGraspRequestParam);
+    Assert.assertNotNull(response);
+    Assert.assertEquals(3, response.getCount());
   }
 }

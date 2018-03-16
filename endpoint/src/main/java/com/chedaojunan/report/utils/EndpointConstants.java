@@ -19,6 +19,8 @@ public class EndpointConstants {
 
   // Gaode Rectangle traffic info API
   public static final String GAODE_RECTANGLE_API_URL = "gaode.rectangle.traffic.info.api.url";
+  public static final String GAODE_RECTANGLE_API_VERSION = "gaode.rectangle.traffic.info.api.version";
+  public static final String GAODE_RECTANGLE_API_PATH_SEGMENT = "gaode.rectangle.traffic.info.api.segment";
   public static final String GAODE_RECTANGLE_API_CONNECT_TIMEOUT = "gaode.rectangle.traffic.info.api.connect.timeout";
   public static final String GAODE_RECTANGLE_API_READ_TIMEOUT =  "gaode.rectangle.traffic.info.api.read.timeout";
   public static final String GAODE_RECTANGLE_API_MAX_CONNECT_RETRY =  "gaode.rectangle.traffic.info.api.max.connect.retry";

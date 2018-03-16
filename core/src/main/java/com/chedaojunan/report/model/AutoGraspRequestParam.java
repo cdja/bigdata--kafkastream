@@ -56,7 +56,10 @@ public class AutoGraspRequestParam {
     setTime(time);
     setDirection(direction);
     setSpeed(speed);
-    setExtensionParamEnum(extensionParamEnum);
+    if(extensionParamEnum != null)
+      setExtensionParamEnum(extensionParamEnum);
+    else
+      setExtensionParamEnum(ExtensionParamEnum.BASE);
   }
 
   public String getKey() {

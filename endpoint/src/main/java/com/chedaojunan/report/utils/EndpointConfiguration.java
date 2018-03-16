@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
+import com.chedaojunan.report.client.RectangleTrafficInfoClient;
+import com.chedaojunan.report.model.RectangleTrafficInfoRequest;
 
 public class EndpointConfiguration {
 
@@ -76,6 +78,14 @@ public class EndpointConfiguration {
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_AUTOGRASP_API_READ_TIMEOUT)),
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_AUTOGRASP_API_CONNECT_TIMEOUT)),
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_AUTOGRASP_API_MAX_CONNECT_RETRY)),
+          Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_MAX_IDLE_CONNECTIONS)),
+          Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_KEEP_ALIVE_DURATION))));
+      settingsMap.put(RectangleTrafficInfoClient.class, new EndpointConfiguration(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_RECTANGLE_API_URL),
+          EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_RECTANGLE_API_VERSION),
+          EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_RECTANGLE_API_PATH_SEGMENT),
+          Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_RECTANGLE_API_READ_TIMEOUT)),
+          Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_RECTANGLE_API_CONNECT_TIMEOUT)),
+          Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_RECTANGLE_API_MAX_CONNECT_RETRY)),
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_MAX_IDLE_CONNECTIONS)),
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_KEEP_ALIVE_DURATION))));
     }

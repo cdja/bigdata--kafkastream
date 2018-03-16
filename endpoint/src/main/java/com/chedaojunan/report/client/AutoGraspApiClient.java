@@ -1,5 +1,7 @@
 package com.chedaojunan.report.client;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,15 +30,16 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
     return getInstance(instance, AutoGraspApiClient.class, API_NAME);
   }
 
+  /* not needed */
   protected String composeUrl(AutoGraspRequestParam autoGraspRequestParam) {
     //TODO: add in validation for locations.
-    String carIdPara = StringUtils.join(AutoGraspRequestParam.CAR_ID, autoGraspRequestParam.getCarId(), EndpointConstants.EQUAL_SIGN_DELIMITER);
-    String keyPara = StringUtils.join(AutoGraspRequestParam.KEY, autoGraspRequestParam.getKey(), EndpointConstants.EQUAL_SIGN_DELIMITER);
-    String locationsPara = StringUtils.join(AutoGraspRequestParam.LOCATIONS, PrepareAutoGraspRequest.convertLocationsToRequestString(autoGraspRequestParam.getLocations()), EndpointConstants.EQUAL_SIGN_DELIMITER);
-    String timePara = StringUtils.join(AutoGraspRequestParam.TIME, PrepareAutoGraspRequest.convertTimeToRequstString(autoGraspRequestParam.getTime()), EndpointConstants.EQUAL_SIGN_DELIMITER);
-    String directionPara = StringUtils.join(AutoGraspRequestParam.DIRECTION, PrepareAutoGraspRequest.convertDirectionToRequestString(autoGraspRequestParam.getDirection()), EndpointConstants.EQUAL_SIGN_DELIMITER);
-    String speedPara = StringUtils.join(AutoGraspRequestParam.SPEED, PrepareAutoGraspRequest.convertSpeedToRequestString(autoGraspRequestParam.getSpeed()), EndpointConstants.EQUAL_SIGN_DELIMITER);
-    String requestPara = StringUtils.join(keyPara, carIdPara, locationsPara, timePara, directionPara, speedPara, EndpointConstants.AMPERSAND_DELIMITER);
+    String carIdPara = String.join(EndpointConstants.EQUAL_SIGN_DELIMITER, AutoGraspRequestParam.CAR_ID, autoGraspRequestParam.getCarId());
+    String keyPara = String.join(EndpointConstants.EQUAL_SIGN_DELIMITER, AutoGraspRequestParam.KEY, autoGraspRequestParam.getKey());
+    String locationsPara = String.join(EndpointConstants.EQUAL_SIGN_DELIMITER, AutoGraspRequestParam.LOCATIONS, PrepareAutoGraspRequest.convertLocationsToRequestString(autoGraspRequestParam.getLocations()));
+    String timePara = String.join(EndpointConstants.EQUAL_SIGN_DELIMITER, AutoGraspRequestParam.TIME, PrepareAutoGraspRequest.convertTimeToRequstString(autoGraspRequestParam.getTime()));
+    String directionPara = String.join(EndpointConstants.EQUAL_SIGN_DELIMITER, AutoGraspRequestParam.DIRECTION, PrepareAutoGraspRequest.convertDirectionToRequestString(autoGraspRequestParam.getDirection()));
+    String speedPara = String.join(EndpointConstants.EQUAL_SIGN_DELIMITER, AutoGraspRequestParam.SPEED, PrepareAutoGraspRequest.convertSpeedToRequestString(autoGraspRequestParam.getSpeed()));
+    String requestPara = String.join(EndpointConstants.AMPERSAND_DELIMITER, Arrays.asList(keyPara, carIdPara, locationsPara, timePara, directionPara, speedPara));
     return String.join(EndpointConstants.QUESTION_MARK_DELIMITER, url, requestPara);
   }
 
@@ -62,7 +65,6 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
   }
 
   public AutoGraspResponse getAutoGraspResponse(AutoGraspRequestParam autoGraspRequestParam) {
-    //return getClientJsonPojo(composeUrl(autoGraspRequestParam), AutoGraspResponse.class);
     return getClientJsonPojo(createRequest(autoGraspRequestParam), AutoGraspResponse.class);
   }
 

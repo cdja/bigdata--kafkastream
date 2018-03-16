@@ -57,21 +57,6 @@ public abstract class Client<R> {
     this.pathSegment = pathSegment;
   }
 
-  /*R getClientJsonPojo(String url, Class<R> classType) {
-    try {
-      long start = Instant.now().toEpochMilli();
-      String json = urlUtils.getJsonFromUrl(url, apiName);
-      if (json == null)
-        return null;
-      long end = Instant.now().toEpochMilli();
-      LOG.info("api query latency: {} for API {} ", (end - start), apiName);
-      return objectMapper.readValue(json, classType);
-    } catch (IOException e) {
-      LOG.error("failed to convert to {} from {}", classType, url, e);
-      return null;
-    }
-  }*/
-
   R getClientJsonPojo(okhttp3.Request request, Class<R> classType) {
     try {
       long start = Instant.now().toEpochMilli();
@@ -87,7 +72,23 @@ public abstract class Client<R> {
     }
   }
 
-  /*List<R> getClientJsonListPojo(String url, Class<R> classType) {
+  /*
+  R getClientJsonPojo(String url, Class<R> classType) {
+    try {
+      long start = Instant.now().toEpochMilli();
+      String json = urlUtils.getJsonFromUrl(url, apiName);
+      if (json == null)
+        return null;
+      long end = Instant.now().toEpochMilli();
+      LOG.info("api query latency: {} for API {} ", (end - start), apiName);
+      return objectMapper.readValue(json, classType);
+    } catch (IOException e) {
+      LOG.error("failed to convert to {} from {}", classType, url, e);
+      return null;
+    }
+  }
+
+  List<R> getClientJsonListPojo(String url, Class<R> classType) {
     try {
       long start = Instant.now().toEpochMilli();
       String json = urlUtils.getJsonFromUrl(url, apiName);
