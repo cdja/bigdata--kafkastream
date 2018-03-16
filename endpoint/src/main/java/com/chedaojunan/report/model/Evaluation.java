@@ -20,68 +20,68 @@ public class Evaluation {
   private static final String DESCRIPTION = "description";
 
   @JsonProperty(EXPEDITE)
-  private String expedite; // 畅通所占百分比
+  private String[] expedite; // 畅通所占百分比
 
   @JsonProperty(CONGESTED)
-  private String congested; // 缓行所占百分比
+  private String[] congested; // 缓行所占百分比
 
   @JsonProperty(BLOCKED)
-  private String blocked; // 拥堵所占百分比
+  private String[] blocked; // 拥堵所占百分比
 
   @JsonProperty(UNKNOWN)
-  private String unknown; // 未知路段所占百分比
+  private String[] unknown; // 未知路段所占百分比
 
   @JsonProperty(STATUS)
-  private String status; // 路况
+  private String[] status; // 路况
 
   @JsonProperty(DESCRIPTION)
-  private String description; // 道路描述
+  private String[] description; // 道路描述
 
-  public String getExpedite() {
+  public String[] getExpedite() {
     return expedite;
   }
 
-  public void setExpedite(String expedite) {
+  public void setExpedite(String[] expedite) {
     this.expedite = expedite;
   }
 
-  public String getCongested() {
+  public String[] getCongested() {
     return congested;
   }
 
-  public void setCongested(String congested) {
+  public void setCongested(String[] congested) {
     this.congested = congested;
   }
 
-  public String getBlocked() {
+  public String[] getBlocked() {
     return blocked;
   }
 
-  public void setBlocked(String blocked) {
+  public void setBlocked(String[] blocked) {
     this.blocked = blocked;
   }
 
-  public String getUnknown() {
+  public String[] getUnknown() {
     return unknown;
   }
 
-  public void setUnknown(String unknown) {
+  public void setUnknown(String[] unknown) {
     this.unknown = unknown;
   }
 
-  public String getStatus() {
+  public String[] getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(String[] status) {
     this.status = status;
   }
 
-  public String getDescription() {
+  public String[] getDescription() {
     return description;
   }
 
-  public void setDescription(String description) {
+  public void setDescription(String[] description) {
     this.description = description;
   }
 

@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.chedaojunan.report.model.AutoGraspRequestParam;
 import com.chedaojunan.report.model.AutoGraspResponse;
 import com.chedaojunan.report.model.ExtensionParamEnum;
+import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
 import com.chedaojunan.report.utils.EndpointConstants;
 import com.chedaojunan.report.utils.EndpointUtils;
 import com.chedaojunan.report.utils.ObjectMapperUtils;
@@ -68,5 +69,11 @@ public class AutoGraspApiClientTest {
     AutoGraspResponse response = autoGraspApiClient.getAutoGraspResponse(autoGraspRequestParam);
     Assert.assertNotNull(response);
     Assert.assertEquals(3, response.getCount());
+  }
+
+  @Test
+  public void testGetTrafficInfoFromAutoGraspResponse() {
+    List<RectangleTrafficInfoResponse> responseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequestParam);
+    Assert.assertEquals(2, responseList.size());
   }
 }
