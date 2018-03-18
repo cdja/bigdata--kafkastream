@@ -2,9 +2,11 @@ package com.chedaojunan.report.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -93,29 +95,28 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
         autoGraspResponse.getRoadInfoList().size() != dataCount) {
       throw new IllegalArgumentException("autoGrasp locations cannot be matched with roads in response");
     }
-    Map<String, RoadInfo> requestGpsToCrossPointMap = RequestUtils.putTwoListsIntoMap(autoGraspRequestGpsList, autoGraspResponse.getRoadInfoList());
-    String trafficInfoRequestRectangleString =
-        requestGpsToCrossPointMap.entrySet().stream()
-            .map(e -> {
-              //use request GPS is crosspoint is "0,0"
-              String crossPoint = e.getValue().getCrosspoint();
-              if (crossPoint.equals(INVALID_CROSSPOINT))
-                return e.getKey();
-              else
-                return crossPoint;
-            }).collect(Collectors.joining(SEMI_COLON));
 
-    String[] rectangleStringArray = trafficInfoRequestRectangleString.split(SEMI_COLON);
-    String trafficInfoRequestRectangle;
-    List<RectangleTrafficInfoResponse> trafficInfoResponseList = new ArrayList<>();
     String apiKey = autoGraspRequestParam.getKey();
     RectangleTrafficInfoClient rectangleTrafficInfoClient = RectangleTrafficInfoClient.getInstance();
-    for (int i = 0; i < rectangleStringArray.length - 1; i++) {
-      trafficInfoRequestRectangle = String.join(SEMI_COLON, rectangleStringArray[i], rectangleStringArray[i + 1]);
-      RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, null);
-      trafficInfoResponseList.add(rectangleTrafficInfoClient.getTrafficInfoResponse(trafficInfoRequest));
-    }
+    List<RectangleTrafficInfoResponse> trafficInfoResponseList =
+        IntStream.range(1, Math.min(autoGraspRequestGpsList.size(), autoGraspResponse.getCount()))
+        .mapToObj(index -> {
+          String validGPS1 = getValidGPS(index-1, autoGraspRequestGpsList, autoGraspResponse.getRoadInfoList());
+          String validGPS2 = getValidGPS(index, autoGraspRequestGpsList, autoGraspResponse.getRoadInfoList());
+          String trafficInfoRequestRectangle = String.join(SEMI_COLON, validGPS1, validGPS2);
+          RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, null);
+          return rectangleTrafficInfoClient.getTrafficInfoResponse(trafficInfoRequest);
+        }).collect(Collectors.toList());
+
     return trafficInfoResponseList;
+  }
+
+  public String getValidGPS(int index, List<String> autoGraspRequestGpsList, List<RoadInfo> autoGraspResponseRoadInfoList) {
+    String crosspoint = autoGraspResponseRoadInfoList.get(index).getCrosspoint();
+    if(crosspoint.equals(INVALID_CROSSPOINT))
+      return autoGraspRequestGpsList.get(index);
+    else
+      return crosspoint;
   }
 
 }
