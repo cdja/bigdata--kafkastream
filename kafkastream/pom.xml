@@ -22,8 +22,17 @@
     </dependency>
     <dependency>
       <groupId>com.chedaojunan.report</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>endpoint</artifactId>
       <version>${project.parent.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.aliyun.datahub</groupId>
+      <artifactId>aliyun-sdk-datahub</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

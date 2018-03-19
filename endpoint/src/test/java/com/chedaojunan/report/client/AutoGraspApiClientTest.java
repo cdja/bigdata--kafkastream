@@ -14,12 +14,8 @@ import com.chedaojunan.report.model.ExtensionParamEnum;
 import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
 import com.chedaojunan.report.utils.EndpointConstants;
 import com.chedaojunan.report.utils.EndpointUtils;
-import com.chedaojunan.report.utils.ObjectMapperUtils;
 import com.chedaojunan.report.utils.Pair;
 import com.chedaojunan.report.utils.UrlUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static org.junit.Assert.*;
 
 public class AutoGraspApiClientTest {
 
@@ -40,17 +36,17 @@ public class AutoGraspApiClientTest {
     time.add(time1);
     time.add(time2);
     time.add(time3);
-    int direction1 = 1;
-    int direction2 = 1;
-    int direction3 = 2;
-    List<Integer> directions = new ArrayList<>();
+    Double direction1 = 1.0;
+    Double direction2 = 1.0;
+    Double direction3 = 2.0;
+    List<Double> directions = new ArrayList<>();
     directions.add(direction1);
     directions.add(direction2);
     directions.add(direction3);
-    int speed1 = 1;
-    int speed2 = 1;
-    int speed3 = 2;
-    List<Integer> speed = new ArrayList<>();
+    Double speed1 = 1.0;
+    Double speed2 = 1.0;
+    Double speed3 = 2.0;
+    List<Double> speed = new ArrayList<>();
     speed.add(speed1);
     speed.add(speed2);
     speed.add(speed3);
