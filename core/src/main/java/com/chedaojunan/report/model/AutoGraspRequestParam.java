@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.chedaojunan.report.utils.Pair;
 import com.chedaojunan.report.utils.PrepareAutoGraspRequest;
-import com.sun.istack.internal.NotNull;
+import javax.validation.constraints.NotNull;
 
 /**
  * 抓路服务请求参数实体类
