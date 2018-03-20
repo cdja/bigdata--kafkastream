@@ -19,7 +19,7 @@ public class SampledDataCleanAndRet {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
 
     // 获取60s内，分组排序后的数据，判断采样清洗
-    public List<FixedFrequencyAccessData> sampleKafkaData(List<FixedFrequencyAccessData> list) throws IOException{
+    public List<FixedFrequencyAccessData> sampleKafkaData(List list) throws IOException{
 
         int listSize = list.size();
         List sampleOver = new ArrayList(); // 用list存取样后数据

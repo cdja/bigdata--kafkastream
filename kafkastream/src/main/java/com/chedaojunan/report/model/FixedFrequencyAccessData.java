@@ -36,6 +36,46 @@ public class FixedFrequencyAccessData {
     private String target_lane_info		; // 目标车道信息编码（虚实、黄白、单双）
     private String source_id            ; // 数据来源id
 
+    public FixedFrequencyAccessData(){}
+
+    public FixedFrequencyAccessData(String device_id, String device_imei, String trip_id, String local_time, String server_time,
+                                    String event_id_list, String file_id_list, double lat, double longi, double alt,
+                                    double gps_speed, double speed, double yawrate, double accelerate_z, double rollrate,
+                                    double accelerate_x, double pitchrate, double accelerate_y, double target_distance,
+                                    double target_speed, String target_id, String target_type, double collision_time,
+                                    int monitoring_car_num, int monitoring_lane_num, double deviation_distance,
+                                    double deviation_speed, String target_lane_info, String source_id) {
+        this.device_id = device_id;
+        this.device_imei = device_imei;
+        this.trip_id = trip_id;
+        this.local_time = local_time;
+        this.server_time = server_time;
+        this.event_id_list = event_id_list;
+        this.file_id_list = file_id_list;
+        this.lat = lat;
+        this.longi = longi;
+        this.alt = alt;
+        this.gps_speed = gps_speed;
+        this.speed = speed;
+        this.yawrate = yawrate;
+        this.accelerate_z = accelerate_z;
+        this.rollrate = rollrate;
+        this.accelerate_x = accelerate_x;
+        this.pitchrate = pitchrate;
+        this.accelerate_y = accelerate_y;
+        this.target_distance = target_distance;
+        this.target_speed = target_speed;
+        this.target_id = target_id;
+        this.target_type = target_type;
+        this.collision_time = collision_time;
+        this.monitoring_car_num = monitoring_car_num;
+        this.monitoring_lane_num = monitoring_lane_num;
+        this.deviation_distance = deviation_distance;
+        this.deviation_speed = deviation_speed;
+        this.target_lane_info = target_lane_info;
+        this.source_id = source_id;
+    }
+
     public String getDevice_id() {
         return device_id;
     }
