@@ -24,16 +24,16 @@ public class FixedFrequencyIntegrationData {
     private double accelerate_x		    ; // 线性加速度 （X方向）
     private double pitchrate			; // 角速度 （Y方向）
     private double accelerate_y		    ; // 线性加速度 （Y方向）
-    private String road_api_status		; // 抓路接口返回结果状态：0表示请求失败；1表示请求成功',
+    private int road_api_status		    ; // 抓路接口返回结果状态：0表示请求失败；1表示请求成功',
     private String polyline				; // 通过抓路修正的经纬度',
     private String roadname				; // 道路名称',
-    private String roadlevel			; // 道路等级',
-    private String maxspeed				; // 道路最高限速',
+    private int roadlevel			    ; // 道路等级',
+    private int maxspeed				; // 道路最高限速',
     private String intersection			; // 临近路口',
     private String intersectiondistance	; // 距离临近路口距离',
     private String traffic_request_time	; // 调用交通态势接口的时间戳',
     private String traffic_request_id	; // 每次调用输入变量id （在调用接口中赋一个唯一值）',
-    private String traffic_api_status	; // 交通态势接口返回结果状态：0表示请求失败；1表示请求成功',
+    private int traffic_api_status	    ; // 交通态势接口返回结果状态：0表示请求失败；1表示请求成功',
     private String congestion_info		; // 交通态势，以key-avalue对的方式存储',
     private double target_distance		; // 前车距离
     private double target_speed			; // 前车车速
@@ -53,9 +53,9 @@ public class FixedFrequencyIntegrationData {
                                          String server_time, String event_id_list, String file_id_list, double lat,
                                          double longi, double alt, double gps_speed, double speed, double yawrate,
                                          double accelerate_z, double rollrate, double accelerate_x, double pitchrate,
-                                         double accelerate_y, String road_api_status, String polyline, String roadname,
-                                         String roadlevel, String maxspeed, String intersection, String intersectiondistance,
-                                         String traffic_request_time, String traffic_request_id, String traffic_api_status,
+                                         double accelerate_y, int road_api_status, String polyline, String roadname,
+                                         int roadlevel, int maxspeed, String intersection, String intersectiondistance,
+                                         String traffic_request_time, String traffic_request_id, int traffic_api_status,
                                          String congestion_info, double target_distance, double target_speed, String target_id,
                                          String target_type, double collision_time, int monitoring_car_num, int monitoring_lane_num,
                                          double deviation_distance, double deviation_speed, String target_lane_info, String source_id) {
@@ -245,11 +245,11 @@ public class FixedFrequencyIntegrationData {
         this.accelerate_y = accelerate_y;
     }
 
-    public String getRoad_api_status() {
+    public int getRoad_api_status() {
         return road_api_status;
     }
 
-    public void setRoad_api_status(String road_api_status) {
+    public void setRoad_api_status(int road_api_status) {
         this.road_api_status = road_api_status;
     }
 
@@ -269,19 +269,19 @@ public class FixedFrequencyIntegrationData {
         this.roadname = roadname;
     }
 
-    public String getRoadlevel() {
+    public int getRoadlevel() {
         return roadlevel;
     }
 
-    public void setRoadlevel(String roadlevel) {
+    public void setRoadlevel(int roadlevel) {
         this.roadlevel = roadlevel;
     }
 
-    public String getMaxspeed() {
+    public int getMaxspeed() {
         return maxspeed;
     }
 
-    public void setMaxspeed(String maxspeed) {
+    public void setMaxspeed(int maxspeed) {
         this.maxspeed = maxspeed;
     }
 
@@ -317,11 +317,11 @@ public class FixedFrequencyIntegrationData {
         this.traffic_request_id = traffic_request_id;
     }
 
-    public String getTraffic_api_status() {
+    public int getTraffic_api_status() {
         return traffic_api_status;
     }
 
-    public void setTraffic_api_status(String traffic_api_status) {
+    public void setTraffic_api_status(int traffic_api_status) {
         this.traffic_api_status = traffic_api_status;
     }
 
@@ -442,16 +442,16 @@ public class FixedFrequencyIntegrationData {
                 ", accelerate_x=" + accelerate_x +
                 ", pitchrate=" + pitchrate +
                 ", accelerate_y=" + accelerate_y +
-                ", road_api_status='" + road_api_status + '\'' +
+                ", road_api_status=" + road_api_status +
                 ", polyline='" + polyline + '\'' +
                 ", roadname='" + roadname + '\'' +
-                ", roadlevel='" + roadlevel + '\'' +
-                ", maxspeed='" + maxspeed + '\'' +
+                ", roadlevel=" + roadlevel +
+                ", maxspeed=" + maxspeed +
                 ", intersection='" + intersection + '\'' +
                 ", intersectiondistance='" + intersectiondistance + '\'' +
                 ", traffic_request_time='" + traffic_request_time + '\'' +
                 ", traffic_request_id='" + traffic_request_id + '\'' +
-                ", traffic_api_status='" + traffic_api_status + '\'' +
+                ", traffic_api_status=" + traffic_api_status +
                 ", congestion_info='" + congestion_info + '\'' +
                 ", target_distance=" + target_distance +
                 ", target_speed=" + target_speed +

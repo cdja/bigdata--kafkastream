@@ -20,7 +20,7 @@ public class DateUtilsTest {
 
     @Test
     public void testGetYMD() throws Exception {
-        Assert.assertEquals("2018-03-19", dateUtils.getYMD());
+        Assert.assertEquals("20180320", dateUtils.getYMD());
     }
 
     @Test
