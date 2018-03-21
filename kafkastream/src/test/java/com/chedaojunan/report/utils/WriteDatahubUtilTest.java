@@ -1,5 +1,6 @@
 package com.chedaojunan.report.utils;
 
+import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ public class WriteDatahubUtilTest {
         double lat = 27.662769;
         double longi = 106.909639;
         double alt = 80.34;
+        double direction = 80.3;
         double gps_speed = 34.8;
         double speed = 38.4;
         double yawrate = 1.0;
@@ -59,7 +61,7 @@ public class WriteDatahubUtilTest {
         integrationData = new FixedFrequencyIntegrationData(
                 device_id, device_imei, trip_id, local_time,
                 server_time, event_id_list, file_id_list, lat,
-                longi, alt, gps_speed, speed, yawrate,
+                longi, alt, direction, gps_speed, speed, yawrate,
                 accelerate_z, rollrate, accelerate_x, pitchrate,
                 accelerate_y, road_api_status, polyline, roadname,
                 roadlevel, maxspeed, intersection, intersectiondistance,

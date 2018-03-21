@@ -4,6 +4,7 @@ import com.chedaojunan.report.common.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class DateUtils {
 
@@ -46,6 +47,32 @@ public class DateUtils {
 		long localMills = cal.getTimeInMillis();
 
 		return localMills;
+	}
+
+	// 根据时间戳获取年月日
+	public String getYMDFromTime(long mill) {
+		Date date = new Date(mill);
+		String strs = "";
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			strs = sdf.format(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return strs;
+	}
+
+	// 根据时间戳获取时分
+	public String getHMFromTime(long mill) {
+		Date date = new Date(mill);
+		String strs = "";
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("HH_mm");
+			strs = sdf.format(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return strs;
 	}
 
 }

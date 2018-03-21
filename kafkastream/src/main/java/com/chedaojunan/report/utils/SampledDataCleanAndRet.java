@@ -4,6 +4,7 @@ import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.chedaojunan.report.model.AutoGraspRequestParam;
 import com.chedaojunan.report.model.AutoGraspResponse;
 import com.chedaojunan.report.model.ExtensionParamEnum;
+import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;

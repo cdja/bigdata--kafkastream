@@ -1,6 +1,7 @@
 package com.chedaojunan.report.utils;
 
 import com.chedaojunan.report.model.AutoGraspRequestParam;
+import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,13 +55,13 @@ public class SampledDataCleanAndRetTest {
     }
 
     @Test
-    public void testSampleKafkaData() throws Exception{
+    public void testSampleKafkaData() throws IOException {
         List listResult = sampledDataCleanAndRet.sampleKafkaData(list);
-        Assert.assertEquals(1, listResult.size());
+        Assert.assertEquals(3, listResult.size());
     }
 
     @Test
-    public void testAutoGraspRequestParamRet() throws Exception{
+    public void testAutoGraspRequestParamRet() throws IOException{
         AutoGraspRequestParam autoGraspRequestParam = sampledDataCleanAndRet.autoGraspRequestParamRet(sampledDataCleanAndRet.sampleKafkaData(list));
         Assert.assertNotNull(autoGraspRequestParam);
     }
