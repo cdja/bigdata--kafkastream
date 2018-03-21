@@ -35,7 +35,7 @@ public class SampledDataCleanAndRet {
 //            for (int i = 0; i < sampleOver.size() - 1; i++) {
 //                FixedFrequencyAccessData t = (FixedFrequencyAccessData) sampleOver.get(i);
 //                FixedFrequencyAccessData t1 = (FixedFrequencyAccessData) sampleOver.get(i + 1);
-//                if (t.getServer_time() == t1.getServer_time() || (t.getLat() == t1.getLat() && t.getLongi() == t1.getLongi())) {
+//                if (t.getLat() == t1.getLat() && t.getLongi() == t1.getLongi()) {
 //
 //                }
 //            }
@@ -84,6 +84,7 @@ public class SampledDataCleanAndRet {
         FixedFrequencyAccessData accessData2;
         List<Long> times = new ArrayList<>();
         List<Double> directions = new ArrayList<>();
+        Double direction;
         AzimuthFromLogLatUtil azimuthFromLogLatUtil;
         AzimuthFromLogLatUtil A;
         AzimuthFromLogLatUtil B;
@@ -92,10 +93,11 @@ public class SampledDataCleanAndRet {
         String carId = "";
         Pair<Double, Double> location;
         List<Pair<Double, Double>> locations = new ArrayList<>();
+        DateUtils dateUtils = new DateUtils();
         int listSampleCount = listSample.size();
         for (int i = 0; i < listSampleCount; i++) {
             if (i==listSampleCount-1) {
-                accessData1 = listSample.get(i);
+                accessData1 = listSample.get(i-1);
                 accessData2 = listSample.get(i);
             } else {
                 accessData1 = listSample.get(i);
@@ -108,13 +110,19 @@ public class SampledDataCleanAndRet {
             }
 
             // TODO 需确认数据端收集的数据格式，并转化为UTC格式
-            times.add(accessData1.getServer_time()==""?0L:Long.valueOf(accessData1.getServer_time()));
+            times.add(accessData1.getServer_time()==""?0L:dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData1.getServer_time())));
 
             // 根据经纬度计算得出
             A = new AzimuthFromLogLatUtil(accessData1.getLongi(), accessData1.getLat());
             B = new AzimuthFromLogLatUtil(accessData2.getLongi(), accessData2.getLat());
             azimuthFromLogLatUtil = new AzimuthFromLogLatUtil();
-            directions.add(azimuthFromLogLatUtil.getAngle(A, B));
+
+            direction = azimuthFromLogLatUtil.getAngle(A, B);
+            if (!Double.isNaN(direction)) {
+                directions.add(direction);
+            } else {
+                directions.add(0.0);
+            }
 
             speeds.add(accessData1.getSpeed());
 
