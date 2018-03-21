@@ -8,7 +8,6 @@ import com.aliyun.datahub.model.PutRecordsResult;
 import com.aliyun.datahub.model.RecordEntry;
 import com.aliyun.datahub.model.ShardEntry;
 import com.aliyun.datahub.wrapper.Topic;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;

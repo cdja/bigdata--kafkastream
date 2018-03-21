@@ -1,6 +1,5 @@
 package com.chedaojunan.report.utils;
 
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

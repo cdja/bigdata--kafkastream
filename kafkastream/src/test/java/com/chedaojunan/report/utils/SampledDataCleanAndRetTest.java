@@ -1,7 +1,6 @@
 package com.chedaojunan.report.utils;
 
 import com.chedaojunan.report.model.AutoGraspRequestParam;
-import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
