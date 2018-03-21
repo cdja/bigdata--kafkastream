@@ -16,6 +16,7 @@ public class FixedFrequencyAccessData {
     private double lat					; // 经度
     private double longi				; // 纬度
     private double alt					; // 海拔
+    private	double direction            ; // 方向角
     private double gps_speed			; // GPS速度
     private double speed				; // 本车速度，跟IMU融合之后的速度
     private double yawrate				; // 偏航角速度 （Z方向）
@@ -39,7 +40,7 @@ public class FixedFrequencyAccessData {
     public FixedFrequencyAccessData(){}
 
     public FixedFrequencyAccessData(String device_id, String device_imei, String trip_id, String local_time, String server_time,
-                                    String event_id_list, String file_id_list, double lat, double longi, double alt,
+                                    String event_id_list, String file_id_list, double lat, double longi, double alt, double direction,
                                     double gps_speed, double speed, double yawrate, double accelerate_z, double rollrate,
                                     double accelerate_x, double pitchrate, double accelerate_y, double target_distance,
                                     double target_speed, String target_id, String target_type, double collision_time,
@@ -55,6 +56,7 @@ public class FixedFrequencyAccessData {
         this.lat = lat;
         this.longi = longi;
         this.alt = alt;
+        this.direction = direction;
         this.gps_speed = gps_speed;
         this.speed = speed;
         this.yawrate = yawrate;
@@ -154,6 +156,14 @@ public class FixedFrequencyAccessData {
 
     public void setAlt(double alt) {
         this.alt = alt;
+    }
+
+    public double getDirection() {
+        return direction;
+    }
+
+    public void setDirection(double direction) {
+        this.direction = direction;
     }
 
     public double getGps_speed() {
@@ -308,38 +318,4 @@ public class FixedFrequencyAccessData {
         this.source_id = source_id;
     }
 
-    @Override
-    public String toString() {
-        return "FixedFrequencyAccessData{" +
-                "device_id='" + device_id + '\'' +
-                ", device_imei='" + device_imei + '\'' +
-                ", trip_id='" + trip_id + '\'' +
-                ", local_time='" + local_time + '\'' +
-                ", server_time='" + server_time + '\'' +
-                ", event_id_list='" + event_id_list + '\'' +
-                ", file_id_list='" + file_id_list + '\'' +
-                ", lat=" + lat +
-                ", longi=" + longi +
-                ", alt=" + alt +
-                ", gps_speed=" + gps_speed +
-                ", speed=" + speed +
-                ", yawrate=" + yawrate +
-                ", accelerate_z=" + accelerate_z +
-                ", rollrate=" + rollrate +
-                ", accelerate_x=" + accelerate_x +
-                ", pitchrate=" + pitchrate +
-                ", accelerate_y=" + accelerate_y +
-                ", target_distance=" + target_distance +
-                ", target_speed=" + target_speed +
-                ", target_id='" + target_id + '\'' +
-                ", target_type='" + target_type + '\'' +
-                ", collision_time=" + collision_time +
-                ", monitoring_car_num=" + monitoring_car_num +
-                ", monitoring_lane_num=" + monitoring_lane_num +
-                ", deviation_distance=" + deviation_distance +
-                ", deviation_speed=" + deviation_speed +
-                ", target_lane_info='" + target_lane_info + '\'' +
-                ", source_id='" + source_id + '\'' +
-                '}';
-    }
 }

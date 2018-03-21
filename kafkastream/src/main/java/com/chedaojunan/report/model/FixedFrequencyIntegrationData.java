@@ -16,6 +16,7 @@ public class FixedFrequencyIntegrationData {
     private double lat					; // 经度
     private double longi				; // 纬度
     private double alt					; // 海拔
+    private double direction			; // 方向角[0,360), 正北为0， 顺时针
     private double gps_speed			; // GPS速度
     private double speed				; // 本车速度，跟IMU融合之后的速度
     private double yawrate				; // 偏航角速度 （Z方向）
@@ -51,7 +52,7 @@ public class FixedFrequencyIntegrationData {
 
     public FixedFrequencyIntegrationData(String device_id, String device_imei, String trip_id, String local_time,
                                          String server_time, String event_id_list, String file_id_list, double lat,
-                                         double longi, double alt, double gps_speed, double speed, double yawrate,
+                                         double longi, double alt, double direction, double gps_speed, double speed, double yawrate,
                                          double accelerate_z, double rollrate, double accelerate_x, double pitchrate,
                                          double accelerate_y, int road_api_status, String polyline, String roadname,
                                          int roadlevel, int maxspeed, String intersection, String intersectiondistance,
@@ -69,6 +70,7 @@ public class FixedFrequencyIntegrationData {
         this.lat = lat;
         this.longi = longi;
         this.alt = alt;
+        this.direction = direction;
         this.gps_speed = gps_speed;
         this.speed = speed;
         this.yawrate = yawrate;
@@ -179,6 +181,13 @@ public class FixedFrequencyIntegrationData {
 
     public void setAlt(double alt) {
         this.alt = alt;
+    }
+
+    public double getDirection() {
+        return direction;
+    }
+    public void setDirection(double direction) {
+        this.direction = direction;
     }
 
     public double getGps_speed() {
@@ -434,6 +443,7 @@ public class FixedFrequencyIntegrationData {
                 ", lat=" + lat +
                 ", longi=" + longi +
                 ", alt=" + alt +
+                ", direction=" + direction +
                 ", gps_speed=" + gps_speed +
                 ", speed=" + speed +
                 ", yawrate=" + yawrate +
