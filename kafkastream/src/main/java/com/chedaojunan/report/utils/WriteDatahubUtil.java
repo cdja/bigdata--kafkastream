@@ -57,9 +57,9 @@ public class WriteDatahubUtil {
             entry.setString(4, integrationData.getServer_time());
             entry.setString(5, integrationData.getEvent_id_list());
             entry.setString(6, integrationData.getFile_id_list());
-            entry.setDouble(7, integrationData.getLat());
-            entry.setDouble(8, integrationData.getLongi());
-            entry.setDouble(9, integrationData.getAlt());
+            entry.setDouble(7, integrationData.getLatitude());
+            entry.setDouble(8, integrationData.getLongitude());
+            entry.setDouble(9, integrationData.getAltitude());
             entry.setDouble(10, integrationData.getDirection());
             entry.setDouble(11, integrationData.getGps_speed());
             entry.setDouble(12, integrationData.getSpeed());

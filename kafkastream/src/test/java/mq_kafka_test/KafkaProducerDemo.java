@@ -41,9 +41,9 @@ public class KafkaProducerDemo {
         fixedFrequencyData.setServer_time("5");
         fixedFrequencyData.setEvent_id_list("6");
         fixedFrequencyData.setFile_id_list("7");
-        fixedFrequencyData.setLat(8.00);
-        fixedFrequencyData.setLongi(9.00);
-        fixedFrequencyData.setAlt(10.00);
+        fixedFrequencyData.setAltitude(8.00);
+        fixedFrequencyData.setLongitude(9.00);
+        fixedFrequencyData.setAltitude(10.00);
         fixedFrequencyData.setGps_speed(11.00);
         fixedFrequencyData.setSpeed(12.00);
         fixedFrequencyData.setYawrate(13.00);

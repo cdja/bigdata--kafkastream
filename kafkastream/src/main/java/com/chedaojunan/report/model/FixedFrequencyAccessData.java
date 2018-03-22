@@ -1,46 +1,140 @@
 package com.chedaojunan.report.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+
 /**
  * 固定频率接入数据实体类
  *
  */
 public class FixedFrequencyAccessData {
 
-    private String device_id			; // 车载adas设备编码/注册时绑定的一个唯一编码
-    private String device_imei			; // 车载adas设备imei号
-    private String trip_id				; // 行程ID
-    private String local_time			; // 设备端数据采集的时间戳
-    private String server_time			; // 服务端时间戳
-    private String event_id_list		; // 事故/预警事件编码列表
-    private String file_id_list		    ; // 事件对应的图片/视频文档唯一编码列表
-    private double lat					; // 经度
-    private double longi				; // 纬度
-    private double alt					; // 海拔
-    private	double direction            ; // 方向角
-    private double gps_speed			; // GPS速度
-    private double speed				; // 本车速度，跟IMU融合之后的速度
-    private double yawrate				; // 偏航角速度 （Z方向）
-    private double accelerate_z		    ; // 线性加速度 （Z方向）
-    private double rollrate			    ; // 角速度 （X方向）
-    private double accelerate_x		    ; // 线性加速度 （X方向）
-    private double pitchrate			; // 角速度 （Y方向）
-    private double accelerate_y		    ; // 线性加速度 （Y方向）
-    private double target_distance		; // 前车距离
-    private double target_speed			; // 前车车速
-    private String target_id			; // 关键目标ID
-    private String target_type			; // 关键目标类型编码
-    private double collision_time		; // 与前车碰撞时间
-    private int monitoring_car_num		; // 视野内被识别的车辆数
-    private int monitoring_lane_num		; // 视野内被识别的车道数
-    private double deviation_distance	; // 车道偏离距离
-    private double deviation_speed		; // 车道偏离速度
-    private String target_lane_info		; // 目标车道信息编码（虚实、黄白、单双）
-    private String source_id            ; // 数据来源id
+    private static final String DEVICE_ID           = "device_id";
+    private static final String DEVICE_IMEI        	= "device_imei";
+    private static final String TRIP_ID			   	= "trip_id";
+    private static final String LOCAL_TIME		   	= "local_time";
+    private static final String SERVER_TIME		   	= "server_time";
+    private static final String EVENT_ID_LIST	   	= "event_id_list";
+    private static final String FILE_ID_LIST		= "file_id_list";
+    private static final String LATITUDE			= "latitude";
+    private static final String LONGITUDE			= "longitude";
+    private static final String ALTITUDE			= "altitude";
+    private static final String DIRECTION          	= "direction";
+    private static final String GPS_SPEED		   	= "gps_speed";
+    private static final String SPEED			   	= "speed";
+    private static final String YAWRATE			   	= "yawrate";
+    private static final String ACCELERATE_Z		= "accelerate_z";
+    private static final String ROLLRATE			= "rollrate";
+    private static final String ACCELERATE_X		= "accelerate_x";
+    private static final String PITCHRATE		   	= "pitchrate";
+    private static final String ACCELERATE_Y		= "accelerate_y";
+    private static final String TARGET_DISTANCE	   	= "target_distance";
+    private static final String TARGET_SPEED		= "target_speed";
+    private static final String TARGET_ID		   	= "target_id";
+    private static final String TARGET_TYPE		   	= "target_type";
+    private static final String COLLISION_TIME	   	= "collision_time";
+    private static final String MONITORING_CAR_NUM	= "monitoring_car_num";
+    private static final String MONITORING_LANE_NUM	= "monitoring_lane_num";
+    private static final String DEVIATION_DISTANCE 	= "deviation_distance";
+    private static final String DEVIATION_SPEED	   	= "deviation_speed";
+    private static final String TARGET_LANE_INFO	= "target_lane_info";
+    private static final String SOURCE_ID          	= "source_id";
+
+    @JsonProperty(DEVICE_ID)
+    public String device_id			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
+
+    @JsonProperty(DEVICE_IMEI)
+    public String device_imei			; // 车载adas设备imei号
+
+    @JsonProperty(TRIP_ID)
+    public String trip_id				; // 行程ID
+
+    @JsonProperty(LOCAL_TIME)
+    public String local_time			; // 设备端数据采集的时间戳
+
+    @JsonProperty(SERVER_TIME)
+    public String server_time			; // 服务端时间戳
+
+    @JsonProperty(EVENT_ID_LIST)
+    public String event_id_list		    ; // 事故/预警事件编码列表
+
+    @JsonProperty(FILE_ID_LIST)
+    public String file_id_list		    ; // 事件对应的图片/视频文档唯一编码列表
+
+    @JsonProperty(LATITUDE)
+    public double latitude				; // 经度
+
+    @JsonProperty(LONGITUDE)
+    public double longitude			    ; // 纬度
+
+    @JsonProperty(ALTITUDE)
+    public double altitude				; // 海拔
+
+    @JsonProperty(DIRECTION)
+    public	double direction            ; // 方向角
+
+    @JsonProperty(GPS_SPEED)
+    public double gps_speed			    ; // GPS速度
+
+    @JsonProperty(SPEED)
+    public double speed				    ; // 本车速度，跟IMU融合之后的速度
+
+    @JsonProperty(YAWRATE)
+    public double yawrate				; // 偏航角速度 （Z方向）
+
+    @JsonProperty(ACCELERATE_Z)
+    public double accelerate_z		    ; // 线性加速度 （Z方向）
+
+    @JsonProperty(ROLLRATE)
+    public double rollrate			    ; // 角速度 （X方向）
+
+    @JsonProperty(ACCELERATE_X)
+    public double accelerate_x		    ; // 线性加速度 （X方向）
+
+    @JsonProperty(PITCHRATE)
+    public double pitchrate			    ; // 角速度 （Y方向）
+
+    @JsonProperty(ACCELERATE_Y)
+    public double accelerate_y		    ; // 线性加速度 （Y方向）
+
+    @JsonProperty(TARGET_DISTANCE)
+    public double target_distance		; // 前车距离
+
+    @JsonProperty(TARGET_SPEED)
+    public double target_speed			; // 前车车速
+
+    @JsonProperty(TARGET_ID)
+    public String target_id			    ; // 关键目标ID
+
+    @JsonProperty(TARGET_TYPE)
+    public String target_type			; // 关键目标类型编码
+
+    @JsonProperty(COLLISION_TIME)
+    public double collision_time		; // 与前车碰撞时间
+
+    @JsonProperty(MONITORING_CAR_NUM)
+    public int monitoring_car_num		; // 视野内被识别的车辆数
+
+    @JsonProperty(MONITORING_LANE_NUM)
+    public int monitoring_lane_num		; // 视野内被识别的车道数
+
+    @JsonProperty(DEVIATION_DISTANCE)
+    public double deviation_distance	; // 车道偏离距离
+
+    @JsonProperty(DEVIATION_SPEED)
+    public double deviation_speed		; // 车道偏离速度
+
+    @JsonProperty(TARGET_LANE_INFO)
+    public String target_lane_info		; // 目标车道信息编码（虚实、黄白、单双）
+
+    @JsonProperty(SOURCE_ID)
+    public String source_id             ; // 数据来源id
 
     public FixedFrequencyAccessData(){}
 
     public FixedFrequencyAccessData(String device_id, String device_imei, String trip_id, String local_time, String server_time,
-                                    String event_id_list, String file_id_list, double lat, double longi, double alt, double direction,
+                                    String event_id_list, String file_id_list, double latitude, double longitude, double altitude, double direction,
                                     double gps_speed, double speed, double yawrate, double accelerate_z, double rollrate,
                                     double accelerate_x, double pitchrate, double accelerate_y, double target_distance,
                                     double target_speed, String target_id, String target_type, double collision_time,
@@ -53,9 +147,9 @@ public class FixedFrequencyAccessData {
         this.server_time = server_time;
         this.event_id_list = event_id_list;
         this.file_id_list = file_id_list;
-        this.lat = lat;
-        this.longi = longi;
-        this.alt = alt;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.altitude = altitude;
         this.direction = direction;
         this.gps_speed = gps_speed;
         this.speed = speed;
@@ -134,28 +228,28 @@ public class FixedFrequencyAccessData {
         this.file_id_list = file_id_list;
     }
 
-    public double getLat() {
-        return lat;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
-    public double getLongi() {
-        return longi;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setLongi(double longi) {
-        this.longi = longi;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
-    public double getAlt() {
-        return alt;
+    public double getAltitude() {
+        return altitude;
     }
 
-    public void setAlt(double alt) {
-        this.alt = alt;
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
     }
 
     public double getDirection() {
@@ -316,6 +410,16 @@ public class FixedFrequencyAccessData {
 
     public void setSource_id(String source_id) {
         this.source_id = source_id;
+    }
+
+    @Override
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
 }
