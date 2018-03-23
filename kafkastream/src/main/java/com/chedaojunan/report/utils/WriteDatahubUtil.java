@@ -70,7 +70,7 @@ public class WriteDatahubUtil {
             entry.setDouble(17, integrationData.getPitchrate());
             entry.setDouble(18, integrationData.getAccelerate_y());
             entry.setBigint(19, (long)integrationData.getRoad_api_status());
-            entry.setString(20, integrationData.getPolyline());
+            entry.setString(20, integrationData.getCrosspoint());
             entry.setString(21, integrationData.getRoadname());
             entry.setBigint(22, (long)integrationData.getRoadlevel());
             entry.setBigint(23, (long)integrationData.getMaxspeed());

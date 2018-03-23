@@ -2,7 +2,6 @@ package com.chedaojunan.report.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import javax.validation.constraints.NotNull;
 
 /**
  * 固定频率接入数据实体类
@@ -10,94 +9,64 @@ import javax.validation.constraints.NotNull;
  */
 public class FixedFrequencyAccessData {
 
-    @NotNull
     public String device_id			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
 
-    @NotNull
     public String device_imei			; // 车载adas设备imei号
 
-    @NotNull
     public String trip_id				; // 行程ID
 
-    @NotNull
     public String local_time			; // 设备端数据采集的时间戳
 
-    @NotNull
     public String server_time			; // 服务端时间戳
 
-    @NotNull
     public String event_id_list		    ; // 事故/预警事件编码列表
 
-    @NotNull
     public String file_id_list		    ; // 事件对应的图片/视频文档唯一编码列表
 
-    @NotNull
     public double latitude				; // 经度
 
-    @NotNull
     public double longitude			    ; // 纬度
 
-    @NotNull
     public double altitude				; // 海拔
 
-    @NotNull
     public	double direction            ; // 方向角
 
-    @NotNull
     public double gps_speed			    ; // GPS速度
 
-    @NotNull
     public double speed				    ; // 本车速度，跟IMU融合之后的速度
 
-    @NotNull
     public double yawrate				; // 偏航角速度 （Z方向）
 
-    @NotNull
     public double accelerate_z		    ; // 线性加速度 （Z方向）
 
-    @NotNull
     public double rollrate			    ; // 角速度 （X方向）
 
-    @NotNull
     public double accelerate_x		    ; // 线性加速度 （X方向）
 
-    @NotNull
     public double pitchrate			    ; // 角速度 （Y方向）
 
-    @NotNull
     public double accelerate_y		    ; // 线性加速度 （Y方向）
 
-    @NotNull
     public double target_distance		; // 前车距离
 
-    @NotNull
     public double target_speed			; // 前车车速
 
-    @NotNull
     public String target_id			    ; // 关键目标ID
 
-    @NotNull
     public String target_type			; // 关键目标类型编码
 
-    @NotNull
     public double collision_time		; // 与前车碰撞时间
 
-    @NotNull
     public int monitoring_car_num		; // 视野内被识别的车辆数
 
-    @NotNull
     public int monitoring_lane_num		; // 视野内被识别的车道数
 
-    @NotNull
     public double deviation_distance	; // 车道偏离距离
 
-    @NotNull
     public double deviation_speed		; // 车道偏离速度
 
-    @NotNull
     public String target_lane_info		; // 目标车道信息编码（虚实、黄白、单双）
 
-    @NotNull
     public String source_id             ; // 数据来源id
 
     public FixedFrequencyAccessData(){}
