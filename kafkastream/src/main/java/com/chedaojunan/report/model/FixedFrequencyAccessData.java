@@ -1,8 +1,8 @@
 package com.chedaojunan.report.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import javax.validation.constraints.NotNull;
 
 /**
  * 固定频率接入数据实体类
@@ -10,125 +10,94 @@ import java.io.IOException;
  */
 public class FixedFrequencyAccessData {
 
-    private static final String DEVICE_ID           = "device_id";
-    private static final String DEVICE_IMEI        	= "device_imei";
-    private static final String TRIP_ID			   	= "trip_id";
-    private static final String LOCAL_TIME		   	= "local_time";
-    private static final String SERVER_TIME		   	= "server_time";
-    private static final String EVENT_ID_LIST	   	= "event_id_list";
-    private static final String FILE_ID_LIST		= "file_id_list";
-    private static final String LATITUDE			= "latitude";
-    private static final String LONGITUDE			= "longitude";
-    private static final String ALTITUDE			= "altitude";
-    private static final String DIRECTION          	= "direction";
-    private static final String GPS_SPEED		   	= "gps_speed";
-    private static final String SPEED			   	= "speed";
-    private static final String YAWRATE			   	= "yawrate";
-    private static final String ACCELERATE_Z		= "accelerate_z";
-    private static final String ROLLRATE			= "rollrate";
-    private static final String ACCELERATE_X		= "accelerate_x";
-    private static final String PITCHRATE		   	= "pitchrate";
-    private static final String ACCELERATE_Y		= "accelerate_y";
-    private static final String TARGET_DISTANCE	   	= "target_distance";
-    private static final String TARGET_SPEED		= "target_speed";
-    private static final String TARGET_ID		   	= "target_id";
-    private static final String TARGET_TYPE		   	= "target_type";
-    private static final String COLLISION_TIME	   	= "collision_time";
-    private static final String MONITORING_CAR_NUM	= "monitoring_car_num";
-    private static final String MONITORING_LANE_NUM	= "monitoring_lane_num";
-    private static final String DEVIATION_DISTANCE 	= "deviation_distance";
-    private static final String DEVIATION_SPEED	   	= "deviation_speed";
-    private static final String TARGET_LANE_INFO	= "target_lane_info";
-    private static final String SOURCE_ID          	= "source_id";
-
-    @JsonProperty(DEVICE_ID)
+    @NotNull
     public String device_id			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
 
-    @JsonProperty(DEVICE_IMEI)
+    @NotNull
     public String device_imei			; // 车载adas设备imei号
 
-    @JsonProperty(TRIP_ID)
+    @NotNull
     public String trip_id				; // 行程ID
 
-    @JsonProperty(LOCAL_TIME)
+    @NotNull
     public String local_time			; // 设备端数据采集的时间戳
 
-    @JsonProperty(SERVER_TIME)
+    @NotNull
     public String server_time			; // 服务端时间戳
 
-    @JsonProperty(EVENT_ID_LIST)
+    @NotNull
     public String event_id_list		    ; // 事故/预警事件编码列表
 
-    @JsonProperty(FILE_ID_LIST)
+    @NotNull
     public String file_id_list		    ; // 事件对应的图片/视频文档唯一编码列表
 
-    @JsonProperty(LATITUDE)
+    @NotNull
     public double latitude				; // 经度
 
-    @JsonProperty(LONGITUDE)
+    @NotNull
     public double longitude			    ; // 纬度
 
-    @JsonProperty(ALTITUDE)
+    @NotNull
     public double altitude				; // 海拔
 
-    @JsonProperty(DIRECTION)
+    @NotNull
     public	double direction            ; // 方向角
 
-    @JsonProperty(GPS_SPEED)
+    @NotNull
     public double gps_speed			    ; // GPS速度
 
-    @JsonProperty(SPEED)
+    @NotNull
     public double speed				    ; // 本车速度，跟IMU融合之后的速度
 
-    @JsonProperty(YAWRATE)
+    @NotNull
     public double yawrate				; // 偏航角速度 （Z方向）
 
-    @JsonProperty(ACCELERATE_Z)
+    @NotNull
     public double accelerate_z		    ; // 线性加速度 （Z方向）
 
-    @JsonProperty(ROLLRATE)
+    @NotNull
     public double rollrate			    ; // 角速度 （X方向）
 
-    @JsonProperty(ACCELERATE_X)
+    @NotNull
     public double accelerate_x		    ; // 线性加速度 （X方向）
 
-    @JsonProperty(PITCHRATE)
+    @NotNull
     public double pitchrate			    ; // 角速度 （Y方向）
 
-    @JsonProperty(ACCELERATE_Y)
+    @NotNull
     public double accelerate_y		    ; // 线性加速度 （Y方向）
 
-    @JsonProperty(TARGET_DISTANCE)
+    @NotNull
     public double target_distance		; // 前车距离
 
-    @JsonProperty(TARGET_SPEED)
+    @NotNull
     public double target_speed			; // 前车车速
 
-    @JsonProperty(TARGET_ID)
+    @NotNull
     public String target_id			    ; // 关键目标ID
 
-    @JsonProperty(TARGET_TYPE)
+    @NotNull
     public String target_type			; // 关键目标类型编码
 
-    @JsonProperty(COLLISION_TIME)
+    @NotNull
     public double collision_time		; // 与前车碰撞时间
 
-    @JsonProperty(MONITORING_CAR_NUM)
+    @NotNull
     public int monitoring_car_num		; // 视野内被识别的车辆数
 
-    @JsonProperty(MONITORING_LANE_NUM)
+    @NotNull
     public int monitoring_lane_num		; // 视野内被识别的车道数
 
-    @JsonProperty(DEVIATION_DISTANCE)
+    @NotNull
     public double deviation_distance	; // 车道偏离距离
 
-    @JsonProperty(DEVIATION_SPEED)
+    @NotNull
     public double deviation_speed		; // 车道偏离速度
 
-    @JsonProperty(TARGET_LANE_INFO)
+    @NotNull
     public String target_lane_info		; // 目标车道信息编码（虚实、黄白、单双）
 
-    @JsonProperty(SOURCE_ID)
+    @NotNull
     public String source_id             ; // 数据来源id
 
     public FixedFrequencyAccessData(){}

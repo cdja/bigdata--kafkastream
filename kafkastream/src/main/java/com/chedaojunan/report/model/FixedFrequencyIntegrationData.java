@@ -1,6 +1,6 @@
 package com.chedaojunan.report.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.constraints.NotNull;
 
 /**
  * 固定采集频率整合数据实体类
@@ -8,49 +8,37 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData{
 
-    private static final String ROAD_API_STATUS       = "road_api_status";
-    private static final String POLYLINE              = "polyline";
-    private static final String ROADNAME              = "roadname";
-    private static final String ROADLEVEL             = "roadlevel";
-    private static final String MAXSPEED              = "maxspeed";
-    private static final String INTERSECTION          = "intersection";
-    private static final String INTERSECTIONDISTANCE  = "intersectiondistance";
-    private static final String TRAFFIC_REQUEST_TIME  = "traffic_request_time";
-    private static final String TRAFFIC_REQUEST_ID    = "traffic_request_id";
-    private static final String TRAFFIC_API_STATUS    = "traffic_api_status";
-    private static final String CONGESTION_INFO       = "congestion_info";
-
-    @JsonProperty(ROAD_API_STATUS)
+    @NotNull
     private int road_api_status		    ; // 抓路接口返回结果状态：0表示请求失败；1表示请求成功',
 
-    @JsonProperty(POLYLINE)
+    @NotNull
     private String polyline				; // 通过抓路修正的经纬度',
 
-    @JsonProperty(ROADNAME)
+    @NotNull
     private String roadname				; // 道路名称',
 
-    @JsonProperty(ROADLEVEL)
+    @NotNull
     private int roadlevel			    ; // 道路等级',
 
-    @JsonProperty(MAXSPEED)
+    @NotNull
     private int maxspeed				; // 道路最高限速',
 
-    @JsonProperty(INTERSECTION)
+    @NotNull
     private String intersection			; // 临近路口',
 
-    @JsonProperty(INTERSECTIONDISTANCE)
+    @NotNull
     private String intersectiondistance	; // 距离临近路口距离',
 
-    @JsonProperty(TRAFFIC_REQUEST_TIME)
+    @NotNull
     private String traffic_request_time	; // 调用交通态势接口的时间戳',
 
-    @JsonProperty(TRAFFIC_REQUEST_ID)
+    @NotNull
     private String traffic_request_id	; // 每次调用输入变量id （在调用接口中赋一个唯一值）',
 
-    @JsonProperty(TRAFFIC_API_STATUS)
+    @NotNull
     private int traffic_api_status	    ; // 交通态势接口返回结果状态：0表示请求失败；1表示请求成功',
 
-    @JsonProperty(CONGESTION_INFO)
+    @NotNull
     private String congestion_info		; // 交通态势，以key-avalue对的方式存储',
 
     public FixedFrequencyIntegrationData(){}
