@@ -17,14 +17,14 @@ public class PrepareAutoGraspRequest {
       return null;
   }
 
-  public static String convertDirectionToRequestString(List<Integer> direction){
+  public static String convertDirectionToRequestString(List<Double> direction){
     if(CollectionUtils.isNotEmpty(direction))
       return StringUtils.join(direction, Constants.COMMA);
     else
       return null;
   }
 
-  public static String convertSpeedToRequestString(List<Integer> speed) {
+  public static String convertSpeedToRequestString(List<Double> speed) {
     if(CollectionUtils.isNotEmpty(speed))
       return StringUtils.join(speed, Constants.COMMA);
     else
