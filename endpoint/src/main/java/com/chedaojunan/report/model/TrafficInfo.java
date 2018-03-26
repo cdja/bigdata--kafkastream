@@ -16,16 +16,16 @@ public class TrafficInfo {
   private static final String EVALUATION = "evaluation";
 
   @JsonProperty(DESCRIPTION)
-  private String[] description; // 路况综述
+  private Object description; // 路况综述
 
   @JsonProperty(EVALUATION)
   private Evaluation evaluation; // 路况评价
 
-  public String[] getDescription() {
+  public Object getDescription() {
     return description;
   }
 
-  public void setDescription(String[] description) {
+  public void setDescription(Object description) {
     this.description = description;
   }
 

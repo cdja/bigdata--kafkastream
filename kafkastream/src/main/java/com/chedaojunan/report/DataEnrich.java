@@ -35,7 +35,7 @@ public class DataEnrich {
 
     KafkaStreams streams = new KafkaStreams(builder, getStreamConfig());
 
-    streams.cleanUp();
+    streams.close();
     streams.start();
 
     Runtime.getRuntime().addShutdownHook(new Thread( () -> {
@@ -56,8 +56,8 @@ public class DataEnrich {
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);
 
     // Specify default (de)serializers for record keys and for record values.
-    streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-    streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
     // Set the commit interval to 500ms so that any changes are flushed frequently. The low latency
     // would be important for anomaly detection.

@@ -95,15 +95,4 @@ public class AzimuthFromLogLatUtil {
     return Math.ceil(d);
   }
 
-  public static void main(String[] args) {
-    AzimuthFromLogLatUtil logLat = new AzimuthFromLogLatUtil();
-//        AzimuthFromLogLatUtil A = new AzimuthFromLogLatUtil(116.496167, 39.917066);
-//        AzimuthFromLogLatUtil B = new AzimuthFromLogLatUtil(116.496149, 39.917205);
-//        double result = logLat.getAzimuth(A, B);
-//        System.out.println(result);
-
-    // 根据两点间的经纬度计算距离，单位：m
-    System.out.println(logLat.getDistance(116.496167, 39.917066, 116.496149, 39.917205));
-  }
-
 }

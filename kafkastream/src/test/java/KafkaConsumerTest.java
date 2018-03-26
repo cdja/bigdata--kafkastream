@@ -1,6 +1,13 @@
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.apache.kafka.clients.consumer.Consumer;
@@ -15,21 +22,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KafkaConsumerTest {
 
-  private static final String TOPIC = "hy-raw-data-test";
-  /*private static final String BOOTSTRAP_SERVERS = "kafka1-footprint-personal-stage.footprint-trulia.com:9092," +
-          "kafka2-footprint-personal-stage.footprint-trulia.com:9092," +
-          "kafka3-footprint-personal-stage.footprint-trulia.com:9092/kafka";*/
   private static final String BOOTSTRAP_SERVERS = "localhost:9092";
+  private static final String TIME_PATTERN = "MM-dd-yy HH:mm:ss";
 
   private static ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
 
-  static void runConsumer() throws InterruptedException {
-    final Consumer<String, String> consumer = createConsumer();
-    final int giveUp = 100;   int noRecordsCount = 0;
+  public static void runConsumer(String inputTopic) {
+    final Consumer<String, String> consumer = createConsumer(inputTopic);
+    final int giveUp = 100;
+    int noRecordsCount = 0;
     while (true) {
       final ConsumerRecords<String, String> consumerRecords =
           consumer.poll(10);
-      if (consumerRecords.count()==0) {
+      if (consumerRecords.count() == 0) {
         noRecordsCount++;
         if (noRecordsCount > giveUp) break;
         else continue;
@@ -38,12 +43,6 @@ public class KafkaConsumerTest {
         System.out.printf("Consumer Record:(%s, %s, %d, %d)\n",
             record.key(), record.value(),
             record.partition(), record.offset());
-        try {
-          HongyanRawData data = objectMapper.readValue(record.value(), HongyanRawData.class);
-          System.out.println(data.getCarId());
-        }catch(IOException e){
-          e.printStackTrace();
-        }
       });
       consumer.commitAsync();
     }
@@ -51,7 +50,7 @@ public class KafkaConsumerTest {
     System.out.println("DONE");
   }
 
-  private static Consumer<String, String> createConsumer() {
+  private static Consumer<String, String> createConsumer(String inputTopic) {
     final Properties props = new Properties();
     props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -65,11 +64,34 @@ public class KafkaConsumerTest {
     final Consumer<String, String> consumer =
         new KafkaConsumer<>(props);
     // Subscribe to the topic.
-    consumer.subscribe(Collections.singletonList(TOPIC));
+    consumer.subscribe(Collections.singletonList(inputTopic));
     return consumer;
   }
 
   public static void main(String... args) throws Exception {
-    runConsumer();
+    String inputTopic = "hy-raw-data-test";
+    runConsumer(inputTopic);
+
   }
+
+  public static ZonedDateTime convertTimeString(String timeString) {
+    ZonedDateTime dateTime = ZonedDateTime.parse(timeString, DateTimeFormatter
+        .ofPattern(TIME_PATTERN).withZone(ZoneId.of("UTC")));
+    return dateTime;
+  }
+
+  static <K, V extends Comparable<? super V>> SortedSet<Map.Entry<K, V>> entriesSortedByValues(Map<K, V> map) {
+    SortedSet<Map.Entry<K, V>> sortedEntries = new TreeSet<Map.Entry<K, V>>(
+        new Comparator<Map.Entry<K, V>>() {
+          @Override
+          public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
+            int res = e1.getValue().compareTo(e2.getValue());
+            return res != 0 ? res : 1; // Special fix to preserve items with equal values
+          }
+        }
+    );
+    sortedEntries.addAll(map.entrySet());
+    return sortedEntries;
+  }
+
 }

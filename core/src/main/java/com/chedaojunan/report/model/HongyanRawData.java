@@ -1,6 +1,5 @@
 package com.chedaojunan.report.model;
 
-import java.time.ZonedDateTime;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -9,7 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+/* for Kafka stream test */
+@JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy.class)
 public class HongyanRawData {
 
   private static final Logger LOG = LoggerFactory.getLogger(HongyanRawData.class);
@@ -38,6 +41,18 @@ public class HongyanRawData {
   @NotNull
   @JsonProperty(LONGITUDE)
   private double longitude;
+
+  public HongyanRawData(){
+
+  }
+
+  public HongyanRawData(String carId, String terminalId, String gpsTime, double latitude, double longitude) {
+    this.carId = carId;
+    this.terminalId = terminalId;
+    this.gpsTime = gpsTime;
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
 
   public String getCarId() {
     return carId;

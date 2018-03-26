@@ -12,5 +12,8 @@ public class Constants {
   public static final String PIPE = "|";
   public static final String AMPERSAND = "&";
 
-  public static final String TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+  //public static final String TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+
+  public static final String YMD_PATTERN = "yyyyMMdd";
+  public static final String HM_PATTERN = "HH_mm";
 }

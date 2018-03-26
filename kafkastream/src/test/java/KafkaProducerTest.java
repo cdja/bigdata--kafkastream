@@ -16,11 +16,10 @@ public class KafkaProducerTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerTest.class);
   private static final String BOOTSTRAP_SERVERS = "localhost:9092";
-  private static final String TOPIC = "hy-raw-data-test";
 
   private Producer producer;
 
-  public void runProducer() {
+  public void runProducer(String dataFile, String inputTopic) {
 
     Properties configProperties = new Properties();
     configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
@@ -29,14 +28,15 @@ public class KafkaProducerTest {
     configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
         Serdes.String().serializer().getClass());
 
+
     producer = new KafkaProducer(configProperties);
-    String testDataFile = "testdata";
+    String testDataFile = dataFile;
     try {
       Path path = Paths.get(getClass().getClassLoader()
           .getResource(testDataFile).toURI());
       Stream<String> rawDataStream = Files.lines(path);
       rawDataStream.forEach(message ->
-          producer.send(new ProducerRecord<String, String>(TOPIC, message))
+          producer.send(new ProducerRecord<String, String>(inputTopic, message))
       );
     } catch (Exception ex) {
       ex.printStackTrace();//handle exception here
@@ -52,7 +52,9 @@ public class KafkaProducerTest {
 
   public static void main(String[] args) {
     KafkaProducerTest producerTest = new KafkaProducerTest();
-    producerTest.runProducer();
+    String dataFile = "testdata";
+    String inputTopic = "hy-raw-data-test";
+    producerTest.runProducer(dataFile, inputTopic);
     producerTest.close();
   }
 }

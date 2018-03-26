@@ -40,16 +40,16 @@ public class AutoGraspRequestParam {
 
   @NotNull
   @Size(min = 3, max = 200)
-  private List<Integer> direction; // 行驶方向
+  private List<Double> direction; // 行驶方向
 
   @NotNull
   @Size(min = 3, max = 200)
 
-  private List<Integer> speed; // 行驶速度
+  private List<Double> speed; // 行驶速度
 
   private ExtensionParamEnum extensionParamEnum; // base or all
 
-  public AutoGraspRequestParam(String apiKey, String carId, List<Pair<Double, Double>> locations, List<Long> time, List<Integer> direction, List<Integer> speed, ExtensionParamEnum extensionParamEnum) {
+  public AutoGraspRequestParam(String apiKey, String carId, List<Pair<Double, Double>> locations, List<Long> time, List<Double> direction, List<Double> speed, ExtensionParamEnum extensionParamEnum) {
     setKey(apiKey);
     setCarId(carId);
     setLocations(locations);
@@ -94,19 +94,19 @@ public class AutoGraspRequestParam {
     this.time = time;
   }
 
-  public List<Integer> getDirection() {
+  public List<Double> getDirection() {
     return direction;
   }
 
-  public void setDirection(List<Integer> direction) {
+  public void setDirection(List<Double> direction) {
     this.direction = direction;
   }
 
-  public List<Integer> getSpeed() {
+  public List<Double> getSpeed() {
     return speed;
   }
 
-  public void setSpeed(List<Integer> speed) {
+  public void setSpeed(List<Double> speed) {
     this.speed = speed;
   }
 
