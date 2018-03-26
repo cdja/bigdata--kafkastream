@@ -40,7 +40,7 @@ public class WriteDatahubUtil {
         Topic topic = Topic.Builder.build(projectName, topicName, client);
         List<ShardEntry> shards = topic.listShard();
         RecordSchema schema = topic.getRecordSchema();
-        List<RecordEntry> recordEntries = new ArrayList<RecordEntry>();
+        List<RecordEntry> recordEntries = new ArrayList();
         String ymd;
         String hm;
         long time;

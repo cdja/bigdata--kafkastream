@@ -6,11 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
-import java.util.Random;
 
 public class SampledDataCleanAndRet {
 
@@ -24,21 +23,21 @@ public class SampledDataCleanAndRet {
     // 60s数据采样返回
     public List<FixedFrequencyAccessData> sampleKafkaData(List batchList) throws IOException{
 
-        int listSize = batchList.size();
+        int batchListSize = batchList.size();
         List sampleOver = new ArrayList(); // 用list存取样后数据
         CopyProperties copyProperties = new CopyProperties();
         int numRange = 50; // 数值取值范围[0,50)
         double decimalDigits = 0.000001;
 
         // 采集步长
-        int stepLength = listSize / 3;
+        int stepLength = batchListSize / 3;
         // 60s内数据少于3条处理
-        if (listSize >= 3) {
+        if (batchListSize >= 3) {
             FixedFrequencyAccessData accessData1;
             FixedFrequencyAccessData accessData2;
             FixedFrequencyAccessData accessData3;
             FixedFrequencyAccessData accessData4;
-            for (int i = 0; i < listSize; i += stepLength) {
+            for (int i = 0; i < batchListSize; i += stepLength) {
                 if (i == 0) {
                     accessData4 = (FixedFrequencyAccessData) batchList.get(i);
                     gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
@@ -65,7 +64,7 @@ public class SampledDataCleanAndRet {
             }
         // 车停止数据量不足3条，不做数据融合
         } else {
-            for (int i = 0; i < listSize; i++) {
+            for (int i = 0; i < batchListSize; i++) {
                 sampleOver.add(batchList.get(i));
             }
         }
@@ -137,42 +136,52 @@ public class SampledDataCleanAndRet {
     }
 
     // 数据整合
-    public List dataIntegration(List<FixedFrequencyAccessData> listSample, HashMap gaoDeMap) throws IOException {
+    public List dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> listSample, Map mapGaoDe) throws IOException {
+        int batchListSize = batchList.size();
         int listSampleSize = listSample.size();
-        int listGaoDeSize = gaoDeMap.size();
+        int mapGaoDeSize = mapGaoDe.size();
+        // 整合步长
+        int stepLength = batchListSize / 3;
 
         List<FixedFrequencyIntegrationData> integrationDatas = new ArrayList<>();
+        FixedFrequencyIntegrationData integrationData;
+        FixedFrequencyAccessData accessData;
+        GaoDeFusionReturn gaoDeFusionReturn;
 
-        if (listSampleSize >= 3) {
-            if (listGaoDeSize > 0) {
-                // 整合步长
-                int stepLength = listSampleSize / 3;
-                for (int i = 0; i < listGaoDeSize; i++) {
-                    // TODO 获取高德数据整合后实体类
-                    gaoDeMap.get(i);
-                    FixedFrequencyIntegrationData integrationData;
-                    for (int j = i * stepLength; j < (i + 1) * stepLength; j++) {
-                        listSample.get(j); // TODO 整合高德数据
+        // 采样数据和高德融合数据大于等于3条，并且两种数据条数相同时
+        if (listSampleSize >= 3 && mapGaoDeSize >= 3 && listSampleSize==mapGaoDeSize) {
+            for (int i = 0; i < mapGaoDeSize; i++) {
+                // TODO 获取高德数据整合后实体类
+                gaoDeFusionReturn = (GaoDeFusionReturn)mapGaoDe.get(listSample.get(i * stepLength).getLongitude() + ","
+                        + listSample.get(i * stepLength).getLatitude());
+                for (int j = i * stepLength; j < (i + 1) * stepLength; j++) {
+                    if (batchListSize > j) {
+                        // TODO 整合高德数据
+                        integrationData = new FixedFrequencyIntegrationData(batchList.get(j), gaoDeFusionReturn);
+                        integrationDatas.add(integrationData);
                     }
                 }
-            } else {
-                // TODO 高德地图不整合，返回(结构化数据和高德字段设置空)
             }
         } else {
             // TODO 高德地图不整合，返回(结构化数据和高德字段设置空)
+            for (int i = 0; i < batchListSize; i++) {
+                accessData = batchList.get(i);
+                integrationData = new FixedFrequencyIntegrationData(accessData);
+                integrationDatas.add(integrationData);
+            }
         }
         return integrationDatas;
     }
 
     public static void main(String[] args) throws Exception{
 
-        List<FixedFrequencyAccessData> list = new ArrayList();
+        List<FixedFrequencyAccessData> batchList = new ArrayList();
 
         SampledDataCleanAndRet sampledData = new SampledDataCleanAndRet();
         autoGraspApiClient = AutoGraspApiClient.getInstance();
 
         // 1.60s数据采样返回
-        List<FixedFrequencyAccessData> listSample = sampledData.sampleKafkaData(list);
+        List<FixedFrequencyAccessData> listSample = sampledData.sampleKafkaData(batchList);
 
         if (listSample.size() >= 3) {
             // 2.高德抓路服务参数返回
@@ -183,16 +192,18 @@ public class SampledDataCleanAndRet {
 
         }
         // TODO 以下为高德整合返回数据接受对象
-        HashMap gaoDeMap = new HashMap();
+        Map gaoDeMap = new HashMap();
 
         // 5.数据整合
-        List integrationDataList = sampledData.dataIntegration(listSample, gaoDeMap);
+        List integrationDataList = sampledData.dataIntegration(batchList, listSample, gaoDeMap);
 
         // 6.入库datahub
         WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
-        int failNum = writeDatahubUtil.putRecords(integrationDataList);
-        if (failNum > 0) {
-            log.info("整合数据入库datahub失败!");
+        if (integrationDataList.size() > 0) {
+            int failNum = writeDatahubUtil.putRecords(integrationDataList);
+            if (failNum > 0) {
+                log.info("整合数据入库datahub失败!");
+            }
         }
     }
 

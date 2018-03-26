@@ -21,15 +21,15 @@ public class DateUtilsTest {
 
     }
 
-    @Test
-    public void testGetYMD() throws Exception {
-        Assert.assertEquals("20180320", dateUtils.getYMD());
-    }
-
-    @Test
-    public void testGetHM() throws Exception {
-        Assert.assertEquals("17_52", dateUtils.getHM());
-    }
+//    @Test
+//    public void testGetYMD() throws Exception {
+//        Assert.assertEquals("20180320", dateUtils.getYMD());
+//    }
+//
+//    @Test
+//    public void testGetHM() throws Exception {
+//        Assert.assertEquals("17_52", dateUtils.getHM());
+//    }
 
     @Test
     public void testGetUTCTimeFromLocal() throws Exception {
