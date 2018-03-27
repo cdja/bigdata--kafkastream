@@ -97,7 +97,7 @@ public class SampledDataCleanAndRet {
 
                 // TODO 需确认数据端收集的数据格式，并转化为UTC格式
                 times.add(accessData2.getServer_time()==""?0L:dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData2.getServer_time())));
-                speeds.add(accessData2.getSpeed());
+                speeds.add(accessData2.getGps_speed());
                 location = new Pair<>(accessData2.getLongitude(), accessData2.getLatitude());
                 locations.add(location);
             } else {
@@ -106,7 +106,7 @@ public class SampledDataCleanAndRet {
 
                 // TODO 需确认数据端收集的数据格式，并转化为UTC格式
                 times.add(accessData1.getServer_time()==""?0L:dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData1.getServer_time())));
-                speeds.add(accessData1.getSpeed());
+                speeds.add(accessData1.getGps_speed());
                 location = new Pair<>(accessData1.getLongitude(), accessData1.getLatitude());
                 locations.add(location);
             }

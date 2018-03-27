@@ -52,47 +52,34 @@ public class WriteDatahubUtil {
             RecordEntry entry = new RecordEntry(schema);
             entry.setString(0, integrationData.getDevice_id());
             entry.setString(1, integrationData.getDevice_imei());
-            entry.setString(2, integrationData.getTrip_id());
-            entry.setString(3, integrationData.getLocal_time());
+            entry.setString(2, integrationData.getLocal_time());
+            entry.setString(3, integrationData.getTrip_id());
             entry.setString(4, integrationData.getServer_time());
-            entry.setString(5, integrationData.getEvent_id_list());
-            entry.setString(6, integrationData.getFile_id_list());
-            entry.setDouble(7, integrationData.getLatitude());
-            entry.setDouble(8, integrationData.getLongitude());
-            entry.setDouble(9, integrationData.getAltitude());
-            entry.setDouble(10, integrationData.getDirection());
-            entry.setDouble(11, integrationData.getGps_speed());
-            entry.setDouble(12, integrationData.getSpeed());
-            entry.setDouble(13, integrationData.getYawrate());
-            entry.setDouble(14, integrationData.getAccelerate_z());
-            entry.setDouble(15, integrationData.getRollrate());
-            entry.setDouble(16, integrationData.getAccelerate_x());
-            entry.setDouble(17, integrationData.getPitchrate());
-            entry.setDouble(18, integrationData.getAccelerate_y());
-            entry.setBigint(19, (long)integrationData.getRoad_api_status());
-            entry.setString(20, integrationData.getCrosspoint());
-            entry.setString(21, integrationData.getRoadname());
-            entry.setBigint(22, (long)integrationData.getRoadlevel());
-            entry.setBigint(23, (long)integrationData.getMaxspeed());
-            entry.setString(24, integrationData.getIntersection());
-            entry.setString(25, integrationData.getIntersectiondistance());
-            entry.setString(26, integrationData.getTraffic_request_time());
-            entry.setString(27, integrationData.getTraffic_request_id());
-            entry.setBigint(28, (long)integrationData.getTraffic_api_status());
-            entry.setString(29, integrationData.getCongestion_info());
-            entry.setDouble(30, integrationData.getTarget_distance());
-            entry.setDouble(31, integrationData.getTarget_speed());
-            entry.setString(32, integrationData.getTarget_id());
-            entry.setString(33, integrationData.getTarget_type());
-            entry.setDouble(34, integrationData.getCollision_time());
-            entry.setBigint(35, (long)integrationData.getMonitoring_car_num());
-            entry.setBigint(36, (long)integrationData.getMonitoring_lane_num());
-            entry.setDouble(37, integrationData.getDeviation_distance());
-            entry.setDouble(38, integrationData.getDeviation_speed());
-            entry.setString(39, integrationData.getTarget_lane_info());
+            entry.setDouble(5, integrationData.getLatitude());
+            entry.setDouble(6, integrationData.getLongitude());
+            entry.setDouble(7, integrationData.getAltitude());
+            entry.setDouble(8, integrationData.getDirection());
+            entry.setDouble(9, integrationData.getGps_speed());
+            entry.setDouble(10, integrationData.getYawrate());
+            entry.setDouble(11, integrationData.getAccelerate_z());
+            entry.setDouble(12, integrationData.getRollrate());
+            entry.setDouble(13, integrationData.getAccelerate_x());
+            entry.setDouble(14, integrationData.getPitchrate());
+            entry.setDouble(15, integrationData.getAccelerate_y());
+            entry.setBigint(16, (long)integrationData.getRoad_api_status());
+            entry.setString(17, integrationData.getCrosspoint());
+            entry.setString(18, integrationData.getRoadname());
+            entry.setBigint(19, (long)integrationData.getRoadlevel());
+            entry.setBigint(20, (long)integrationData.getMaxspeed());
+            entry.setString(21, integrationData.getIntersection());
+            entry.setString(22, integrationData.getIntersectiondistance());
+            entry.setString(23, integrationData.getTraffic_request_time());
+            entry.setString(24, integrationData.getTraffic_request_id());
+            entry.setBigint(25, (long)integrationData.getTraffic_api_status());
+            entry.setString(26, integrationData.getCongestion_info());
 
             // 使用自定义分区方式
-            entry.setString(40, integrationData.getSource_id());
+            entry.setString(27, integrationData.getSource_id());
 
             // 根据server_time设置，为空则根据系统当前时间
             dateUtils = new DateUtils();
@@ -105,8 +92,8 @@ public class WriteDatahubUtil {
                 hm = dateUtils.getHM();
             }
 
-            entry.setString(41, ymd);
-            entry.setString(42, hm);
+            entry.setString(28, ymd);
+            entry.setString(29, hm);
 
             // 写记录到不同的分片
             String shardId = shards.get(i % Integer.parseInt(topicShardNum)).getShardId();

@@ -30,30 +30,17 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData{
         this.trip_id = accessData.getTrip_id();
         this.local_time = accessData.getLocal_time();
         this.server_time = accessData.getServer_time();
-        this.event_id_list = accessData.getEvent_id_list();
-        this.file_id_list = accessData.getFile_id_list();
         this.latitude = accessData.getLatitude();
         this.longitude = accessData.getLongitude();
         this.altitude = accessData.getAltitude();
         this.direction = accessData.getDirection();
         this.gps_speed = accessData.getGps_speed();
-        this.speed = accessData.getSpeed();
         this.yawrate = accessData.getYawrate();
         this.accelerate_z = accessData.getAccelerate_z();
         this.rollrate = accessData.getRollrate();
         this.accelerate_x = accessData.getAccelerate_x();
         this.pitchrate = accessData.getPitchrate();
         this.accelerate_y = accessData.getAccelerate_y();
-        this.target_distance = accessData.getTarget_distance();
-        this.target_speed = accessData.getTarget_speed();
-        this.target_id = accessData.getTarget_id();
-        this.target_type = accessData.getTarget_type();
-        this.collision_time = accessData.getCollision_time();
-        this.monitoring_car_num = accessData.getMonitoring_car_num();
-        this.monitoring_lane_num = accessData.getMonitoring_lane_num();
-        this.deviation_distance = accessData.getDeviation_distance();
-        this.deviation_speed = accessData.getDeviation_speed();
-        this.target_lane_info = accessData.getTarget_lane_info();
         this.source_id = accessData.getSource_id();
     }
 
@@ -63,30 +50,17 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData{
         this.trip_id = accessData.getTrip_id();
         this.local_time = accessData.getLocal_time();
         this.server_time = accessData.getServer_time();
-        this.event_id_list = accessData.getEvent_id_list();
-        this.file_id_list = accessData.getFile_id_list();
         this.latitude = accessData.getLatitude();
         this.longitude = accessData.getLongitude();
         this.altitude = accessData.getAltitude();
         this.direction = accessData.getDirection();
         this.gps_speed = accessData.getGps_speed();
-        this.speed = accessData.getSpeed();
         this.yawrate = accessData.getYawrate();
         this.accelerate_z = accessData.getAccelerate_z();
         this.rollrate = accessData.getRollrate();
         this.accelerate_x = accessData.getAccelerate_x();
         this.pitchrate = accessData.getPitchrate();
         this.accelerate_y = accessData.getAccelerate_y();
-        this.target_distance = accessData.getTarget_distance();
-        this.target_speed = accessData.getTarget_speed();
-        this.target_id = accessData.getTarget_id();
-        this.target_type = accessData.getTarget_type();
-        this.collision_time = accessData.getCollision_time();
-        this.monitoring_car_num = accessData.getMonitoring_car_num();
-        this.monitoring_lane_num = accessData.getMonitoring_lane_num();
-        this.deviation_distance = accessData.getDeviation_distance();
-        this.deviation_speed = accessData.getDeviation_speed();
-        this.target_lane_info = accessData.getTarget_lane_info();
         this.source_id = accessData.getSource_id();
 
         this.road_api_status = gaoDeFusionReturn.getRoad_api_status();
@@ -108,14 +82,6 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData{
 
     public void setGps_speed(double gps_speed) {
         this.gps_speed = gps_speed;
-    }
-
-    public double getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(double speed) {
-        this.speed = speed;
     }
 
     public int getRoad_api_status() {
