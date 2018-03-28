@@ -1,6 +1,8 @@
 package com.chedaojunan.report.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 
 /**
@@ -9,22 +11,39 @@ import java.io.IOException;
  */
 public class FixedFrequencyAccessData {
 
+    @JsonProperty(value = "device_id")
     public String device_id			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
+    @JsonProperty(value = "device_imei")
     public String device_imei			; // 车载adas设备imei号
+    @JsonProperty(value = "local_time")
     public String local_time			; // 设备端数据采集的时间戳
+    @JsonProperty(value = "server_time")
     public String server_time			; // 服务端时间戳
+    @JsonProperty(value = "trip_id")
     public String trip_id				; // 行程ID
+    @JsonProperty(value = "lat")
     public double latitude				; // 纬度
+    @JsonProperty(value = "longi")
     public double longitude			    ; // 经度
+    @JsonProperty(value = "alt")
     public double altitude				; // 海拔
+    @JsonProperty(value = "gps_speed")
     public double gps_speed			    ; // GPS速度
+    @JsonProperty(value = "direction")
     public double direction             ; // 方向角
+    @JsonProperty(value = "yawrate")
     public double yawrate				; // 偏航角速度 （Z方向）
+    @JsonProperty(value = "accelerate_z")
     public double accelerate_z		    ; // 线性加速度 （Z方向）
+    @JsonProperty(value = "rollrate")
     public double rollrate			    ; // 角速度 （X方向）
+    @JsonProperty(value = "accelerate_x")
     public double accelerate_x		    ; // 线性加速度 （X方向）
+    @JsonProperty(value = "pitchrate")
     public double pitchrate			    ; // 角速度 （Y方向）
+    @JsonProperty(value = "accelerate_y")
     public double accelerate_y		    ; // 线性加速度 （Y方向）
+    @JsonProperty(value = "source_id")
     public String source_id             ; // 数据来源id
 
     public FixedFrequencyAccessData(){}
