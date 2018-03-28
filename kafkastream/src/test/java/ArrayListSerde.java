@@ -1,30 +1,33 @@
-import java.util.Comparator;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.PriorityQueue;
 
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 
-public class PriorityQueueSerde<T> implements Serde<PriorityQueue<T>> {
+public class ArrayListSerde<T> implements Serde<ArrayList<T>> {
 
-  private final Serde<PriorityQueue<T>> inner;
+  private final Serde<ArrayList<T>> inner;
 
-  private final Serde<String> stringSerde = Serdes.String();
-
-  public PriorityQueueSerde(final Comparator<T> comparator, final Serde<T> stringSerde) {
-    inner = Serdes.serdeFrom(new PriorityQueueSerializer<>(comparator, stringSerde.serializer()),
-        new PriorityQueueDeserializer<>(comparator, stringSerde.deserializer()));
+  public ArrayListSerde(Serde<T> serde) {
+    inner =
+        Serdes.serdeFrom(
+            new ArrayListSerializer<>(serde.serializer()),
+            new ArrayListDeserializer<>(serde.deserializer()));
   }
 
   @Override
-  public Serializer<PriorityQueue<T>> serializer() {
+  public Serializer<ArrayList<T>> serializer() {
     return inner.serializer();
   }
 
   @Override
-  public Deserializer<PriorityQueue<T>> deserializer() {
+  public Deserializer<ArrayList<T>> deserializer() {
     return inner.deserializer();
   }
 

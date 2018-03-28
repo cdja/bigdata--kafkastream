@@ -21,7 +21,7 @@ public class HongyanDataTimestampExtractor implements TimestampExtractor {
       if(rawData != null) {
         Date d = df.parse(rawData.getGpsTime());
         long milliseconds = d.getTime();
-        System.out.println(rawData.getCarId() + ":" + rawData.getGpsTime() + "-" + milliseconds);
+        //System.out.println(rawData.getCarId() + ":" + rawData.getGpsTime() + "-" + milliseconds);
         return milliseconds;
       } else
         return -1L;

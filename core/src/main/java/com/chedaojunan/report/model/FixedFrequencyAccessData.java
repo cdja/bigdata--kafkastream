@@ -15,105 +15,37 @@ public class FixedFrequencyAccessData {
 
   @NotNull
   public String device_id			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
-
   public String device_imei			; // 车载adas设备imei号
-
   public String trip_id				; // 行程ID
-
   public String local_time			; // 设备端数据采集的时间戳
-
   public String server_time			; // 服务端时间戳
-
   public String event_id_list		    ; // 事故/预警事件编码列表
-
   public String file_id_list		    ; // 事件对应的图片/视频文档唯一编码列表
-
   public double latitude				; // 经度
-
   public double longitude			    ; // 纬度
-
   public double altitude				; // 海拔
-
   public	double direction            ; // 方向角
-
   public double gps_speed			    ; // GPS速度
-
   public double speed				    ; // 本车速度，跟IMU融合之后的速度
-
   public double yawrate				; // 偏航角速度 （Z方向）
-
   public double accelerate_z		    ; // 线性加速度 （Z方向）
-
   public double rollrate			    ; // 角速度 （X方向）
-
   public double accelerate_x		    ; // 线性加速度 （X方向）
-
   public double pitchrate			    ; // 角速度 （Y方向）
-
   public double accelerate_y		    ; // 线性加速度 （Y方向）
-
   public double target_distance		; // 前车距离
-
   public double target_speed			; // 前车车速
-
   public String target_id			    ; // 关键目标ID
-
   public String target_type			; // 关键目标类型编码
-
   public double collision_time		; // 与前车碰撞时间
-
   public int monitoring_car_num		; // 视野内被识别的车辆数
-
   public int monitoring_lane_num		; // 视野内被识别的车道数
-
   public double deviation_distance	; // 车道偏离距离
-
   public double deviation_speed		; // 车道偏离速度
-
   public String target_lane_info		; // 目标车道信息编码（虚实、黄白、单双）
-
   public String source_id             ; // 数据来源id
 
   public FixedFrequencyAccessData(){}
-
-  public FixedFrequencyAccessData(String device_id, String device_imei, String trip_id, String local_time, String server_time,
-                                  String event_id_list, String file_id_list, double latitude, double longitude, double altitude, double direction,
-                                  double gps_speed, double speed, double yawrate, double accelerate_z, double rollrate,
-                                  double accelerate_x, double pitchrate, double accelerate_y, double target_distance,
-                                  double target_speed, String target_id, String target_type, double collision_time,
-                                  int monitoring_car_num, int monitoring_lane_num, double deviation_distance,
-                                  double deviation_speed, String target_lane_info, String source_id) {
-    this.device_id = device_id;
-    this.device_imei = device_imei;
-    this.trip_id = trip_id;
-    this.local_time = local_time;
-    this.server_time = server_time;
-    this.event_id_list = event_id_list;
-    this.file_id_list = file_id_list;
-    this.latitude = latitude;
-    this.longitude = longitude;
-    this.altitude = altitude;
-    this.direction = direction;
-    this.gps_speed = gps_speed;
-    this.speed = speed;
-    this.yawrate = yawrate;
-    this.accelerate_z = accelerate_z;
-    this.rollrate = rollrate;
-    this.accelerate_x = accelerate_x;
-    this.pitchrate = pitchrate;
-    this.accelerate_y = accelerate_y;
-    this.target_distance = target_distance;
-    this.target_speed = target_speed;
-    this.target_id = target_id;
-    this.target_type = target_type;
-    this.collision_time = collision_time;
-    this.monitoring_car_num = monitoring_car_num;
-    this.monitoring_lane_num = monitoring_lane_num;
-    this.deviation_distance = deviation_distance;
-    this.deviation_speed = deviation_speed;
-    this.target_lane_info = target_lane_info;
-    this.source_id = source_id;
-  }
 
   public String getDevice_id() {
     return device_id;

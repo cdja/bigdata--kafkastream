@@ -12,57 +12,95 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
 
   private int road_api_status		    ; // 抓路接口返回结果状态：0表示请求失败；1表示请求成功',
-
   private String crosspoint			; // 通过抓路修正的经纬度',
-
   private String roadname				; // 道路名称',
-
   private int roadlevel			    ; // 道路等级',
-
   private int maxspeed				; // 道路最高限速',
-
   private String intersection			; // 临近路口',
-
   private String intersectiondistance	; // 距离临近路口距离',
-
   private String traffic_request_time	; // 调用交通态势接口的时间戳',
-
   private String traffic_request_id	; // 每次调用输入变量id （在调用接口中赋一个唯一值）',
-
   private int traffic_api_status	    ; // 交通态势接口返回结果状态：0表示请求失败；1表示请求成功',
-
   private String congestion_info		; // 交通态势，以json串的方式存储',
 
   public FixedFrequencyIntegrationData(){}
 
-  public FixedFrequencyIntegrationData(String device_id, String device_imei, String trip_id, String local_time,
-                                       String server_time, String event_id_list, String file_id_list, double latitude,
-                                       double longitude, double altitude, double direction, double gps_speed, double speed,
-                                       double yawrate, double accelerate_z, double rollrate, double accelerate_x,
-                                       double pitchrate, double accelerate_y, int road_api_status, String crosspoint,
-                                       String roadname, int roadlevel, int maxspeed, String intersection,
-                                       String intersectiondistance, String traffic_request_time,
-                                       String traffic_request_id, int traffic_api_status, String congestion_info,
-                                       double target_distance, double target_speed, String target_id, String target_type,
-                                       double collision_time, int monitoring_car_num, int monitoring_lane_num,
-                                       double deviation_distance, double deviation_speed, String target_lane_info, String source_id) {
+  public FixedFrequencyIntegrationData(FixedFrequencyAccessData accessData) {
+    this.device_id = accessData.getDevice_id();
+    this.device_imei = accessData.getDevice_imei();
+    this.trip_id = accessData.getTrip_id();
+    this.local_time = accessData.getLocal_time();
+    this.server_time = accessData.getServer_time();
+    this.event_id_list = accessData.getEvent_id_list();
+    this.file_id_list = accessData.getFile_id_list();
+    this.latitude = accessData.getLatitude();
+    this.longitude = accessData.getLongitude();
+    this.altitude = accessData.getAltitude();
+    this.direction = accessData.getDirection();
+    this.gps_speed = accessData.getGps_speed();
+    this.speed = accessData.getSpeed();
+    this.yawrate = accessData.getYawrate();
+    this.accelerate_z = accessData.getAccelerate_z();
+    this.rollrate = accessData.getRollrate();
+    this.accelerate_x = accessData.getAccelerate_x();
+    this.pitchrate = accessData.getPitchrate();
+    this.accelerate_y = accessData.getAccelerate_y();
+    this.target_distance = accessData.getTarget_distance();
+    this.target_speed = accessData.getTarget_speed();
+    this.target_id = accessData.getTarget_id();
+    this.target_type = accessData.getTarget_type();
+    this.collision_time = accessData.getCollision_time();
+    this.monitoring_car_num = accessData.getMonitoring_car_num();
+    this.monitoring_lane_num = accessData.getMonitoring_lane_num();
+    this.deviation_distance = accessData.getDeviation_distance();
+    this.deviation_speed = accessData.getDeviation_speed();
+    this.target_lane_info = accessData.getTarget_lane_info();
+    this.source_id = accessData.getSource_id();
+  }
 
-    super(device_id, device_imei, trip_id, local_time, server_time, event_id_list, file_id_list, latitude, longitude,
-        altitude, direction, gps_speed, speed, yawrate, accelerate_z, rollrate, accelerate_x, pitchrate, accelerate_y,
-        target_distance, target_speed, target_id, target_type, collision_time, monitoring_car_num, monitoring_lane_num,
-        deviation_distance, deviation_speed, target_lane_info, source_id);
+  public FixedFrequencyIntegrationData(FixedFrequencyAccessData accessData, GaoDeFusionReturn gaoDeFusionReturn) {
+    this.device_id = accessData.getDevice_id();
+    this.device_imei = accessData.getDevice_imei();
+    this.trip_id = accessData.getTrip_id();
+    this.local_time = accessData.getLocal_time();
+    this.server_time = accessData.getServer_time();
+    this.event_id_list = accessData.getEvent_id_list();
+    this.file_id_list = accessData.getFile_id_list();
+    this.latitude = accessData.getLatitude();
+    this.longitude = accessData.getLongitude();
+    this.altitude = accessData.getAltitude();
+    this.direction = accessData.getDirection();
+    this.gps_speed = accessData.getGps_speed();
+    this.speed = accessData.getSpeed();
+    this.yawrate = accessData.getYawrate();
+    this.accelerate_z = accessData.getAccelerate_z();
+    this.rollrate = accessData.getRollrate();
+    this.accelerate_x = accessData.getAccelerate_x();
+    this.pitchrate = accessData.getPitchrate();
+    this.accelerate_y = accessData.getAccelerate_y();
+    this.target_distance = accessData.getTarget_distance();
+    this.target_speed = accessData.getTarget_speed();
+    this.target_id = accessData.getTarget_id();
+    this.target_type = accessData.getTarget_type();
+    this.collision_time = accessData.getCollision_time();
+    this.monitoring_car_num = accessData.getMonitoring_car_num();
+    this.monitoring_lane_num = accessData.getMonitoring_lane_num();
+    this.deviation_distance = accessData.getDeviation_distance();
+    this.deviation_speed = accessData.getDeviation_speed();
+    this.target_lane_info = accessData.getTarget_lane_info();
+    this.source_id = accessData.getSource_id();
 
-    this.road_api_status = road_api_status;
-    this.crosspoint = crosspoint;
-    this.roadname = roadname;
-    this.roadlevel = roadlevel;
-    this.maxspeed = maxspeed;
-    this.intersection = intersection;
-    this.intersectiondistance = intersectiondistance;
-    this.traffic_request_time = traffic_request_time;
-    this.traffic_request_id = traffic_request_id;
-    this.traffic_api_status = traffic_api_status;
-    this.congestion_info = congestion_info;
+    this.road_api_status = gaoDeFusionReturn.getRoad_api_status();
+    this.crosspoint = gaoDeFusionReturn.getCrosspoint();
+    this.roadname = gaoDeFusionReturn.getRoadname();
+    this.roadlevel = gaoDeFusionReturn.getRoadlevel();
+    this.maxspeed = gaoDeFusionReturn.getMaxspeed();
+    this.intersection = gaoDeFusionReturn.getIntersection();
+    this.intersectiondistance = gaoDeFusionReturn.getIntersectiondistance();
+    this.traffic_request_time = gaoDeFusionReturn.getTraffic_request_time();
+    this.traffic_request_id = gaoDeFusionReturn.getTraffic_request_id();
+    this.traffic_api_status = gaoDeFusionReturn.getTraffic_api_status();
+    this.congestion_info = gaoDeFusionReturn.getCongestion_info();
   }
 
   public double getGps_speed() {
@@ -178,6 +216,8 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
       return null;
     }
   }
+
+
 
 
 }

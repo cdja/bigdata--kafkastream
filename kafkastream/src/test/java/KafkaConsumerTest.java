@@ -4,6 +4,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -27,7 +29,8 @@ public class KafkaConsumerTest {
 
   private static ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
 
-  public static void runConsumer(String inputTopic) {
+  public static List<String> runConsumer(String inputTopic) {
+    List<String> data = new LinkedList<>();
     final Consumer<String, String> consumer = createConsumer(inputTopic);
     final int giveUp = 100;
     int noRecordsCount = 0;
@@ -40,14 +43,17 @@ public class KafkaConsumerTest {
         else continue;
       }
       consumerRecords.forEach(record -> {
-        System.out.printf("Consumer Record:(%s, %s, %d, %d)\n",
+        System.out.printf("Consumer Record:(%d, %s, %s, %d, %d)\n",
+            record.timestamp(),
             record.key(), record.value(),
             record.partition(), record.offset());
+        data.add(record.value());
       });
       consumer.commitAsync();
     }
-    consumer.close();
+    Runtime.getRuntime().addShutdownHook(new Thread(consumer::close));
     System.out.println("DONE");
+    return data;
   }
 
   private static Consumer<String, String> createConsumer(String inputTopic) {
@@ -69,7 +75,8 @@ public class KafkaConsumerTest {
   }
 
   public static void main(String... args) throws Exception {
-    String inputTopic = "hy-raw-data-test";
+    //String inputTopic = "hy-raw-data-test";
+    String inputTopic = "schedule";
     runConsumer(inputTopic);
 
   }
