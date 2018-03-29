@@ -66,17 +66,17 @@ public class WriteDatahubUtil {
             entry.setDouble(13, integrationData.getAccelerateX());
             entry.setDouble(14, integrationData.getPitchRate());
             entry.setDouble(15, integrationData.getAccelerateY());
-            entry.setBigint(16, (long)integrationData.getRoad_api_status());
+            entry.setBigint(16, (long)integrationData.getRoadApiStatus());
             entry.setString(17, integrationData.getCrosspoint());
-            entry.setString(18, integrationData.getRoadname());
-            entry.setBigint(19, (long)integrationData.getRoadlevel());
-            entry.setBigint(20, (long)integrationData.getMaxspeed());
+            entry.setString(18, integrationData.getRoadName());
+            entry.setBigint(19, (long)integrationData.getRoadLevel());
+            entry.setBigint(20, (long)integrationData.getMaxSpeed());
             entry.setString(21, integrationData.getIntersection());
-            entry.setString(22, integrationData.getIntersectiondistance());
-            entry.setString(23, integrationData.getTraffic_request_time());
-            entry.setString(24, integrationData.getTraffic_request_id());
-            entry.setBigint(25, (long)integrationData.getTraffic_api_status());
-            entry.setString(26, integrationData.getCongestion_info());
+            entry.setString(22, integrationData.getIntersectionDistance());
+            entry.setString(23, integrationData.getTrafficRequestTimesamp());
+            entry.setString(24, integrationData.getTrafficRequestId());
+            entry.setBigint(25, (long)integrationData.getTrafficApiStatus());
+            entry.setString(26, integrationData.getCongestionInfo());
 
             // 使用自定义分区方式
             entry.setString(27, integrationData.getSourceId());

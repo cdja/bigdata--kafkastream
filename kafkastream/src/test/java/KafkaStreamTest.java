@@ -25,6 +25,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.JoinWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.processor.TopologyBuilder;
@@ -79,10 +80,10 @@ public class KafkaStreamTest {
     Runtime.getRuntime().addShutdownHook(new Thread(sampledRawDataStream::close));
     //sampledRawDataStream.close();
 
-    /*final KafkaStreams apiRequestStream = buildApiEnrichedDataStream(outputTopic, inputTopic);
+    final KafkaStreams apiRequestStream = buildApiEnrichedDataStream(outputTopic, inputTopic);
     apiRequestStream.start();
 
-    Runtime.getRuntime().addShutdownHook(new Thread(apiRequestStream::close));*/
+    Runtime.getRuntime().addShutdownHook(new Thread(apiRequestStream::close));
 
   }
 
@@ -103,7 +104,7 @@ public class KafkaStreamTest {
     KStream<String, String> rawDataStream = builder.stream(rawDataTopic);
 
     // get Gaode API response -- final KStream<String, ArrayList<String>>
-    apiRequestStream
+    final KTable<String, ArrayList<String>> gaodeApiResponse = apiRequestStream
         .groupByKey()
         .aggregate(
             // the initializer
@@ -124,7 +125,7 @@ public class KafkaStreamTest {
               .stream()
               .map(
                   apiRequest -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    System.out.println(apiRequest);
+                    System.out.println("haha:" + apiRequest);
                     results.add(apiRequest);
                   })
               )
@@ -133,7 +134,11 @@ public class KafkaStreamTest {
           return results;
         });
 
-    //apiRequestStream.print();
+    KStream<Long, AdClickAndViewEvent> leftJoin = viewStream.leftJoin(clickStream, (view, click) ->  new AdClickAndViewEvent(view, click),
+        Serdes.Long(), AdSerdes.AD_VIEW_SERDE);
+    leftJoin.print();
+
+    gaodeApiResponse.toStream().print();
 
     // stream-to-table join using carId, ts and GPS
 

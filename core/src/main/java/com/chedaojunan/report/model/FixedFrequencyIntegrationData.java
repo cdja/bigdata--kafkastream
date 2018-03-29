@@ -8,68 +8,98 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
 
   @JsonProperty(value = "road_api_status")
-  private int road_api_status		    ; // 抓路接口返回结果状态：0表示请求失败；1表示请求成功',
+  private int roadApiStatus		    ; // 抓路接口返回结果状态：0表示请求失败；1表示请求成功',
+
   @JsonProperty(value = "crosspoint")
   private String crosspoint			; // 通过抓路修正的经纬度',
+
   @JsonProperty(value = "roadname")
-  private String roadname				; // 道路名称',
+  private String roadName				; // 道路名称',
+
   @JsonProperty(value = "roadlevel")
-  private int roadlevel			    ; // 道路等级',
+  private int roadLevel			    ; // 道路等级',
+
   @JsonProperty(value = "maxspeed")
-  private int maxspeed				; // 道路最高限速',
+  private int maxSpeed				; // 道路最高限速',
+
   @JsonProperty(value = "intersection")
   private String intersection			; // 临近路口',
+
   @JsonProperty(value = "intersectiondistance")
-  private String intersectiondistance	; // 距离临近路口距离',
+  private String intersectionDistance	; // 距离临近路口距离',
+
   @JsonProperty(value = "traffic_request_time")
-  private String traffic_request_time	; // 调用交通态势接口的时间戳',
+  private String trafficRequestTimesamp	; // 调用交通态势接口的时间戳',
+
   @JsonProperty(value = "traffic_request_id")
-  private String traffic_request_id	; // 每次调用输入变量id （在调用接口中赋一个唯一值）',
+  private String trafficRequestId	; // 每次调用输入变量id （在调用接口中赋一个唯一值）',
+
   @JsonProperty(value = "traffic_api_status")
-  private int traffic_api_status	    ; // 交通态势接口返回结果状态：0表示请求失败；1表示请求成功',
+  private int trafficApiStatus	    ; // 交通态势接口返回结果状态：0表示请求失败；1表示请求成功',
+
   @JsonProperty(value = "congestion_info")
-  private String congestion_info		; // 交通态势，以json串的方式存储',
+  private String congestionInfo		; // 交通态势，以json串的方式存储',
 
   public FixedFrequencyIntegrationData(){}
 
   public FixedFrequencyIntegrationData(FixedFrequencyAccessData accessData, GaoDeFusionReturn gaoDeFusionReturn) {
-    this.deviceId = accessData.getDeviceId();
-    this.deviceImei = accessData.getDeviceImei();
-    this.tripId = accessData.getTripId();
-    this.localTime = accessData.getLocalTime();
-    this.serverTime = accessData.getServerTime();
-    this.latitude = accessData.getLatitude();
-    this.longitude = accessData.getLongitude();
-    this.altitude = accessData.getAltitude();
-    this.direction = accessData.getDirection();
-    this.gpsSpeed = accessData.getGpsSpeed();
-    this.yawRate = accessData.getYawRate();
-    this.accelerateZ = accessData.getAccelerateZ();
-    this.rollRate = accessData.getRollRate();
-    this.accelerateX = accessData.getAccelerateX();
-    this.pitchRate = accessData.getPitchRate();
-    this.accelerateY = accessData.getAccelerateY();
-    this.sourceId = accessData.getSourceId();
+    setDeviceId(accessData.getDeviceId());
+    setDeviceImei(accessData.getDeviceImei());
+    setLocalTime(accessData.getLocalTime());
+    setServerTime(accessData.getServerTime());
+    setTripId(accessData.getTripId());
+    setLatitude(accessData.getLatitude());
+    setLongitude(accessData.getLongitude());
+    setAltitude(accessData.getAltitude());
+    setGpsSpeed(accessData.getGpsSpeed());
+    setDirection(accessData.getDirection());
+    setYawRate(accessData.getYawRate());
+    setAccelerateZ(accessData.getAccelerateZ());
+    setRollRate(accessData.getRollRate());
+    setAccelerateX(accessData.getAccelerateX());
+    setPitchRate(accessData.getPitchRate());
+    setAccelerateY(accessData.getAccelerateY());
+    setSourceId(accessData.getSourceId());
 
-    this.road_api_status = gaoDeFusionReturn.getRoad_api_status();
-    this.crosspoint = gaoDeFusionReturn.getCrosspoint();
-    this.roadname = gaoDeFusionReturn.getRoadname();
-    this.roadlevel = gaoDeFusionReturn.getRoadlevel();
-    this.maxspeed = gaoDeFusionReturn.getMaxspeed();
-    this.intersection = gaoDeFusionReturn.getIntersection();
-    this.intersectiondistance = gaoDeFusionReturn.getIntersectiondistance();
-    this.traffic_request_time = gaoDeFusionReturn.getTraffic_request_time();
-    this.traffic_request_id = gaoDeFusionReturn.getTraffic_request_id();
-    this.traffic_api_status = gaoDeFusionReturn.getTraffic_api_status();
-    this.congestion_info = gaoDeFusionReturn.getCongestion_info();
+    setRoadApiStatus(gaoDeFusionReturn.getRoad_api_status());
+    setCrosspoint(gaoDeFusionReturn.getCrosspoint());
+    setRoadName(gaoDeFusionReturn.getRoadname());
+    setRoadLevel(gaoDeFusionReturn.getRoadlevel());
+    setMaxSpeed(gaoDeFusionReturn.getMaxspeed());
+    setIntersection(gaoDeFusionReturn.getIntersection());
+    setIntersectionDistance(gaoDeFusionReturn.getIntersectiondistance());
+    setTrafficRequestTimesamp(gaoDeFusionReturn.getTraffic_request_time());
+    setTrafficRequestId(gaoDeFusionReturn.getTraffic_request_id());
+    setTrafficApiStatus(gaoDeFusionReturn.getTraffic_api_status());
+    setCongestionInfo(gaoDeFusionReturn.getCongestion_info());
   }
 
-  public int getRoad_api_status() {
-    return road_api_status;
+  public FixedFrequencyIntegrationData(FixedFrequencyAccessData accessData) {
+    setDeviceId(accessData.getDeviceId());
+    setDeviceImei(accessData.getDeviceImei());
+    setLocalTime(accessData.getLocalTime());
+    setServerTime(accessData.getServerTime());
+    setTripId(accessData.getTripId());
+    setLatitude(accessData.getLatitude());
+    setLongitude(accessData.getLongitude());
+    setAltitude(accessData.getAltitude());
+    setGpsSpeed(accessData.getGpsSpeed());
+    setDirection(accessData.getDirection());
+    setYawRate(accessData.getYawRate());
+    setAccelerateZ(accessData.getAccelerateZ());
+    setRollRate(accessData.getRollRate());
+    setAccelerateX(accessData.getAccelerateX());
+    setPitchRate(accessData.getPitchRate());
+    setAccelerateY(accessData.getAccelerateY());
+    setSourceId(accessData.getSourceId());
   }
 
-  public void setRoad_api_status(int road_api_status) {
-    this.road_api_status = road_api_status;
+  public int getRoadApiStatus() {
+    return roadApiStatus;
+  }
+
+  public void setRoadApiStatus(int roadApiStatus) {
+    this.roadApiStatus = roadApiStatus;
   }
 
   public String getCrosspoint() {
@@ -80,28 +110,28 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
     this.crosspoint = crosspoint;
   }
 
-  public String getRoadname() {
-    return roadname;
+  public String getRoadName() {
+    return roadName;
   }
 
-  public void setRoadname(String roadname) {
-    this.roadname = roadname;
+  public void setRoadName(String roadName) {
+    this.roadName = roadName;
   }
 
-  public int getRoadlevel() {
-    return roadlevel;
+  public int getRoadLevel() {
+    return roadLevel;
   }
 
-  public void setRoadlevel(int roadlevel) {
-    this.roadlevel = roadlevel;
+  public void setRoadLevel(int roadLevel) {
+    this.roadLevel = roadLevel;
   }
 
-  public int getMaxspeed() {
-    return maxspeed;
+  public int getMaxSpeed() {
+    return maxSpeed;
   }
 
-  public void setMaxspeed(int maxspeed) {
-    this.maxspeed = maxspeed;
+  public void setMaxSpeed(int maxSpeed) {
+    this.maxSpeed = maxSpeed;
   }
 
   public String getIntersection() {
@@ -112,44 +142,44 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
     this.intersection = intersection;
   }
 
-  public String getIntersectiondistance() {
-    return intersectiondistance;
+  public String getIntersectionDistance() {
+    return intersectionDistance;
   }
 
-  public void setIntersectiondistance(String intersectiondistance) {
-    this.intersectiondistance = intersectiondistance;
+  public void setIntersectionDistance(String intersectionDistance) {
+    this.intersectionDistance = intersectionDistance;
   }
 
-  public String getTraffic_request_time() {
-    return traffic_request_time;
+  public String getTrafficRequestTimesamp() {
+    return trafficRequestTimesamp;
   }
 
-  public void setTraffic_request_time(String traffic_request_time) {
-    this.traffic_request_time = traffic_request_time;
+  public void setTrafficRequestTimesamp(String trafficRequestTimesamp) {
+    this.trafficRequestTimesamp = trafficRequestTimesamp;
   }
 
-  public String getTraffic_request_id() {
-    return traffic_request_id;
+  public String getTrafficRequestId() {
+    return trafficRequestId;
   }
 
-  public void setTraffic_request_id(String traffic_request_id) {
-    this.traffic_request_id = traffic_request_id;
+  public void setTrafficRequestId(String trafficRequestId) {
+    this.trafficRequestId = trafficRequestId;
   }
 
-  public int getTraffic_api_status() {
-    return traffic_api_status;
+  public int getTrafficApiStatus() {
+    return trafficApiStatus;
   }
 
-  public void setTraffic_api_status(int traffic_api_status) {
-    this.traffic_api_status = traffic_api_status;
+  public void setTrafficApiStatus(int trafficApiStatus) {
+    this.trafficApiStatus = trafficApiStatus;
   }
 
-  public String getCongestion_info() {
-    return congestion_info;
+  public String getCongestionInfo() {
+    return congestionInfo;
   }
 
-  public void setCongestion_info(String congestion_info) {
-    this.congestion_info = congestion_info;
+  public void setCongestionInfo(String congestionInfo) {
+    this.congestionInfo = congestionInfo;
   }
 
   @Override

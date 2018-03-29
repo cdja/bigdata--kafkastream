@@ -17,7 +17,7 @@ public class GaoDeApiResponse {
 
 
   @JsonProperty(STATUS)
-  private String status;// 结果状态0,表示失败,1:表示成功
+  private int status;// 结果状态0,表示失败,1:表示成功
 
   @JsonProperty(INFO)
   private String info;// 返回状态说明
@@ -26,11 +26,11 @@ public class GaoDeApiResponse {
   private String infoCode; // 返回信息码
 
 
-  public String getStatus() {
+  public int getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(int status) {
     this.status = status;
   }
 

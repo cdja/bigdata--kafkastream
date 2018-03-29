@@ -15,55 +15,55 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class FixedFrequencyAccessData {
 
   @JsonProperty(value = "device_id")
-  public String deviceId			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
+  private String deviceId			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
 
   @JsonProperty(value = "device_imei")
-  public String deviceImei			; // 车载adas设备imei号
+  private String deviceImei			; // 车载adas设备imei号
 
   @JsonProperty(value = "local_time")
-  public String localTime			; // 设备端数据采集的时间戳
+  private String localTime			; // 设备端数据采集的时间戳
 
   @JsonProperty(value = "server_time")
-  public String serverTime			; // 服务端时间戳
+  private String serverTime			; // 服务端时间戳
 
   @JsonProperty(value = "trip_id")
-  public String tripId				; // 行程ID
+  private String tripId				; // 行程ID
 
   @JsonProperty(value = "lat")
-  public double latitude				; // 纬度
+  private double latitude				; // 纬度
 
   @JsonProperty(value = "longi")
-  public double longitude			    ; // 经度
+  private double longitude			    ; // 经度
 
   @JsonProperty(value = "alt")
-  public double altitude				; // 海拔
+  private double altitude				; // 海拔
 
   @JsonProperty(value = "gps_speed")
-  public double gpsSpeed	    ; // GPS速度
+  private double gpsSpeed	    ; // GPS速度
 
   @JsonProperty(value = "direction")
-  public double direction             ; // 方向角
+  private double direction             ; // 方向角
 
   @JsonProperty(value = "yawrate")
-  public double yawRate				; // 偏航角速度 （Z方向）
+  private double yawRate				; // 偏航角速度 （Z方向）
 
   @JsonProperty(value = "accelerate_z")
-  public double accelerateZ		    ; // 线性加速度 （Z方向）
+  private double accelerateZ		    ; // 线性加速度 （Z方向）
 
   @JsonProperty(value = "rollrate")
-  public double rollRate			    ; // 角速度 （X方向）
+  private double rollRate			    ; // 角速度 （X方向）
 
   @JsonProperty(value = "accelerate_x")
-  public double accelerateX		    ; // 线性加速度 （X方向）
+  private double accelerateX		    ; // 线性加速度 （X方向）
 
   @JsonProperty(value = "pitchrate")
-  public double pitchRate			    ; // 角速度 （Y方向）
+  private double pitchRate			    ; // 角速度 （Y方向）
 
   @JsonProperty(value = "accelerate_y")
-  public double accelerateY		    ; // 线性加速度 （Y方向）
+  private double accelerateY		    ; // 线性加速度 （Y方向）
 
   @JsonProperty(value = "source_id")
-  public String sourceId             ; // 数据来源id
+  private String sourceId             ; // 数据来源id
 
   public FixedFrequencyAccessData(){}
 

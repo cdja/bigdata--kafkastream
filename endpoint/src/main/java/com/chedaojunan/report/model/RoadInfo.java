@@ -36,10 +36,10 @@ public class RoadInfo {
   private int maxspeed; // 道路最高限速
 
   @JsonProperty(INTERSECTION)
-  private String[] intersection; // 临近路口
+  private Object intersection; // 临近路口
 
   @JsonProperty(INTERSECTION_DISTANCE)
-  private double intersectiondistance; // 距离临近路口距离
+  private String intersectiondistance; // 距离临近路口距离
 
   public String getCrosspoint() {
     return crosspoint;
@@ -81,19 +81,19 @@ public class RoadInfo {
     this.maxspeed = maxspeed;
   }
 
-  public String[] getIntersection() {
+  public Object getIntersection() {
     return intersection;
   }
 
-  public void setIntersection(String[] intersection) {
+  public void setIntersection(Object intersection) {
     this.intersection = intersection;
   }
 
-  public double getIntersectiondistance() {
+  public String getIntersectiondistance() {
     return intersectiondistance;
   }
 
-  public void setIntersectiondistance(double intersectiondistance) {
+  public void setIntersectiondistance(String intersectiondistance) {
     this.intersectiondistance = intersectiondistance;
   }
 

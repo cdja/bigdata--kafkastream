@@ -17,11 +17,14 @@ import com.chedaojunan.report.model.AutoGraspRequestParam;
 import com.chedaojunan.report.model.AutoGraspResponse;
 import com.chedaojunan.report.model.ExtensionParamEnum;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
+import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SampledDataCleanAndRet {
 
   private static final String TIME_PATTERN = "MM-dd-yy HH:mm:ss";
+  private static final int MININUM_SAMPLE_COUNT = 3;
+  private static final double DECIMAL_DIGITS = 0.000001;
 
   private static AutoGraspApiClient autoGraspApiClient;
   static AutoGraspRequestParam autoGraspRequestParam;
@@ -37,12 +40,12 @@ public class SampledDataCleanAndRet {
     ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
     CopyProperties copyProperties = new CopyProperties();
     int numRange = 50; // 数值取值范围[0,50)
-    double decimalDigits = 0.000001;
+
 
     // 采集步长
-    int stepLength = batchListSize / 3;
+    int stepLength = batchListSize / MININUM_SAMPLE_COUNT;
     // 60s内数据少于3条处理
-    if (batchListSize >= 3) {
+    if (batchListSize >= MININUM_SAMPLE_COUNT) {
       FixedFrequencyAccessData accessData1;
       FixedFrequencyAccessData accessData2;
       FixedFrequencyAccessData accessData3;
@@ -61,9 +64,9 @@ public class SampledDataCleanAndRet {
               && accessData1.getLongitude() == accessData2.getLongitude()) {
             accessData3 = copyProperties.clone(accessData2);
             double longitude = calculateUtils.add(
-                calculateUtils.randomReturn(numRange, decimalDigits), accessData2.getLongitude());
+                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLongitude());
             double latitude = calculateUtils.add(
-                calculateUtils.randomReturn(numRange, decimalDigits), accessData2.getLatitude());
+                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
             accessData3.setLongitude(longitude);
             accessData3.setLatitude(latitude);
             gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
@@ -151,30 +154,33 @@ public class SampledDataCleanAndRet {
   }
 
   // 数据整合
-  /*public List dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> listSample, Map mapGaoDe) throws IOException {
-    int batchListSize = batchList.size();
-    int listSampleSize = listSample.size();
-    int mapGaoDeSize = mapGaoDe.size();
-    // 整合步长
-    int stepLength = batchListSize / 3;
+  public List dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) throws IOException {
+    List<FixedFrequencyIntegrationData> integrationDataList = new ArrayList<>();
 
-    List<FixedFrequencyIntegrationData> integrationDatas = new ArrayList<>();
+    int batchListSize = batchList.size();
+    int sampleListSize = sampleList.size();
+    int gaodeApiResponseListSize = gaodeApiResponseList.size();
+
+    // 整合步长
+    int stepLength = batchListSize / MININUM_SAMPLE_COUNT;
+
+
     FixedFrequencyIntegrationData integrationData;
     FixedFrequencyAccessData accessData;
-    GaoDeFusionReturn gaoDeFusionReturn;
 
     // 采样数据和高德融合数据大于等于3条，并且两种数据条数相同时
-    if (listSampleSize >= 3 && mapGaoDeSize >= 3 && listSampleSize==mapGaoDeSize) {
-      for (int i = 0; i < mapGaoDeSize; i++) {
+    if (sampleListSize >= MININUM_SAMPLE_COUNT && gaodeApiResponseListSize >= MININUM_SAMPLE_COUNT
+        && sampleListSize == gaodeApiResponseListSize) {
+      for (int i = 0; i < gaodeApiResponseListSize; i++) {
         // TODO 获取高德数据整合后实体类
-        gaoDeFusionReturn = (GaoDeFusionReturn)mapGaoDe.get(listSample.get(i * stepLength).getLongitude() + ","
-            + listSample.get(i * stepLength).getLatitude());
-        for (int j = i * stepLength; j < (i + 1) * stepLength; j++) {
-          if (batchListSize > j) {
+        integrationData = gaodeApiResponseList.get(i);
+        /*gaoDeFusionReturn = (GaoDeFusionReturn)mapGaoDe.get(listSample.get(i * stepLength).getLongitude() + ","
+            + listSample.get(i * stepLength).getLatitude());*/
+        for (int j = i * stepLength; j < Math.min((i + 1) * stepLength, batchListSize); j++) {
             // TODO 整合高德数据
-            integrationData = new FixedFrequencyIntegrationData(batchList.get(j), gaoDeFusionReturn);
-            integrationDatas.add(integrationData);
-          }
+            accessData = batchList.get(j);
+            addAccessDataToIntegrationData(integrationData, accessData);
+            integrationDataList.add(integrationData);
         }
       }
     } else {
@@ -182,11 +188,31 @@ public class SampledDataCleanAndRet {
       for (int i = 0; i < batchListSize; i++) {
         accessData = batchList.get(i);
         integrationData = new FixedFrequencyIntegrationData(accessData);
-        integrationDatas.add(integrationData);
+        integrationDataList.add(integrationData);
       }
     }
-    return integrationDatas;
-  }*/
+    return integrationDataList;
+  }
+
+  public void addAccessDataToIntegrationData(FixedFrequencyIntegrationData integrationData, FixedFrequencyAccessData accessData) {
+    integrationData.setDeviceId(accessData.getDeviceId());
+    integrationData.setDeviceImei(accessData.getDeviceImei());
+    integrationData.setLocalTime(accessData.getLocalTime());
+    integrationData.setServerTime(accessData.getServerTime());
+    integrationData.setTripId(accessData.getTripId());
+    integrationData.setLatitude(accessData.getLatitude());
+    integrationData.setLongitude(accessData.getLongitude());
+    integrationData.setAltitude(accessData.getAltitude());
+    integrationData.setGpsSpeed(accessData.getGpsSpeed());
+    integrationData.setDirection(accessData.getDirection());
+    integrationData.setYawRate(accessData.getYawRate());
+    integrationData.setAccelerateZ(accessData.getAccelerateZ());
+    integrationData.setRollRate(accessData.getRollRate());
+    integrationData.setAccelerateX(accessData.getAccelerateX());
+    integrationData.setPitchRate(accessData.getPitchRate());
+    integrationData.setAccelerateY(accessData.getAccelerateY());
+    integrationData.setSourceId(accessData.getSourceId());
+  }
 
   public static void main(String[] args) throws Exception{
 
@@ -236,7 +262,7 @@ public class SampledDataCleanAndRet {
   }
 
   public static long convertTimeStringToEpochSecond(String timeString) {
-    System.out.println("haha:" + timeString);
+    //System.out.println("haha:" + timeString);
     ZonedDateTime dateTime = ZonedDateTime.parse(timeString, DateTimeFormatter
         .ofPattern(TIME_PATTERN).withZone(ZoneId.of("UTC")));
     return dateTime.toEpochSecond();
