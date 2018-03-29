@@ -42,6 +42,26 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
 
   public FixedFrequencyIntegrationData(){}
 
+  public FixedFrequencyIntegrationData(FixedFrequencyAccessData accessData) {
+    setDeviceId(accessData.getDeviceId());
+    setDeviceImei(accessData.getDeviceImei());
+    setLocalTime(accessData.getLocalTime());
+    setServerTime(accessData.getServerTime());
+    setTripId(accessData.getTripId());
+    setLatitude(accessData.getLatitude());
+    setLongitude(accessData.getLongitude());
+    setAltitude(accessData.getAltitude());
+    setGpsSpeed(accessData.getGpsSpeed());
+    setDirection(accessData.getDirection());
+    setYawRate(accessData.getYawRate());
+    setAccelerateZ(accessData.getAccelerateZ());
+    setRollRate(accessData.getRollRate());
+    setAccelerateX(accessData.getAccelerateX());
+    setPitchRate(accessData.getPitchRate());
+    setAccelerateY(accessData.getAccelerateY());
+    setSourceId(accessData.getSourceId());
+  }
+
   public int getRoadApiStatus() {
     return roadApiStatus;
   }
