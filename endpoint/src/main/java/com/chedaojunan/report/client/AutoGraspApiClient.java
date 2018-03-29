@@ -84,7 +84,6 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
   }
 
   public List<FixedFrequencyIntegrationData> getTrafficInfoFromAutoGraspResponse(AutoGraspRequestParam autoGraspRequestParam) {
-    //Map<String, FixedFrequencyIntegrationData> gaodeApiResponseMap = new HashMap<>();
 
     AutoGraspResponse autoGraspResponse = getClientJsonPojo(createRequest(autoGraspRequestParam), AutoGraspResponse.class);
 
@@ -105,19 +104,9 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
     RectangleTrafficInfoClient rectangleTrafficInfoClient = RectangleTrafficInfoClient.getInstance();
     List<RoadInfo> roadInfoList = autoGraspResponse.getRoadInfoList();
 
-    //List<String> test =
-    IntStream.range(1, 3)
-        .mapToObj(index -> {
-          System.out.println(autoGraspRequestGpsList.get(index-1));
-          System.out.println(autoGraspResponse.getRoadInfoList().get(index-1));
-          return "haha";
-        });//.collect(Collectors.toList());
-
-
     List<FixedFrequencyIntegrationData> integrationDataList =
       IntStream.range(1, Math.min(autoGraspRequestGpsList.size(), autoGraspResponse.getCount()))
         .mapToObj(index -> {
-          String origGPS = autoGraspRequestGpsList.get(index - 1);
           String validGPS1 = getValidGPS(index - 1, autoGraspRequestGpsList, roadInfoList);
           String validGPS2 = getValidGPS(index, autoGraspRequestGpsList, roadInfoList);
           String trafficInfoRequestRectangle = String.join(SEMI_COLON, validGPS1, validGPS2);
