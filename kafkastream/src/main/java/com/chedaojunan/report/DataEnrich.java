@@ -35,7 +35,7 @@ public class DataEnrich {
 
     KafkaStreams streams = new KafkaStreams(builder, getStreamConfig());
 
-    streams.cleanUp();
+    streams.close();
     streams.start();
 
     Runtime.getRuntime().addShutdownHook(new Thread( () -> {

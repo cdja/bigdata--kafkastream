@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka_2.12</artifactId>
+      <artifactId>kafka_2.11</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
@@ -29,29 +29,36 @@
       <groupId>com.aliyun.datahub</groupId>
       <artifactId>aliyun-sdk-datahub</artifactId>
     </dependency>
-
-    <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
     <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>fastjson</artifactId>
-      <version>1.2.46</version>
+      <groupId>com.chedaojunan.report</groupId>
+      <artifactId>endpoint</artifactId>
+      <version>${project.parent.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>0.10.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.aliyun.openservices</groupId>
-      <artifactId>ons-sasl-client</artifactId>
-      <version>0.1</version>
-    </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.kafka</groupId>-->
+      <!--<artifactId>kafka_2.11</artifactId>-->
+      <!--<version>0.10.2.0</version>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
+    <!--<dependency>-->
+      <!--<groupId>org.apache.kafka</groupId>-->
+      <!--<artifactId>kafka_2.11</artifactId>-->
+      <!--<version>0.10.2.0</version>-->
+      <!--<classifier>test</classifier>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
+    <!--<dependency>-->
+      <!--<groupId>org.apache.kafka</groupId>-->
+      <!--<artifactId>kafka-clients</artifactId>-->
+      <!--<version>0.10.2.0</version>-->
+      <!--<classifier>test</classifier>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
   </dependencies>
 
 

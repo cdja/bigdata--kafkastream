@@ -50,22 +50,22 @@ public class WriteDatahubUtil {
             integrationData = (FixedFrequencyIntegrationData)list.get(i);
             // RecordData
             RecordEntry entry = new RecordEntry(schema);
-            entry.setString(0, integrationData.getDevice_id());
-            entry.setString(1, integrationData.getDevice_imei());
-            entry.setString(2, integrationData.getLocal_time());
-            entry.setString(3, integrationData.getTrip_id());
-            entry.setString(4, integrationData.getServer_time());
+            entry.setString(0, integrationData.getDeviceId());
+            entry.setString(1, integrationData.getDeviceImei());
+            entry.setString(2, integrationData.getLocalTime());
+            entry.setString(3, integrationData.getTripId());
+            entry.setString(4, integrationData.getServerTime());
             entry.setDouble(5, integrationData.getLatitude());
             entry.setDouble(6, integrationData.getLongitude());
             entry.setDouble(7, integrationData.getAltitude());
             entry.setDouble(8, integrationData.getDirection());
-            entry.setDouble(9, integrationData.getGps_speed());
-            entry.setDouble(10, integrationData.getYawrate());
-            entry.setDouble(11, integrationData.getAccelerate_z());
-            entry.setDouble(12, integrationData.getRollrate());
-            entry.setDouble(13, integrationData.getAccelerate_x());
-            entry.setDouble(14, integrationData.getPitchrate());
-            entry.setDouble(15, integrationData.getAccelerate_y());
+            entry.setDouble(9, integrationData.getGpsSpeed());
+            entry.setDouble(10, integrationData.getYawRate());
+            entry.setDouble(11, integrationData.getAccelerateZ());
+            entry.setDouble(12, integrationData.getRollRate());
+            entry.setDouble(13, integrationData.getAccelerateX());
+            entry.setDouble(14, integrationData.getPitchRate());
+            entry.setDouble(15, integrationData.getAccelerateY());
             entry.setBigint(16, (long)integrationData.getRoad_api_status());
             entry.setString(17, integrationData.getCrosspoint());
             entry.setString(18, integrationData.getRoadname());
@@ -79,12 +79,12 @@ public class WriteDatahubUtil {
             entry.setString(26, integrationData.getCongestion_info());
 
             // 使用自定义分区方式
-            entry.setString(27, integrationData.getSource_id());
+            entry.setString(27, integrationData.getSourceId());
 
             // 根据server_time设置，为空则根据系统当前时间
             dateUtils = new DateUtils();
-            if (StringUtils.isNotEmpty(integrationData.getServer_time())) {
-                time = Long.valueOf(integrationData.getServer_time());
+            if (StringUtils.isNotEmpty(integrationData.getServerTime())) {
+                time = Long.valueOf(integrationData.getServerTime());
                 ymd = dateUtils.getYMDFromTime(time);
                 hm = dateUtils.getHMFromTime(time);
             } else {

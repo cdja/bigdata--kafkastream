@@ -17,6 +17,12 @@ public class RectangleTrafficInfoRequest {
   @NotNull
   private String rectangle; // 代表此为矩形区域查询	必填
 
+  @NotNull
+  private String trafficRequestId; // unique
+
+  @NotNull
+  private String trafficRequestTime;
+
   private String level; // 道路等级	可选
 
   private ExtensionParamEnum extensions; // 返回结果控制	可选
@@ -27,9 +33,12 @@ public class RectangleTrafficInfoRequest {
 
   private String callback; // 回调函数	可选
 
-  public RectangleTrafficInfoRequest(String key, String rectangle, ExtensionParamEnum extensions) {
+  public RectangleTrafficInfoRequest(String key, String rectangle, String trafficRequestId,
+                                     String trafficRequestTime, ExtensionParamEnum extensions) {
     setKey(key);
     setRectangle(rectangle);
+    setTrafficRequestId(trafficRequestId);
+    setTrafficRequestTime(trafficRequestTime);
     if(extensions != null)
       setExtensions(extensions);
     else
@@ -91,6 +100,22 @@ public class RectangleTrafficInfoRequest {
 
   public void setRectangle(String rectangle) {
     this.rectangle = rectangle;
+  }
+
+  public String getTrafficRequestId() {
+    return trafficRequestId;
+  }
+
+  public void setTrafficRequestId(String trafficRequestId) {
+    this.trafficRequestId = trafficRequestId;
+  }
+
+  public String getTrafficRequestTime() {
+    return trafficRequestTime;
+  }
+
+  public void setTrafficRequestTime(String trafficRequestTime) {
+    this.trafficRequestTime = trafficRequestTime;
   }
 
   @Override

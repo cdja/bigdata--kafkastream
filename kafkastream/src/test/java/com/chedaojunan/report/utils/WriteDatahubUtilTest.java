@@ -21,23 +21,23 @@ public class WriteDatahubUtilTest {
     public void init() throws IOException {
         FixedFrequencyIntegrationData integrationData;
         accessData = new FixedFrequencyAccessData();
-        accessData.setDevice_id("70211191");
-        accessData.setDevice_imei("64691168800");
-        accessData.setTrip_id("100");
-        accessData.setLocal_time("1521478861000");
-        accessData.setServer_time("1521478866000");
+        accessData.setDeviceId("70211191");
+        accessData.setDeviceImei("64691168800");
+        accessData.setTripId("100");
+        accessData.setLocalTime("1521478861000");
+        accessData.setServerTime("1521478866000");
         accessData.setLatitude(39.00);
         accessData.setLongitude(129.01);
         accessData.setAltitude(30.98);
         accessData.setDirection(98.00);
-        accessData.setGps_speed(98.00);
-        accessData.setYawrate(20.3);
-        accessData.setAccelerate_z(20.4);
-        accessData.setRollrate(20.5);
-        accessData.setAccelerate_x(20.6);
-        accessData.setPitchrate(20.7);
-        accessData.setAccelerate_y(20.8);
-        accessData.setSource_id("source_id");
+        accessData.setGpsSpeed(98.00);
+        accessData.setYawRate(20.3);
+        accessData.setAccelerateZ(20.4);
+        accessData.setRollRate(20.5);
+        accessData.setAccelerateX(20.6);
+        accessData.setPitchRate(20.7);
+        accessData.setAccelerateY(20.8);
+        accessData.setSourceId("source_id");
 
         gaoDeFusionReturn = new GaoDeFusionReturn();
         gaoDeFusionReturn.setRoad_api_status(1);

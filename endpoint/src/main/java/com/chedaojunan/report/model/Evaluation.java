@@ -20,68 +20,68 @@ public class Evaluation {
   private static final String DESCRIPTION = "description";
 
   @JsonProperty(EXPEDITE)
-  private String[] expedite; // 畅通所占百分比
+  private Object expedite; // 畅通所占百分比
 
   @JsonProperty(CONGESTED)
-  private String[] congested; // 缓行所占百分比
+  private Object congested; // 缓行所占百分比
 
   @JsonProperty(BLOCKED)
-  private String[] blocked; // 拥堵所占百分比
+  private Object blocked; // 拥堵所占百分比
 
   @JsonProperty(UNKNOWN)
-  private String[] unknown; // 未知路段所占百分比
+  private Object unknown; // 未知路段所占百分比
 
   @JsonProperty(STATUS)
-  private String[] status; // 路况
+  private Object status; // 路况
 
   @JsonProperty(DESCRIPTION)
-  private String[] description; // 道路描述
+  private Object description; // 道路描述
 
-  public String[] getExpedite() {
+  public Object getExpedite() {
     return expedite;
   }
 
-  public void setExpedite(String[] expedite) {
+  public void setExpedite(Object expedite) {
     this.expedite = expedite;
   }
 
-  public String[] getCongested() {
+  public Object getCongested() {
     return congested;
   }
 
-  public void setCongested(String[] congested) {
+  public void setCongested(Object congested) {
     this.congested = congested;
   }
 
-  public String[] getBlocked() {
+  public Object getBlocked() {
     return blocked;
   }
 
-  public void setBlocked(String[] blocked) {
+  public void setBlocked(Object blocked) {
     this.blocked = blocked;
   }
 
-  public String[] getUnknown() {
+  public Object getUnknown() {
     return unknown;
   }
 
-  public void setUnknown(String[] unknown) {
+  public void setUnknown(Object unknown) {
     this.unknown = unknown;
   }
 
-  public String[] getStatus() {
+  public Object getStatus() {
     return status;
   }
 
-  public void setStatus(String[] status) {
+  public void setStatus(Object status) {
     this.status = status;
   }
 
-  public String[] getDescription() {
+  public Object getDescription() {
     return description;
   }
 
-  public void setDescription(String[] description) {
+  public void setDescription(Object description) {
     this.description = description;
   }
 

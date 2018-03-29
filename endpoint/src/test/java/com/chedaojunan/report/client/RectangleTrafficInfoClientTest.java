@@ -1,8 +1,10 @@
 package com.chedaojunan.report.client;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,7 +34,9 @@ public class RectangleTrafficInfoClientTest {
     rectangleTrafficInfoClient = RectangleTrafficInfoClient.getInstance();
     String apiKey = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_KEY);
     String rectangle = "116.351147,39.966309;116.357134,39.968727";
-    rectangleTrafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, rectangle, null);
+    String requestTime = Instant.now().toString();
+    String requestId = UUID.randomUUID().toString();
+    rectangleTrafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, rectangle, requestId, requestTime, null);
   }
 
   @Test
@@ -40,5 +44,6 @@ public class RectangleTrafficInfoClientTest {
     RectangleTrafficInfoResponse response =
         rectangleTrafficInfoClient.getTrafficInfoResponse(rectangleTrafficInfoRequest);
     Assert.assertNotNull(response);
+    System.out.println(response.getTrafficInfo().getDescription());
   }
 }

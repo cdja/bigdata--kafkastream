@@ -1,10 +1,12 @@
 package com.chedaojunan.report.client;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -104,7 +106,9 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
           String validGPS1 = getValidGPS(index-1, autoGraspRequestGpsList, autoGraspResponse.getRoadInfoList());
           String validGPS2 = getValidGPS(index, autoGraspRequestGpsList, autoGraspResponse.getRoadInfoList());
           String trafficInfoRequestRectangle = String.join(SEMI_COLON, validGPS1, validGPS2);
-          RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, null);
+          String requestTime = Instant.now().toString();
+          String requestId = UUID.randomUUID().toString();
+          RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, requestId, requestTime, null);
           return rectangleTrafficInfoClient.getTrafficInfoResponse(trafficInfoRequest);
         }).collect(Collectors.toList());
 
