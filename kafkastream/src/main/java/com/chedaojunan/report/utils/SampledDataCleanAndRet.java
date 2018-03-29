@@ -237,7 +237,7 @@ public class SampledDataCleanAndRet {
   }
 
   public static long convertTimeStringToEpochSecond(String timeString) {
-    System.out.println("haha:" + timeString);
+    //System.out.println("haha:" + timeString);
     ZonedDateTime dateTime = ZonedDateTime.parse(timeString, DateTimeFormatter
         .ofPattern(TIME_PATTERN).withZone(ZoneId.of("UTC")));
     return dateTime.toEpochSecond();
