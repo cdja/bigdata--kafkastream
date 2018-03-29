@@ -57,9 +57,11 @@ public class SampledDataCleanAndRet {
                         accessData3.setLongitude(longitude);
                         accessData3.setLatitude(latitude);
                         gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
+                        sampleOver.add(accessData3);
+                    } else {
+                        gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
+                        sampleOver.add(accessData2);
                     }
-                    gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
-                    sampleOver.add(accessData3);
                 }
             }
         // 车停止数据量不足3条，不做数据融合

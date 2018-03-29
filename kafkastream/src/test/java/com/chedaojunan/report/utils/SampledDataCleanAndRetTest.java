@@ -17,6 +17,10 @@ public class SampledDataCleanAndRetTest {
     List listSample = null;
     FixedFrequencyAccessData accessData;
 
+    List<FixedFrequencyAccessData> batchList02;
+    List listSample02 = null;
+    FixedFrequencyAccessData accessData02;
+
     SampledDataCleanAndRet sampledDataCleanAndRet = new SampledDataCleanAndRet();
 
     @Before
@@ -44,12 +48,42 @@ public class SampledDataCleanAndRetTest {
             accessData.setSource_id("source_id" + (i + 1));
             batchList.add(accessData);
         }
+
+        batchList02 = new ArrayList<>();
+        // accessData02数据设置
+        for (int i = 0; i < 6; i++) {
+            accessData02 = new FixedFrequencyAccessData();
+            accessData02.setDevice_id("70211191");
+            accessData02.setDevice_imei("64691168800");
+            accessData02.setTrip_id(i + 100 + "");
+            accessData02.setLocal_time("1521478861000");
+            accessData02.setServer_time(1521478866000L + i + "");
+            accessData02.setLatitude(39.00 + i);
+            accessData02.setLongitude(129.01 + i);
+            accessData02.setAltitude(30.98);
+            accessData02.setDirection(98.00);
+            accessData02.setGps_speed(98.00);
+            accessData02.setYawrate(20.3);
+            accessData02.setAccelerate_z(20.4);
+            accessData02.setRollrate(20.5);
+            accessData02.setAccelerate_x(20.6);
+            accessData02.setPitchrate(20.7);
+            accessData02.setAccelerate_y(20.8);
+            accessData02.setSource_id("source_id" + (i + 1));
+            batchList02.add(accessData02);
+        }
     }
 
     @Test
-    public void testSampleKafkaData() throws IOException {
+    public void testSampleKafkaDataGpsSame() throws IOException {
         listSample = sampledDataCleanAndRet.sampleKafkaData(batchList);
         Assert.assertEquals(3, listSample.size());
+    }
+
+    @Test
+    public void testSampleKafkaDataGpsDiff() throws IOException {
+        listSample02 = sampledDataCleanAndRet.sampleKafkaData(batchList02);
+        Assert.assertEquals(3, listSample02.size());
     }
 
     @Test
