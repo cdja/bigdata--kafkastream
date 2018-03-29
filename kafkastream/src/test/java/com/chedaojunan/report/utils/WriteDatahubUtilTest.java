@@ -61,7 +61,7 @@ public class WriteDatahubUtilTest {
     }
 
     @Test
-    public void testPutRecords() throws Exception {
+    public void testPutRecords() {
         WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
         int failNum = writeDatahubUtil.putRecords(integrationDataList);
         Assert.assertEquals(0, failNum);

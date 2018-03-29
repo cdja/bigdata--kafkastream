@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.chedaojunan.report.model.AutoGraspRequestParam;
-import com.chedaojunan.report.model.AutoGraspResponse;
 import com.chedaojunan.report.model.ExtensionParamEnum;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
@@ -58,7 +57,6 @@ public class SampledDataCleanAndRet {
         } else {
           accessData1 = convertToFixedAccessDataPojo(batchList.get(i - stepLength));
           accessData2 = convertToFixedAccessDataPojo(batchList.get(i));
-          accessData3 = new FixedFrequencyAccessData();
           // TODO 根据经纬度判断数据是否有效
           if (accessData1.getLatitude() == accessData2.getLatitude()
               && accessData1.getLongitude() == accessData2.getLongitude()) {
@@ -156,6 +154,7 @@ public class SampledDataCleanAndRet {
   // 数据整合
   public List dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) throws IOException {
     List<FixedFrequencyIntegrationData> integrationDataList = new ArrayList<>();
+    CopyProperties copyProperties = new CopyProperties();
 
     int batchListSize = batchList.size();
     int sampleListSize = sampleList.size();
@@ -180,7 +179,7 @@ public class SampledDataCleanAndRet {
             // TODO 整合高德数据
             accessData = batchList.get(j);
             addAccessDataToIntegrationData(integrationData, accessData);
-            integrationDataList.add(integrationData);
+            integrationDataList.add(copyProperties.clone(integrationData));
         }
       }
     } else {
