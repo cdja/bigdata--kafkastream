@@ -262,6 +262,19 @@ public class SampledDataCleanAndRet {
     }
   }
 
+  public static AutoGraspRequestParam convertToAutoGraspRequestParam (String apiRequest) {
+    if (StringUtils.isEmpty(apiRequest))
+      return null;
+    ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
+    try {
+      AutoGraspRequestParam autoGraspRequestParam = objectMapper.readValue(apiRequest, AutoGraspRequestParam.class);
+      return autoGraspRequestParam;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
   public static long convertTimeStringToEpochSecond(String timeString) {
     //System.out.println("haha:" + timeString);
     ZonedDateTime dateTime = ZonedDateTime.parse(timeString, DateTimeFormatter

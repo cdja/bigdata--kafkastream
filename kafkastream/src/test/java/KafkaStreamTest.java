@@ -1,12 +1,5 @@
-import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Properties;
@@ -22,21 +15,17 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.JoinWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.processor.TopologyBuilder;
 
+import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.chedaojunan.report.model.AutoGraspRequestParam;
-import com.chedaojunan.report.model.FixedFrequencyAccessData;
-import com.chedaojunan.report.model.HongyanRawData;
+import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.service.ExternalApiExecutorService;
-import com.chedaojunan.report.utils.ObjectMapperUtils;
 import com.chedaojunan.report.utils.SampledDataCleanAndRet;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KafkaStreamTest {
 
@@ -66,15 +55,14 @@ public class KafkaStreamTest {
 
     sampledRawDataStream.start();
 
-    /*String dataFile = "testdata";
+    // mock producer
+    String dataFile = "testdata";
     KafkaProducerTest producerTest = new KafkaProducerTest();
     producerTest.runProducer(dataFile, inputTopic);
-    producerTest.close();*/
-
+    producerTest.close();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
     Runtime.getRuntime().addShutdownHook(new Thread(sampledRawDataStream::close));
-    //sampledRawDataStream.close();
 
     final KafkaStreams apiRequestStream = buildApiEnrichedDataStream(outputTopic, inputTopic);
     apiRequestStream.start();
@@ -84,6 +72,8 @@ public class KafkaStreamTest {
   }
 
   static KafkaStreams buildApiEnrichedDataStream(String apiRequestTopic, String rawDataTopic) {
+    AutoGraspApiClient autoGraspApiClient = AutoGraspApiClient.getInstance();
+
     final Properties streamsConfiguration = new Properties();
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, UUID.randomUUID().toString());
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -100,7 +90,7 @@ public class KafkaStreamTest {
     KStream<String, String> rawDataStream = builder.stream(rawDataTopic);
 
     // get Gaode API response -- final KStream<String, ArrayList<String>>
-    final KTable<String, ArrayList<String>> gaodeApiResponse = apiRequestStream
+    final KTable<String, ArrayList<String>> gaodeApiResponseTable = apiRequestStream
         .groupByKey()
         .aggregate(
             // the initializer
@@ -121,20 +111,23 @@ public class KafkaStreamTest {
               .stream()
               .map(
                   apiRequest -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    System.out.println("haha:" + apiRequest);
-                    results.add(apiRequest);
+                    System.out.println("apiRequest: " + apiRequest);
+                    AutoGraspRequestParam autoGraspRequestParam = SampledDataCleanAndRet.convertToAutoGraspRequestParam(apiRequest);
+                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequestParam);
+                    gaodeApiResponseList
+                        .stream()
+                        .forEach(gaodeApiResponse -> results.add(gaodeApiResponse.toString()));
                   })
-              )
-              .collect(Collectors.toList());
+              ).collect(Collectors.toList());
           ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
           return results;
         });
 
-    KStream<Long, AdClickAndViewEvent> leftJoin = viewStream.leftJoin(clickStream, (view, click) ->  new AdClickAndViewEvent(view, click),
+    /*KStream<Long, AdClickAndViewEvent> leftJoin = viewStream.leftJoin(clickStream, (view, click) ->  new AdClickAndViewEvent(view, click),
         Serdes.Long(), AdSerdes.AD_VIEW_SERDE);
-    leftJoin.print();
+    leftJoin.print();*/
 
-    gaodeApiResponse.toStream().print();
+    gaodeApiResponseTable.toStream().print();
 
     // stream-to-table join using carId, ts and GPS
 
@@ -204,7 +197,7 @@ public class KafkaStreamTest {
 
   }
 
-  static HongyanRawData convertToHongYanPojo(String rawDataString) {
+  /*static HongyanRawData convertToHongYanPojo(String rawDataString) {
     if (StringUtils.isEmpty(rawDataString))
       return null;
     ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
@@ -216,6 +209,6 @@ public class KafkaStreamTest {
       e.printStackTrace();
       return null;
     }
-  }
+  }*/
 
 }
