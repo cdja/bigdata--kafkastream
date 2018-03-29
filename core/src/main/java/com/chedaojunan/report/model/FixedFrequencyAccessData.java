@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -13,94 +14,97 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FixedFrequencyAccessData {
 
-  @NotNull
-  public String device_id			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
-  public String device_imei			; // 车载adas设备imei号
-  public String trip_id				; // 行程ID
-  public String local_time			; // 设备端数据采集的时间戳
-  public String server_time			; // 服务端时间戳
-  public String event_id_list		    ; // 事故/预警事件编码列表
-  public String file_id_list		    ; // 事件对应的图片/视频文档唯一编码列表
-  public double latitude				; // 经度
-  public double longitude			    ; // 纬度
+  @JsonProperty(value = "device_id")
+  public String deviceId			    ; // 车载adas设备编码/注册时绑定的一个唯一编码
+
+  @JsonProperty(value = "device_imei")
+  public String deviceImei			; // 车载adas设备imei号
+
+  @JsonProperty(value = "local_time")
+  public String localTime			; // 设备端数据采集的时间戳
+
+  @JsonProperty(value = "server_time")
+  public String serverTime			; // 服务端时间戳
+
+  @JsonProperty(value = "trip_id")
+  public String tripId				; // 行程ID
+
+  @JsonProperty(value = "lat")
+  public double latitude				; // 纬度
+
+  @JsonProperty(value = "longi")
+  public double longitude			    ; // 经度
+
+  @JsonProperty(value = "alt")
   public double altitude				; // 海拔
-  public	double direction            ; // 方向角
-  public double gps_speed			    ; // GPS速度
-  public double speed				    ; // 本车速度，跟IMU融合之后的速度
-  public double yawrate				; // 偏航角速度 （Z方向）
-  public double accelerate_z		    ; // 线性加速度 （Z方向）
-  public double rollrate			    ; // 角速度 （X方向）
-  public double accelerate_x		    ; // 线性加速度 （X方向）
-  public double pitchrate			    ; // 角速度 （Y方向）
-  public double accelerate_y		    ; // 线性加速度 （Y方向）
-  public double target_distance		; // 前车距离
-  public double target_speed			; // 前车车速
-  public String target_id			    ; // 关键目标ID
-  public String target_type			; // 关键目标类型编码
-  public double collision_time		; // 与前车碰撞时间
-  public int monitoring_car_num		; // 视野内被识别的车辆数
-  public int monitoring_lane_num		; // 视野内被识别的车道数
-  public double deviation_distance	; // 车道偏离距离
-  public double deviation_speed		; // 车道偏离速度
-  public String target_lane_info		; // 目标车道信息编码（虚实、黄白、单双）
-  public String source_id             ; // 数据来源id
+
+  @JsonProperty(value = "gps_speed")
+  public double gpsSpeed	    ; // GPS速度
+
+  @JsonProperty(value = "direction")
+  public double direction             ; // 方向角
+
+  @JsonProperty(value = "yawrate")
+  public double yawRate				; // 偏航角速度 （Z方向）
+
+  @JsonProperty(value = "accelerate_z")
+  public double accelerateZ		    ; // 线性加速度 （Z方向）
+
+  @JsonProperty(value = "rollrate")
+  public double rollRate			    ; // 角速度 （X方向）
+
+  @JsonProperty(value = "accelerate_x")
+  public double accelerateX		    ; // 线性加速度 （X方向）
+
+  @JsonProperty(value = "pitchrate")
+  public double pitchRate			    ; // 角速度 （Y方向）
+
+  @JsonProperty(value = "accelerate_y")
+  public double accelerateY		    ; // 线性加速度 （Y方向）
+
+  @JsonProperty(value = "source_id")
+  public String sourceId             ; // 数据来源id
 
   public FixedFrequencyAccessData(){}
 
-  public String getDevice_id() {
-    return device_id;
+  public String getDeviceId() {
+    return deviceId;
   }
 
-  public void setDevice_id(String device_id) {
-    this.device_id = device_id;
+  public void setDeviceId(String deviceId) {
+    this.deviceId = deviceId;
   }
 
-  public String getDevice_imei() {
-    return device_imei;
+  public String getDeviceImei() {
+    return deviceImei;
   }
 
-  public void setDevice_imei(String device_imei) {
-    this.device_imei = device_imei;
+  public void setDeviceImei(String deviceImei) {
+    this.deviceImei = deviceImei;
   }
 
-  public String getTrip_id() {
-    return trip_id;
+  public String getLocalTime() {
+    return localTime;
   }
 
-  public void setTrip_id(String trip_id) {
-    this.trip_id = trip_id;
+  public void setLocalTime(String localTime) {
+    this.localTime = localTime;
   }
 
-  public String getLocal_time() {
-    return local_time;
+  public String getServerTime() {
+    return serverTime;
   }
 
-  public void setLocal_time(String local_time) {
-    this.local_time = local_time;
+  public void setServerTime(String serverTime) {
+    this.serverTime = serverTime;
   }
 
-  public String getServer_time() {
-    return server_time;
+  public String getTripId() {
+    return tripId;
   }
 
-  public void setServer_time(String server_time) {
-    this.server_time = server_time;
-  }
-
-  public String getEvent_id_list() {
-    return event_id_list;
-  }
-
-  public void setEvent_id_list(String event_id_list) {
-    this.event_id_list = event_id_list;
-  }
-
-  public String getFile_id_list() {
-    return file_id_list;
-  }
-
-  public void setFile_id_list(String file_id_list) {
-    this.file_id_list = file_id_list;
+  public void setTripId(String tripId) {
+    this.tripId = tripId;
   }
 
   public double getLatitude() {
@@ -127,6 +131,14 @@ public class FixedFrequencyAccessData {
     this.altitude = altitude;
   }
 
+  public double getGpsSpeed() {
+    return gpsSpeed;
+  }
+
+  public void setGpsSpeed(double gpsSpeed) {
+    this.gpsSpeed = gpsSpeed;
+  }
+
   public double getDirection() {
     return direction;
   }
@@ -135,156 +147,60 @@ public class FixedFrequencyAccessData {
     this.direction = direction;
   }
 
-  public double getGps_speed() {
-    return gps_speed;
+  public double getYawRate() {
+    return yawRate;
   }
 
-  public void setGps_speed(double gps_speed) {
-    this.gps_speed = gps_speed;
+  public void setYawRate(double yawRate) {
+    this.yawRate = yawRate;
   }
 
-  public double getSpeed() {
-    return speed;
+  public double getAccelerateZ() {
+    return accelerateZ;
   }
 
-  public void setSpeed(double speed) {
-    this.speed = speed;
+  public void setAccelerateZ(double accelerateZ) {
+    this.accelerateZ = accelerateZ;
   }
 
-  public double getYawrate() {
-    return yawrate;
+  public double getRollRate() {
+    return rollRate;
   }
 
-  public void setYawrate(double yawrate) {
-    this.yawrate = yawrate;
+  public void setRollRate(double rollRate) {
+    this.rollRate = rollRate;
   }
 
-  public double getAccelerate_z() {
-    return accelerate_z;
+  public double getAccelerateX() {
+    return accelerateX;
   }
 
-  public void setAccelerate_z(double accelerate_z) {
-    this.accelerate_z = accelerate_z;
+  public void setAccelerateX(double accelerateX) {
+    this.accelerateX = accelerateX;
   }
 
-  public double getRollrate() {
-    return rollrate;
+  public double getPitchRate() {
+    return pitchRate;
   }
 
-  public void setRollrate(double rollrate) {
-    this.rollrate = rollrate;
+  public void setPitchRate(double pitchRate) {
+    this.pitchRate = pitchRate;
   }
 
-  public double getAccelerate_x() {
-    return accelerate_x;
+  public double getAccelerateY() {
+    return accelerateY;
   }
 
-  public void setAccelerate_x(double accelerate_x) {
-    this.accelerate_x = accelerate_x;
+  public void setAccelerateY(double accelerateY) {
+    this.accelerateY = accelerateY;
   }
 
-  public double getPitchrate() {
-    return pitchrate;
+  public String getSourceId() {
+    return sourceId;
   }
 
-  public void setPitchrate(double pitchrate) {
-    this.pitchrate = pitchrate;
-  }
-
-  public double getAccelerate_y() {
-    return accelerate_y;
-  }
-
-  public void setAccelerate_y(double accelerate_y) {
-    this.accelerate_y = accelerate_y;
-  }
-
-  public double getTarget_distance() {
-    return target_distance;
-  }
-
-  public void setTarget_distance(double target_distance) {
-    this.target_distance = target_distance;
-  }
-
-  public double getTarget_speed() {
-    return target_speed;
-  }
-
-  public void setTarget_speed(double target_speed) {
-    this.target_speed = target_speed;
-  }
-
-  public String getTarget_id() {
-    return target_id;
-  }
-
-  public void setTarget_id(String target_id) {
-    this.target_id = target_id;
-  }
-
-  public String getTarget_type() {
-    return target_type;
-  }
-
-  public void setTarget_type(String target_type) {
-    this.target_type = target_type;
-  }
-
-  public double getCollision_time() {
-    return collision_time;
-  }
-
-  public void setCollision_time(double collision_time) {
-    this.collision_time = collision_time;
-  }
-
-  public int getMonitoring_car_num() {
-    return monitoring_car_num;
-  }
-
-  public void setMonitoring_car_num(int monitoring_car_num) {
-    this.monitoring_car_num = monitoring_car_num;
-  }
-
-  public int getMonitoring_lane_num() {
-    return monitoring_lane_num;
-  }
-
-  public void setMonitoring_lane_num(int monitoring_lane_num) {
-    this.monitoring_lane_num = monitoring_lane_num;
-  }
-
-  public double getDeviation_distance() {
-    return deviation_distance;
-  }
-
-  public void setDeviation_distance(double deviation_distance) {
-    this.deviation_distance = deviation_distance;
-  }
-
-  public double getDeviation_speed() {
-    return deviation_speed;
-  }
-
-  public void setDeviation_speed(double deviation_speed) {
-    this.deviation_speed = deviation_speed;
-  }
-
-  public String getTarget_lane_info() {
-    return target_lane_info;
-  }
-
-  public void setTarget_lane_info(String target_lane_info) {
-    this.target_lane_info = target_lane_info;
-  }
-
-  public String getSource_id() {
-    return source_id;
-  }
-
-  public void setSource_id(String source_id) {
-    this.source_id = source_id;
+  public void setSourceId(String sourceId) {
+    this.sourceId = sourceId;
   }
 
   @Override

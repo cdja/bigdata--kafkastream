@@ -3,6 +3,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import com.chedaojunan.report.model.HongyanRawData;
+import com.chedaojunan.report.utils.SampledDataCleanAndRet;
 
 public class HongyanDataAccumulator {
 
@@ -13,8 +14,8 @@ public class HongyanDataAccumulator {
         return (int)(KafkaStreamTest.convertTimeStringToEpochSecond(rawData2.getGpsTime()) -
             KafkaStreamTest.convertTimeStringToEpochSecond(rawData1.getGpsTime()));};*/
   final Comparator<HongyanRawData> comparator =
-      (o1, o2) -> (int)(KafkaStreamTest.convertTimeStringToEpochSecond(o2.getGpsTime()) -
-          KafkaStreamTest.convertTimeStringToEpochSecond(o1.getGpsTime()));
+      (o1, o2) -> (int)(SampledDataCleanAndRet.convertTimeStringToEpochSecond(o2.getGpsTime()) -
+          SampledDataCleanAndRet.convertTimeStringToEpochSecond(o1.getGpsTime()));
 
   PriorityQueue queue = new PriorityQueue<>(comparator);
 
