@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.chedaojunan.report.model.AutoGraspRequest;
 import com.chedaojunan.report.model.AutoGraspRequestParam;
 import com.chedaojunan.report.model.AutoGraspResponse;
 import com.chedaojunan.report.model.ExtensionParamEnum;
@@ -18,6 +19,7 @@ import com.chedaojunan.report.utils.EndpointConstants;
 import com.chedaojunan.report.utils.EndpointUtils;
 import com.chedaojunan.report.utils.ObjectMapperUtils;
 import com.chedaojunan.report.utils.Pair;
+import com.chedaojunan.report.utils.PrepareAutoGraspRequest;
 import com.chedaojunan.report.utils.UrlUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,8 +29,8 @@ public class AutoGraspApiClientTest {
 
   private AutoGraspApiClient autoGraspApiClient;
   private AutoGraspRequestParam autoGraspRequestParam;
+  private AutoGraspRequest autoGraspRequest;
 
-  private UrlUtils urlUtils;
 
   @Before
   public void init() throws IOException {
@@ -63,19 +65,30 @@ public class AutoGraspApiClientTest {
     locations.add(location1);
     locations.add(location2);
     locations.add(location3);
-    autoGraspRequestParam = new AutoGraspRequestParam(apiKey, carId, locations, time, directions, speed, ExtensionParamEnum.BASE);
+    String locationString = PrepareAutoGraspRequest.convertLocationsToRequestString(locations);
+    String timeString = PrepareAutoGraspRequest.convertTimeToRequstString(time);
+    String speedString  = PrepareAutoGraspRequest.convertSpeedToRequestString(speed);
+    String directionString = PrepareAutoGraspRequest.convertDirectionToRequestString(directions);
+    autoGraspRequest = new AutoGraspRequest(apiKey, carId, locationString, timeString, directionString, speedString);
   }
 
   @Test
   public void testGetAutoGraspResponse() throws Exception {
-    AutoGraspResponse response = autoGraspApiClient.getAutoGraspResponse(autoGraspRequestParam);
+    AutoGraspResponse response = autoGraspApiClient.getAutoGraspResponse(autoGraspRequest);
     Assert.assertNotNull(response);
     Assert.assertEquals(3, response.getCount());
   }
 
   @Test
   public void testGetTrafficInfoFromAutoGraspResponse() {
-    List<FixedFrequencyIntegrationData> gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequestParam);
+    String apiKey = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_KEY);
+    String carId = "70211192";
+    String locationString = "107.997534,26.605624|107.989107,26.596756|107.985385,26.595086";
+    String timeString = "1514414,1514414,1514414";
+    String directionString = "220.4,243.4,243.4";
+    String speedString = "0.0,1.0,2.0";
+    autoGraspRequest = new AutoGraspRequest(apiKey, carId, locationString, timeString, directionString, speedString);
+    List<FixedFrequencyIntegrationData> gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
     Assert.assertEquals(3, gaodeApiResponseList.size());
   }
 }

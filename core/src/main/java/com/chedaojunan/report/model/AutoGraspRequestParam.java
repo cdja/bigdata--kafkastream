@@ -149,8 +149,8 @@ public class AutoGraspRequestParam {
 
   @Override
   public String toString() {
-    return "AutoGraspRequest{" +
-        "key='" + key + '\'' +
+    return "{" +
+        "key'" + key + '\'' +
         ", carid='" + carId + '\'' +
         ", locations='" + PrepareAutoGraspRequest.convertLocationsToRequestString(locations) + '\'' +
         ", time='" + PrepareAutoGraspRequest.convertTimeToRequstString(time) + '\'' +

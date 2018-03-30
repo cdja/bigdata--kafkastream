@@ -15,34 +15,33 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.GlobalKTable;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
-import com.chedaojunan.report.model.AutoGraspRequestParam;
+import com.chedaojunan.report.model.AutoGraspRequest;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.service.ExternalApiExecutorService;
 import com.chedaojunan.report.utils.SampledDataCleanAndRet;
 
 public class KafkaStreamTest {
 
-  private static final String BOOTSTRAP_SERVERS = "localhost:9092";
-  private static final int SAMPLE_THRESHOLD = 2;
-  private static final long TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS = 10000000000L;
-
-
-  static Comparator<String> stringComparator =
-      (s1, s2) -> (int) (SampledDataCleanAndRet.convertTimeStringToEpochSecond(SampledDataCleanAndRet.convertToFixedAccessDataPojo(s1).getServerTime()) -
-          SampledDataCleanAndRet.convertTimeStringToEpochSecond(SampledDataCleanAndRet.convertToFixedAccessDataPojo(s2).getServerTime()));
-
   static final Serde<String> stringSerde = Serdes.String();
+  private static final String BOOTSTRAP_SERVERS = "localhost:9092";
+  private static final int WINDOW_LENGTH_IN_SECONDS = 90;
+  private static final long TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS = 10000000000L;
+  static Comparator<String> stringComparator =
+      (s1, s2) -> (int) (Long.parseLong(SampledDataCleanAndRet.convertToFixedAccessDataPojo(s1).getServerTime()) -
+          Long.parseLong(SampledDataCleanAndRet.convertToFixedAccessDataPojo(s2).getServerTime()));
   //static final Serde<AutoGraspRequestParam> autoGraspRequestParamSerde =
   //final Serde<Long> longSerde = Serdes.Long();
   //final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
-
 
   public static void main(String[] args) {
     String inputTopic = "hy-raw-data-test";
@@ -56,10 +55,10 @@ public class KafkaStreamTest {
     sampledRawDataStream.start();
 
     // mock producer
-    String dataFile = "testdata";
+    /*String dataFile = "testdata";
     KafkaProducerTest producerTest = new KafkaProducerTest();
     producerTest.runProducer(dataFile, inputTopic);
-    producerTest.close();
+    producerTest.close();*/
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
     Runtime.getRuntime().addShutdownHook(new Thread(sampledRawDataStream::close));
@@ -112,8 +111,8 @@ public class KafkaStreamTest {
               .map(
                   apiRequest -> ExternalApiExecutorService.getExecutorService().submit(() -> {
                     System.out.println("apiRequest: " + apiRequest);
-                    AutoGraspRequestParam autoGraspRequestParam = SampledDataCleanAndRet.convertToAutoGraspRequestParam(apiRequest);
-                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequestParam);
+                    AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.convertToAutoGraspRequest(apiRequest);
+                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
                     gaodeApiResponseList
                         .stream()
                         .forEach(gaodeApiResponse -> results.add(gaodeApiResponse.toString()));
@@ -123,13 +122,45 @@ public class KafkaStreamTest {
           return results;
         });
 
-    /*KStream<Long, AdClickAndViewEvent> leftJoin = viewStream.leftJoin(clickStream, (view, click) ->  new AdClickAndViewEvent(view, click),
-        Serdes.Long(), AdSerdes.AD_VIEW_SERDE);
-    leftJoin.print();*/
+    /*final GlobalKTable<String, ArrayList<String>>
+        customers =
+        builder.globalTable()
+        builder.globalTable(CUSTOMER_TOPIC, Materialized.<Long, Customer, KeyValueStore<Bytes, byte[]>>as(CUSTOMER_STORE)
+            .withKeySerde(Serdes.Long())
+            .withValueSerde(customerSerde));*/
 
     gaodeApiResponseTable.toStream().print();
 
     // stream-to-table join using carId, ts and GPS
+
+    //final KStream<Windowed<String>, ArrayList<String>> orderedRawData =
+    /*    rawDataStream
+        .map(
+            (key, rawDataString) ->
+                new KeyValue<>(SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getDeviceId(), rawDataString)
+        )
+        .groupByKey()
+        .aggregate(
+            // the initializer
+            () -> {
+              return new PriorityQueue<>(stringComparator);
+            },
+            // the "add" aggregator
+            (windowedCarId, record, queue) -> {
+              if (!queue.contains(record))
+                queue.add(record);
+              return queue;
+            },
+            TimeWindows.of(TimeUnit.SECONDS.toMillis(WINDOW_LENGTH_IN_SECONDS)),
+            new PriorityQueueSerde<>(stringComparator, stringSerde)
+        )
+        .toStream()
+        .map(
+            (windowedString, accessDataPriorityQueue) -> {
+              long windowStartTime = windowedString.window().start();
+              long windowEndTime = windowedString.window().end();
+              return new KeyValue<>(String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime)), accessDataPriorityQueue);
+        })*/
 
     return new KafkaStreams(builder, streamsConfiguration);
   }
@@ -169,7 +200,7 @@ public class KafkaStreamTest {
                 queue.add(record);
               return queue;
             },
-            TimeWindows.of(TimeUnit.SECONDS.toMillis(90)),
+            TimeWindows.of(TimeUnit.SECONDS.toMillis(WINDOW_LENGTH_IN_SECONDS)),
             new PriorityQueueSerde<>(stringComparator, stringSerde)
         )
         .toStream();
@@ -182,12 +213,12 @@ public class KafkaStreamTest {
           long windowStartTime = windowedString.window().start();
           long windowEndTime = windowedString.window().end();
           ArrayList<String> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataPriorityQueue));
-          AutoGraspRequestParam autoGraspRequestParam = SampledDataCleanAndRet.autoGraspRequestParamRet(sampledDataList);
+          AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
           String valueString;
-          if (autoGraspRequestParam == null)
+          if (autoGraspRequest == null)
             valueString = null;
           else
-            valueString = autoGraspRequestParam.toString();
+            valueString = autoGraspRequest.toString();
           return new KeyValue<>(String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime)), valueString);
         })
         .filter((key, autoGraspRequestParamString) -> StringUtils.isNotEmpty(autoGraspRequestParamString))

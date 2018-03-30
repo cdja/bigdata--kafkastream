@@ -1,7 +1,7 @@
-{"device_id":"70211192", "server_time": "03-11-17 06:42:06","longi": 107.997534, "lat": 26.605624, "gps_speed": 0}
-{"device_id":"70211192", "server_time": "03-11-17 06:42:37","longi": 107.989107, "lat": 26.596756, "gps_speed": 1}
-{"device_id":"70211192", "server_time": "03-11-17 06:43:14","longi": 107.985385, "lat": 26.595086, "gps_speed": 2}
-{"device_id":"70211192", "server_time": "03-11-17 06:44:44","longi": 107.983825, "lat": 26.592922, "gps_speed": 3}
-{"device_id":"70267534", "server_time": "03-11-17 06:42:06","longi": 106.928352, "lat": 27.675555, "gps_speed": 4}
-{"device_id":"70267534", "server_time": "03-11-17 06:42:37","longi": 106.925622, "lat": 27.672498, "gps_speed": 5}
-{"device_id":"70267534", "server_time": "03-11-17 06:43:30","longi": 106.921609, "lat": 27.670728, "gps_speed": 6}
+{"device_id":"70211192", "server_time": "1489214526000","longi": 107.997534, "lat": 26.605624, "gps_speed": 0}
+{"device_id":"70211192", "server_time": "1489214557000","longi": 107.989107, "lat": 26.596756, "gps_speed": 1}
+{"device_id":"70211192", "server_time": "1489214594000","longi": 107.985385, "lat": 26.595086, "gps_speed": 2}
+{"device_id":"70211192", "server_time": "1489214684000","longi": 107.983825, "lat": 26.592922, "gps_speed": 3}
+{"device_id":"70267534", "server_time": "1489214526000","longi": 106.928352, "lat": 27.675555, "gps_speed": 4}
+{"device_id":"70267534", "server_time": "1489214557000","longi": 106.925622, "lat": 27.672498, "gps_speed": 5}
+{"device_id":"70267534", "server_time": "1489213950000","longi": 106.921609, "lat": 27.670728, "gps_speed": 6}
