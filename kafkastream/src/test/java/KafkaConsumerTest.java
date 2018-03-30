@@ -75,8 +75,8 @@ public class KafkaConsumerTest {
   }
 
   public static void main(String... args) throws Exception {
-    //String inputTopic = "hy-raw-data-test";
-    String inputTopic = "schedule";
+    String inputTopic = "hy-raw-data-test";
+    //String inputTopic = "twitter_json";
     runConsumer(inputTopic);
 
   }

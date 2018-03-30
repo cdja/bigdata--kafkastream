@@ -156,8 +156,8 @@ public class SampledDataCleanAndRet {
   }
 
   // 数据整合
-  public List dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) throws IOException {
-    List<FixedFrequencyIntegrationData> integrationDataList = new ArrayList<>();
+  public static ArrayList<FixedFrequencyIntegrationData> dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) {
+    ArrayList<FixedFrequencyIntegrationData> integrationDataList = new ArrayList<>();
     CopyProperties copyProperties = new CopyProperties();
 
     int batchListSize = batchList.size();
@@ -197,7 +197,7 @@ public class SampledDataCleanAndRet {
     return integrationDataList;
   }
 
-  public void addAccessDataToIntegrationData(FixedFrequencyIntegrationData integrationData, FixedFrequencyAccessData accessData) {
+  public static void addAccessDataToIntegrationData(FixedFrequencyIntegrationData integrationData, FixedFrequencyAccessData accessData) {
     integrationData.setDeviceId(accessData.getDeviceId());
     integrationData.setDeviceImei(accessData.getDeviceImei());
     integrationData.setLocalTime(accessData.getLocalTime());
@@ -252,6 +252,19 @@ public class SampledDataCleanAndRet {
     try {
       FixedFrequencyAccessData accessData = objectMapper.readValue(accessDataString, FixedFrequencyAccessData.class);
       return accessData;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public static FixedFrequencyIntegrationData convertToFixedFrequencyIntegrationDataPojo(String integrationDataString) {
+    if (StringUtils.isEmpty(integrationDataString))
+      return null;
+    ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
+    try {
+      FixedFrequencyIntegrationData integrationData = objectMapper.readValue(integrationDataString, FixedFrequencyIntegrationData.class);
+      return integrationData;
     } catch (IOException e) {
       e.printStackTrace();
       return null;
