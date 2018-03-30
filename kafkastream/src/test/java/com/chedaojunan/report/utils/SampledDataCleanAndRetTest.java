@@ -1,9 +1,6 @@
 package com.chedaojunan.report.utils;
 
-import com.chedaojunan.report.model.AutoGraspRequestParam;
-import com.chedaojunan.report.model.FixedFrequencyAccessData;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
-import com.chedaojunan.report.model.GaoDeFusionReturn;
+import com.chedaojunan.report.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.junit.Assert;
@@ -146,9 +143,9 @@ public class SampledDataCleanAndRetTest {
     }
 
     @Test
-    public void testAutoGraspRequestParamRet() {
-        AutoGraspRequestParam autoGraspRequestParam = sampledDataCleanAndRet.autoGraspRequestParamRet(sampledDataCleanAndRet.sampleKafkaData(batchList));
-        Assert.assertNotNull(autoGraspRequestParam);
+    public void testAutoGraspRequestRet() {
+        AutoGraspRequest autoGraspRequest = sampledDataCleanAndRet.autoGraspRequestRet(sampledDataCleanAndRet.sampleKafkaData(batchList));
+        Assert.assertNotNull(autoGraspRequest);
     }
 
     @Test

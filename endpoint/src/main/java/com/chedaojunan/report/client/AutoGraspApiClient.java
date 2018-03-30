@@ -2,7 +2,9 @@ package com.chedaojunan.report.client;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -13,8 +15,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chedaojunan.report.common.Constants;
+import com.chedaojunan.report.model.AutoGraspRequest;
 import com.chedaojunan.report.model.AutoGraspRequestParam;
 import com.chedaojunan.report.model.AutoGraspResponse;
+import com.chedaojunan.report.model.ExtensionParamEnum;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.model.RectangleTrafficInfoRequest;
 import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
@@ -58,19 +63,19 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
     return String.join(EndpointConstants.QUESTION_MARK_DELIMITER, url, requestPara);
   }
 
-  protected Request createRequest(AutoGraspRequestParam autoGraspRequestParam) {
+  protected Request createRequest(AutoGraspRequest autoGraspRequest) {
     HttpUrl httpUrl = new HttpUrl.Builder()
         .scheme("http")
         .host(url)
         .addPathSegment(apiVersion)
         .addPathSegments(pathSegment)
-        .addQueryParameter(AutoGraspRequestParam.KEY, autoGraspRequestParam.getKey())
-        .addQueryParameter(AutoGraspRequestParam.CAR_ID, autoGraspRequestParam.getCarId())
-        .addQueryParameter(AutoGraspRequestParam.LOCATIONS, PrepareAutoGraspRequest.convertLocationsToRequestString(autoGraspRequestParam.getLocations()))
-        .addQueryParameter(AutoGraspRequestParam.TIME, PrepareAutoGraspRequest.convertTimeToRequstString(autoGraspRequestParam.getTime()))
-        .addQueryParameter(AutoGraspRequestParam.DIRECTION, PrepareAutoGraspRequest.convertDirectionToRequestString(autoGraspRequestParam.getDirection()))
-        .addQueryParameter(AutoGraspRequestParam.SPEED, PrepareAutoGraspRequest.convertSpeedToRequestString(autoGraspRequestParam.getSpeed()))
-        .addQueryParameter(AutoGraspRequestParam.EXTENSIONS, autoGraspRequestParam.getExtensionParamEnum().toString())
+        .addQueryParameter(AutoGraspRequestParam.KEY, autoGraspRequest.getKey())
+        .addQueryParameter(AutoGraspRequestParam.CAR_ID, autoGraspRequest.getCarId())
+        .addQueryParameter(AutoGraspRequestParam.LOCATIONS, autoGraspRequest.getLocations())
+        .addQueryParameter(AutoGraspRequestParam.TIME, autoGraspRequest.getTime())
+        .addQueryParameter(AutoGraspRequestParam.DIRECTION, autoGraspRequest.getDirection())
+        .addQueryParameter(AutoGraspRequestParam.SPEED, autoGraspRequest.getSpeed())
+        .addQueryParameter(AutoGraspRequestParam.EXTENSIONS, ExtensionParamEnum.BASE.toString())
         .build();
 
     Request request = new Request.Builder()
@@ -79,28 +84,32 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
     return request;
   }
 
-  public AutoGraspResponse getAutoGraspResponse(AutoGraspRequestParam autoGraspRequestParam) {
-    return getClientJsonPojo(createRequest(autoGraspRequestParam), AutoGraspResponse.class);
+  public AutoGraspResponse getAutoGraspResponse(AutoGraspRequest autoGraspRequest) {
+    return getClientJsonPojo(createRequest(autoGraspRequest), AutoGraspResponse.class);
   }
 
-  public List<FixedFrequencyIntegrationData> getTrafficInfoFromAutoGraspResponse(AutoGraspRequestParam autoGraspRequestParam) {
+  public List<FixedFrequencyIntegrationData> getTrafficInfoFromAutoGraspResponse(AutoGraspRequest autoGraspRequest) {
 
-    AutoGraspResponse autoGraspResponse = getClientJsonPojo(createRequest(autoGraspRequestParam), AutoGraspResponse.class);
+    AutoGraspResponse autoGraspResponse = getClientJsonPojo(createRequest(autoGraspRequest), AutoGraspResponse.class);
 
-    List<String> autoGraspRequestGpsList = autoGraspRequestParam.getLocations()
-        .stream()
-        .map(Pair::toString)
-        .collect(Collectors.toList());
+    List<String> autoGraspRequestGpsList = Arrays.asList(autoGraspRequest.getLocations().split(Constants.ESCAPE_PIPE));
 
     int dataCount = autoGraspResponse.getCount();
     if (CollectionUtils.isEmpty(autoGraspRequestGpsList) || CollectionUtils.isEmpty(autoGraspResponse.getRoadInfoList()) ||
         (autoGraspRequestGpsList.size() != autoGraspResponse.getRoadInfoList().size()) ||
         autoGraspRequestGpsList.size() != dataCount ||
         autoGraspResponse.getRoadInfoList().size() != dataCount) {
-      throw new IllegalArgumentException("autoGrasp locations cannot be matched with roads in response");
+      LOG.debug("status = 0 from AutoGrasp or autoGrasp locations cannot be matched with roads in response");
+      //status = 0 for autograsp API, no need to enrich data
+      List<FixedFrequencyIntegrationData> integrationDataList = new LinkedList<>();
+      FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
+      integrationData.setDeviceId(autoGraspRequest.getCarId());
+      int requestGpsCount = autoGraspRequestGpsList.size();
+      integrationDataList = Collections.nCopies(requestGpsCount, integrationData);
+      return integrationDataList;
     }
 
-    String apiKey = autoGraspRequestParam.getKey();
+    String apiKey = autoGraspRequest.getKey();
     RectangleTrafficInfoClient rectangleTrafficInfoClient = RectangleTrafficInfoClient.getInstance();
     List<RoadInfo> roadInfoList = autoGraspResponse.getRoadInfoList();
 
@@ -114,14 +123,13 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
           String requestId = UUID.randomUUID().toString();
 
           FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
+          integrationData.setDeviceId(autoGraspRequest.getCarId());
           enrichDataWithAutoGraspResponse(integrationData, index - 1, autoGraspRequestGpsList, roadInfoList, autoGraspResponse, requestTimestamp, requestId);
-          //gaodeApiResponseMap.put(origGPS, integrationData);
 
           RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, requestId, requestTimestamp, null);
           RectangleTrafficInfoResponse trafficInfoResponse = rectangleTrafficInfoClient.getTrafficInfoResponse(trafficInfoRequest);
 
           enrichDataWithTrafficInfoResponse(integrationData, trafficInfoResponse.getStatus(), trafficInfoResponse.getTrafficInfo().toString());
-          //gaodeApiResponseMap.put(origGPS, integrationData);
 
           return integrationData;
         }).collect(Collectors.toList());
@@ -129,8 +137,6 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
     //replicate traffic info for the last GPS
     int requestGpsListSize = autoGraspRequestGpsList.size();
 
-    //String secondToLastGPS = autoGraspRequestGpsList.get(requestGpsListSize - 2);
-    //String lastGPS = autoGraspRequestGpsList.get(requestGpsListSize - 1);
     FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
     String requestTimestamp = Instant.now().toString();
     String requestId = UUID.randomUUID().toString();

@@ -1,22 +1,15 @@
 package com.chedaojunan.report.model;
 
 import java.io.IOException;
-import java.util.List;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.chedaojunan.report.utils.Pair;
-import com.chedaojunan.report.utils.PrepareAutoGraspRequest;
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * 抓路服务请求参数实体类
- */
-
-public class AutoGraspRequestParam {
+public class AutoGraspRequest {
 
   public static final String KEY = "key";
   public static final String CAR_ID = "carid";
@@ -24,44 +17,40 @@ public class AutoGraspRequestParam {
   public static final String TIME = "time";
   public static final String DIRECTION = "direction";
   public static final String SPEED = "speed";
-  public static final String EXTENSIONS = "extensions";
 
   @NotNull
+  @JsonProperty(KEY)
   private String key; // 用户唯一标识
 
   @NotNull
+  @JsonProperty(CAR_ID)
   private String carId; // 车辆唯一标识
 
   @NotNull
-  @Size(min = 3, max = 200)
-  private List<Pair<Double, Double>> locations; // 经纬度
+  @JsonProperty(LOCATIONS)
+  private String locations; // 经纬度
 
   @NotNull
-  @Size(min = 3, max = 200)
-  private List<Long> time; // gps时间 (UTC format)
+  @JsonProperty(TIME)
+  private String time; // gps时间 (UTC format)
 
   @NotNull
-  @Size(min = 3, max = 200)
-  private List<Double> direction; // 行驶方向
+  @JsonProperty(DIRECTION)
+  private String direction; // 行驶方向
 
   @NotNull
-  @Size(min = 3, max = 200)
+  @JsonProperty(SPEED)
+  private String speed; // 行驶速度
 
-  private List<Double> speed; // 行驶速度
+  public AutoGraspRequest() {}
 
-  private ExtensionParamEnum extensionParamEnum; // base or all
-
-  public AutoGraspRequestParam(String apiKey, String carId, List<Pair<Double, Double>> locations, List<Long> time, List<Double> direction, List<Double> speed, ExtensionParamEnum extensionParamEnum) {
-    setKey(apiKey);
+  public AutoGraspRequest(String key, String carId, String locations, String time, String direction, String speed){
     setCarId(carId);
-    setLocations(locations);
-    setTime(time);
     setDirection(direction);
+    setKey(key);
+    setLocations(locations);
     setSpeed(speed);
-    if(extensionParamEnum != null)
-      setExtensionParamEnum(extensionParamEnum);
-    else
-      setExtensionParamEnum(ExtensionParamEnum.BASE);
+    setTime(time);
   }
 
   public String getKey() {
@@ -80,44 +69,36 @@ public class AutoGraspRequestParam {
     this.carId = carId;
   }
 
-  public List<Pair<Double, Double>> getLocations() {
+  public String getLocations() {
     return locations;
   }
 
-  public void setLocations(List<Pair<Double, Double>> locations) {
+  public void setLocations(String locations) {
     this.locations = locations;
   }
 
-  public List<Long> getTime() {
+  public String getTime() {
     return time;
   }
 
-  public void setTime(List<Long> time) {
+  public void setTime(String time) {
     this.time = time;
   }
 
-  public List<Double> getDirection() {
+  public String getDirection() {
     return direction;
   }
 
-  public void setDirection(List<Double> direction) {
+  public void setDirection(String direction) {
     this.direction = direction;
   }
 
-  public List<Double> getSpeed() {
+  public String getSpeed() {
     return speed;
   }
 
-  public void setSpeed(List<Double> speed) {
+  public void setSpeed(String speed) {
     this.speed = speed;
-  }
-
-  public ExtensionParamEnum getExtensionParamEnum() {
-    return extensionParamEnum;
-  }
-
-  public void setExtensionParamEnum(ExtensionParamEnum extensionParamEnum) {
-    this.extensionParamEnum = extensionParamEnum;
   }
 
   @Override
@@ -136,10 +117,10 @@ public class AutoGraspRequestParam {
     if (other == this) {
       return true;
     }
-    if ((other instanceof AutoGraspRequestParam) == false) {
+    if ((other instanceof AutoGraspRequest) == false) {
       return false;
     }
-    AutoGraspRequestParam rhs = ((AutoGraspRequestParam) other);
+    AutoGraspRequest rhs = ((AutoGraspRequest) other);
     return new EqualsBuilder()
         .append(key, rhs.key)
         .append(carId, rhs.carId)
@@ -159,5 +140,3 @@ public class AutoGraspRequestParam {
     }
   }
 }
-
-

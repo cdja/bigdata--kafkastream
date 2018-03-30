@@ -13,11 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
-import com.chedaojunan.report.model.AutoGraspRequestParam;
-import com.chedaojunan.report.model.ExtensionParamEnum;
+import com.chedaojunan.report.model.AutoGraspRequest;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.ws.rs.HEAD;
 
 public class SampledDataCleanAndRet {
 
@@ -26,14 +27,14 @@ public class SampledDataCleanAndRet {
   private static final double DECIMAL_DIGITS = 0.000001;
 
   private static AutoGraspApiClient autoGraspApiClient;
-  static AutoGraspRequestParam autoGraspRequestParam;
+  //static AutoGraspRequestParam autoGraspRequestParam;
   static CalculateUtils calculateUtils = new CalculateUtils();
-  private static final Logger log = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
 
   static HashMap gpsMap = new HashMap();
 
   // 60s数据采样返回
-  public static ArrayList<String> sampleKafkaData(List<String> batchList){
+  public static ArrayList<String> sampleKafkaData(List<String> batchList) {
 
     int batchListSize = batchList.size();
     ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
@@ -87,7 +88,7 @@ public class SampledDataCleanAndRet {
 
 
   // 返回抓路服务请求参数
-  public static AutoGraspRequestParam autoGraspRequestParamRet(ArrayList<String> listSample) {
+  public static AutoGraspRequest autoGraspRequestRet(ArrayList<String> listSample) {
     FixedFrequencyAccessData accessData1;
     FixedFrequencyAccessData accessData2;
     List<Long> times = new ArrayList<>();
@@ -143,17 +144,21 @@ public class SampledDataCleanAndRet {
         }
       }
 
+      String locationString = PrepareAutoGraspRequest.convertLocationsToRequestString(locations);
+      String timeString = PrepareAutoGraspRequest.convertTimeToRequstString(times);
+      String speedString  = PrepareAutoGraspRequest.convertSpeedToRequestString(speeds);
+      String directionString = PrepareAutoGraspRequest.convertDirectionToRequestString(directions);
+
       autoGraspApiClient = AutoGraspApiClient.getInstance();
-      autoGraspRequestParam = new AutoGraspRequestParam(apiKey, carId, locations, times, directions, speeds, ExtensionParamEnum.BASE);
-      return autoGraspRequestParam;
-    }
-    else
+      AutoGraspRequest autoGraspRequest = new AutoGraspRequest(apiKey, carId, locationString, timeString, directionString, speedString);
+      return autoGraspRequest;
+    } else
       return null;
   }
 
   // 数据整合
-  public List dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) throws IOException {
-    List<FixedFrequencyIntegrationData> integrationDataList = new ArrayList<>();
+  public static ArrayList<FixedFrequencyIntegrationData> dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) {
+    ArrayList<FixedFrequencyIntegrationData> integrationDataList = new ArrayList<>();
     CopyProperties copyProperties = new CopyProperties();
 
     int batchListSize = batchList.size();
@@ -176,10 +181,10 @@ public class SampledDataCleanAndRet {
         /*gaoDeFusionReturn = (GaoDeFusionReturn)mapGaoDe.get(listSample.get(i * stepLength).getLongitude() + ","
             + listSample.get(i * stepLength).getLatitude());*/
         for (int j = i * stepLength; j < Math.min((i + 1) * stepLength, batchListSize); j++) {
-            // TODO 整合高德数据
-            accessData = batchList.get(j);
-            addAccessDataToIntegrationData(integrationData, accessData);
-            integrationDataList.add(copyProperties.clone(integrationData));
+          // TODO 整合高德数据
+          accessData = batchList.get(j);
+          addAccessDataToIntegrationData(integrationData, accessData);
+          integrationDataList.add(copyProperties.clone(integrationData));
         }
       }
     } else {
@@ -193,7 +198,7 @@ public class SampledDataCleanAndRet {
     return integrationDataList;
   }
 
-  public void addAccessDataToIntegrationData(FixedFrequencyIntegrationData integrationData, FixedFrequencyAccessData accessData) {
+  public static void addAccessDataToIntegrationData(FixedFrequencyIntegrationData integrationData, FixedFrequencyAccessData accessData) {
     integrationData.setDeviceId(accessData.getDeviceId());
     integrationData.setDeviceImei(accessData.getDeviceImei());
     integrationData.setLocalTime(accessData.getLocalTime());
@@ -213,30 +218,24 @@ public class SampledDataCleanAndRet {
     integrationData.setSourceId(accessData.getSourceId());
   }
 
-  public static void main(String[] args) throws Exception{
+  public static void main(String[] args) throws Exception {
 
     /*List<FixedFrequencyAccessData> batchList = new ArrayList();
-
     SampledDataCleanAndRet sampledData = new SampledDataCleanAndRet();
     autoGraspApiClient = AutoGraspApiClient.getInstance();
-
     // 1.60s数据采样返回
     List<FixedFrequencyAccessData> listSample = sampledData.sampleKafkaData(batchList);
-
     if (listSample.size() >= 3) {
       // 2.高德抓路服务参数返回
       AutoGraspRequestParam autoGraspRequestParam = sampledData.autoGraspRequestParamRet(listSample);
       // 3.调用抓路服务
       AutoGraspResponse response = autoGraspApiClient.getAutoGraspResponse(autoGraspRequestParam);
       // 4. TODO 调用交通态势服务参数和服务
-
     }
     // TODO 以下为高德整合返回数据接受对象
     Map gaoDeMap = new HashMap();
-
     // 5.数据整合
     List integrationDataList = sampledData.dataIntegration(batchList, listSample, gaoDeMap);
-
     // 6.入库datahub
     WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
     if (integrationDataList.size() > 0) {
@@ -260,13 +259,26 @@ public class SampledDataCleanAndRet {
     }
   }
 
-  public static AutoGraspRequestParam convertToAutoGraspRequestParam (String apiRequest) {
+  public static FixedFrequencyIntegrationData convertToFixedFrequencyIntegrationDataPojo(String integrationDataString) {
+    if (StringUtils.isEmpty(integrationDataString))
+      return null;
+    ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
+    try {
+      FixedFrequencyIntegrationData integrationData = objectMapper.readValue(integrationDataString, FixedFrequencyIntegrationData.class);
+      return integrationData;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public static AutoGraspRequest convertToAutoGraspRequest (String apiRequest) {
     if (StringUtils.isEmpty(apiRequest))
       return null;
     ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
     try {
-      AutoGraspRequestParam autoGraspRequestParam = objectMapper.readValue(apiRequest, AutoGraspRequestParam.class);
-      return autoGraspRequestParam;
+      AutoGraspRequest autoGraspRequest = objectMapper.readValue(apiRequest, AutoGraspRequest.class);
+      return autoGraspRequest;
     } catch (IOException e) {
       e.printStackTrace();
       return null;

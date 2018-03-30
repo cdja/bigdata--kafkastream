@@ -3,6 +3,9 @@ package com.chedaojunan.report.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RectangleTrafficInfoRequest {
@@ -120,14 +123,11 @@ public class RectangleTrafficInfoRequest {
 
   @Override
   public String toString() {
-    return "RectangleTrafficInfoRequest{" +
-        "key='" + key + '\'' +
-        ", level='" + level + '\'' +
-        ", extensions='" + extensions + '\'' +
-        ", sig='" + sig + '\'' +
-        ", output='" + output + '\'' +
-        ", callback='" + callback + '\'' +
-        ", rectangle='" + rectangle + '\'' +
-        '}';
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.writeValueAsString(this);
+    } catch (IOException e) {
+      return null;
+    }
   }
 }
