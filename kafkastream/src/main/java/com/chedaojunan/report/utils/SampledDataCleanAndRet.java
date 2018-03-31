@@ -30,7 +30,7 @@ public class SampledDataCleanAndRet {
   static CalculateUtils calculateUtils = new CalculateUtils();
   private static final Logger LOG = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
 
-  static HashMap gpsMap = new HashMap();
+//  static HashMap gpsMap = new HashMap();
 
   // 60s数据采样返回 -- String
   public static ArrayList<String> sampleKafkaDataWithString (List<String> batchList) {
@@ -52,7 +52,7 @@ public class SampledDataCleanAndRet {
       for (int i = 0; i < batchListSize; i += stepLength) {
         if (i == 0) {
           accessData4 = convertToFixedAccessDataPojo(batchList.get(i));
-          gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
+//          gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
           sampleOver.add(accessData4.toString());
         } else {
           accessData1 = convertToFixedAccessDataPojo(batchList.get(i - stepLength));
@@ -67,10 +67,10 @@ public class SampledDataCleanAndRet {
                 calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
             accessData3.setLongitude(longitude);
             accessData3.setLatitude(latitude);
-            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
+//            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
             sampleOver.add(accessData3.toString());
           } else {
-            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
+//            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
             sampleOver.add(accessData2.toString());
           }
         }
@@ -104,7 +104,7 @@ public class SampledDataCleanAndRet {
       for (int i = 0; i < batchListSize; i += stepLength) {
         if (i == 0) {
           accessData4 = convertToFixedAccessDataPojo(batchList.get(i));
-          gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
+//          gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
           sampleOver.add(accessData4);
         } else {
           accessData1 = convertToFixedAccessDataPojo(batchList.get(i - stepLength));
@@ -119,10 +119,10 @@ public class SampledDataCleanAndRet {
                 calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
             accessData3.setLongitude(longitude);
             accessData3.setLatitude(latitude);
-            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
+//            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
             sampleOver.add(accessData3);
           } else {
-            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
+//            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
             sampleOver.add(accessData2);
           }
         }
