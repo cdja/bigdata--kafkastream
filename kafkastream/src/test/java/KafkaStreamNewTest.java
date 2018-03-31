@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.chedaojunan.report.utils.WriteDatahubUtil;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -70,7 +71,7 @@ public class KafkaStreamNewTest {
 
     KStreamBuilder builder = new KStreamBuilder();
     KStream<String, String> kStream = builder.stream(inputTopic);
-
+    WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
 
     final KStream<String, FixedFrequencyIntegrationData> enrichedDataStream = kStream
         .map(
@@ -108,6 +109,10 @@ public class KafkaStreamNewTest {
               .map(rawDataString -> SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString))
               .collect(Collectors.toCollection(ArrayList::new));
           ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(rawDataList, sampledDataList, gaodeApiResponseList);
+          // 整合数据入库datahub
+          if (enrichedData != null && enrichedData.size()!=0) {
+            writeDatahubUtil.putRecords(enrichedData);
+          }
           return new KeyValue<>(dataKey, enrichedData);
         })
         .flatMapValues(gaodeApiResponseList ->

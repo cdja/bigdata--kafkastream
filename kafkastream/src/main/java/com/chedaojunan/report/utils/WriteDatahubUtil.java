@@ -36,7 +36,10 @@ public class WriteDatahubUtil {
     }
 
     // 存数据到datahub的固定频率采集数据表中
-    public int putRecords(List<Object> list) {
+    public int putRecords(ArrayList<FixedFrequencyIntegrationData> list) {
+        if (list == null || list.size()==0) {
+            return -1;
+        }
         Topic topic = Topic.Builder.build(projectName, topicName, client);
         List<ShardEntry> shards = topic.listShard();
         RecordSchema schema = topic.getRecordSchema();

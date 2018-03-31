@@ -13,7 +13,7 @@ import java.util.List;
 
 public class WriteDatahubUtilTest {
 
-    private List integrationDataList = null;
+    private ArrayList<FixedFrequencyIntegrationData> integrationDataList = null;
     FixedFrequencyAccessData accessData;
     GaoDeFusionReturn gaoDeFusionReturn;
 
