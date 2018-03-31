@@ -130,7 +130,7 @@ public class SampledDataCleanAndRetTest {
         }
     }
 
-    @Test
+    /*@Test
     public void testSampleKafkaDataGpsSame() {
         listSample = sampledDataCleanAndRet.sampleKafkaData(batchList);
         Assert.assertEquals(3, listSample.size());
@@ -140,7 +140,7 @@ public class SampledDataCleanAndRetTest {
     public void testSampleKafkaDataGpsDiff() {
         listSample02 = sampledDataCleanAndRet.sampleKafkaData(batchList02);
         Assert.assertEquals(3, listSample02.size());
-    }
+    }*/
 
     @Test
     public void testAutoGraspRequestRet() {
