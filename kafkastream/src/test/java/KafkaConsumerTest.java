@@ -20,6 +20,7 @@ import org.apache.kafka.common.serialization.Serdes;
 
 import com.chedaojunan.report.model.HongyanRawData;
 import com.chedaojunan.report.utils.ObjectMapperUtils;
+import com.chedaojunan.report.utils.SampledDataCleanAndRet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KafkaConsumerTest {
@@ -47,6 +48,7 @@ public class KafkaConsumerTest {
             record.timestamp(),
             record.key(), record.value(),
             record.partition(), record.offset());
+        //System.out.println(SampledDataCleanAndRet.convertToFixedFrequencyIntegrationDataPojo(record.value()).getDeviceId());
         data.add(record.value());
       });
       consumer.commitAsync();
@@ -75,8 +77,9 @@ public class KafkaConsumerTest {
   }
 
   public static void main(String... args) throws Exception {
-    String inputTopic = "hy-raw-data-test";
-    //String inputTopic = "twitter_json";
+    //String inputTopic = "hy-raw-data-test";
+    String inputTopic = "twitter_json";
+    //String inputTopic = "schedule";
     runConsumer(inputTopic);
 
   }

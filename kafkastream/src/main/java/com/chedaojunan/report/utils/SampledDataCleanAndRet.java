@@ -32,8 +32,8 @@ public class SampledDataCleanAndRet {
 
   static HashMap gpsMap = new HashMap();
 
-  // 60s数据采样返回
-  public static ArrayList<String> sampleKafkaData(List<String> batchList) {
+  // 60s数据采样返回 -- String
+  public static ArrayList<String> sampleKafkaDataWithString (List<String> batchList) {
 
     int batchListSize = batchList.size();
     ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
@@ -85,9 +85,60 @@ public class SampledDataCleanAndRet {
     return sampleOver;
   }
 
+  public static ArrayList<FixedFrequencyAccessData> sampleKafkaData(List<String> batchList) {
+
+    int batchListSize = batchList.size();
+    ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
+    CopyProperties copyProperties = new CopyProperties();
+    int numRange = 50; // 数值取值范围[0,50)
+
+
+    // 采集步长
+    int stepLength = batchListSize / MININUM_SAMPLE_COUNT;
+    // 60s内数据少于3条处理
+    if (batchListSize >= MININUM_SAMPLE_COUNT) {
+      FixedFrequencyAccessData accessData1;
+      FixedFrequencyAccessData accessData2;
+      FixedFrequencyAccessData accessData3;
+      FixedFrequencyAccessData accessData4;
+      for (int i = 0; i < batchListSize; i += stepLength) {
+        if (i == 0) {
+          accessData4 = convertToFixedAccessDataPojo(batchList.get(i));
+          gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
+          sampleOver.add(accessData4);
+        } else {
+          accessData1 = convertToFixedAccessDataPojo(batchList.get(i - stepLength));
+          accessData2 = convertToFixedAccessDataPojo(batchList.get(i));
+          // TODO 根据经纬度判断数据是否有效
+          if (accessData1.getLatitude() == accessData2.getLatitude()
+              && accessData1.getLongitude() == accessData2.getLongitude()) {
+            accessData3 = copyProperties.clone(accessData2);
+            double longitude = calculateUtils.add(
+                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLongitude());
+            double latitude = calculateUtils.add(
+                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
+            accessData3.setLongitude(longitude);
+            accessData3.setLatitude(latitude);
+            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
+            sampleOver.add(accessData3);
+          } else {
+            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
+            sampleOver.add(accessData2);
+          }
+        }
+      }
+      // 车停止数据量不足3条，不做数据融合
+    } else {
+      for (int i = 0; i < batchListSize; i++) {
+        sampleOver.add(convertToFixedAccessDataPojo(batchList.get(i)));
+      }
+    }
+
+    return sampleOver;
+  }
 
   // 返回抓路服务请求参数
-  public static AutoGraspRequest autoGraspRequestRet(ArrayList<String> listSample) {
+  public static AutoGraspRequest autoGraspRequestRet(ArrayList<FixedFrequencyAccessData> listSample) {
     FixedFrequencyAccessData accessData1;
     FixedFrequencyAccessData accessData2;
     List<Long> times = new ArrayList<>();
@@ -106,8 +157,10 @@ public class SampledDataCleanAndRet {
     if (listSampleCount > 2) {
       for (int i = 0; i < listSampleCount; i++) {
         if (i == listSampleCount - 1) {
-          accessData1 = convertToFixedAccessDataPojo(listSample.get(i - 1));
-          accessData2 = convertToFixedAccessDataPojo(listSample.get(i));
+          /*accessData1 = convertToFixedAccessDataPojo(listSample.get(i - 1));
+          accessData2 = convertToFixedAccessDataPojo(listSample.get(i));*/
+          accessData1 = listSample.get(i - 1);
+          accessData2 = listSample.get(i);
 
           // TODO 需确认数据端收集的数据格式，并转化为UTC格式
           times.add(accessData2.getServerTime() == "" ? 0L : dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData2.getServerTime())));
@@ -115,8 +168,10 @@ public class SampledDataCleanAndRet {
           location = new Pair<>(accessData2.getLongitude(), accessData2.getLatitude());
           locations.add(location);
         } else {
-          accessData1 = convertToFixedAccessDataPojo(listSample.get(i));
-          accessData2 = convertToFixedAccessDataPojo(listSample.get(i + 1));
+          /*accessData1 = convertToFixedAccessDataPojo(listSample.get(i));
+          accessData2 = convertToFixedAccessDataPojo(listSample.get(i + 1));*/
+          accessData1 = listSample.get(i);
+          accessData2 = listSample.get(i + 1);
 
           // TODO 需确认数据端收集的数据格式，并转化为UTC格式
           times.add(accessData1.getServerTime() == "" ? 0L : dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData1.getServerTime())));

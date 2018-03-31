@@ -12,18 +12,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.ForeachAction;
+import org.apache.kafka.streams.kstream.GlobalKTable;
 import org.apache.kafka.streams.kstream.JoinWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.processor.ProcessorSupplier;
+import org.apache.kafka.streams.processor.StateStoreSupplier;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.Stores;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.chedaojunan.report.model.AutoGraspRequest;
@@ -53,18 +59,18 @@ public class KafkaStreamTest {
     /*TopologyBuilder topologyBuilder = new TopologyBuilder();
     topologyBuilder.*/
 
-    final KafkaStreams sampledRawDataStream = buildSampleDataStream(rawDataTopic, apiReuqestTopic);
+    //final KafkaStreams sampledRawDataStream = buildSampleDataStream(rawDataTopic, apiReuqestTopic);
 
-    sampledRawDataStream.start();
+    //sampledRawDataStream.start();
 
     // mock producer
-    String dataFile = "testdata";
+    /*String dataFile = "testdata";
     KafkaProducerTest producerTest = new KafkaProducerTest();
     producerTest.runProducer(dataFile, rawDataTopic);
-    producerTest.close();
+    producerTest.close();*/
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-    Runtime.getRuntime().addShutdownHook(new Thread(sampledRawDataStream::close));
+    //Runtime.getRuntime().addShutdownHook(new Thread(sampledRawDataStream::close));
 
     final KafkaStreams apiResponseStream = buildApiResponseStream(apiReuqestTopic, apiResponseTopic);
     apiResponseStream.start();
@@ -83,69 +89,28 @@ public class KafkaStreamTest {
 
   }
 
-  static KafkaStreams buildApiResponseStream(String apiRequestTopic, String apiResponseTopic) {
+  /*static void buildGlobalTable(){
+    KStreamBuilder globalBuilder = new KStreamBuilder();
+    StateStoreSupplier<KeyValueStore<String, String>> storeSupplier = Stores
+        .create("config-table")
+        .withKeys(stringSerde)
+        .withValues(stringSerde)
+        .persistent()
+        .disableLogging()
+        .build();
 
-    AutoGraspApiClient autoGraspApiClient = AutoGraspApiClient.getInstance();
-
-    final Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, UUID.randomUUID().toString());
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
-        BOOTSTRAP_SERVERS);
-    streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,
-        Serdes.String().getClass().getName());
-    streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,
-        Serdes.String().getClass().getName());
-    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    //streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/Users/qianz/Documents/Misc/Work-beijing/state-store-test");
-    //streamsConfiguration.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, FixedFrequencyAccessDataTimestampExtractor.class);
-
-    KStreamBuilder builder = new KStreamBuilder();
-    KStream<String, String> apiRequestStream = builder.stream(apiRequestTopic);
-
-    // get Gaode API response -- final KStream<String, ArrayList<String>>
-    final KTable<String, ArrayList<String>> gaodeApiResponseTable = apiRequestStream
-        .groupByKey()
-        .aggregate(
-            // the initializer
-            () -> {
-              return new ArrayList<>();
-            },
-            // the "add" aggregator
-            (windowTime, record, list) -> {
-              if (!list.contains(record))
-                list.add(record);
-              return list;
-            },
-            new ArrayListSerde<>(stringSerde)
-        )
-        .mapValues(apiRquestList -> {
-          ArrayList<String> results = new ArrayList<>();
-          List<Future<?>> futures = apiRquestList
-              .stream()
-              .map(
-                  apiRequest -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    System.out.println("apiRequest: " + apiRequest);
-                    AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.convertToAutoGraspRequest(apiRequest);
-                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
-                    gaodeApiResponseList
-                        .stream()
-                        .forEach(gaodeApiResponse -> results.add(gaodeApiResponse.toString()));
-                  })
-              ).collect(Collectors.toList());
-          ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
-          return results;
-        });
-    //gaodeApiResponseTable.toStream().print();
-    gaodeApiResponseTable
-        .toStream()
-        .flatMapValues(
-            apiResponseList -> apiResponseList.stream().collect(Collectors.toList())
-        )
-        .to(stringSerde, stringSerde, apiResponseTopic);
-
-    return new KafkaStreams(builder, streamsConfiguration);
-
-  }
+    // a Processor that updates the store
+    ProcessorSupplier<String, String> procSupplier = () -> new ConfigWorker();
+    globalBuilder.addGlobalStore(
+        storeSupplier.get(),
+        "test-table-source",
+        new StringDeserializer(),
+        new StringDeserializer(),
+        apiResponseTopic,
+        "config-worker",
+        procSupplier)
+        .buildGlobalStateTopology();
+  }*/
 
   static KafkaStreams buildApiEnrichedDataStream(String apiResponseTopic, String rawDataTopic) {
 
@@ -162,10 +127,33 @@ public class KafkaStreamTest {
     streamsConfiguration.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, FixedFrequencyIntegrationDataTimestampExtractor.class);
 
     KStreamBuilder builder = new KStreamBuilder();
-    /*KStream<String, String> rawDataStream = builder.stream(rawDataTopic);
+    KStream<String, String> apiResponseStringStream = builder.stream(apiResponseTopic);
+    KStream<String, ArrayList<String>> apiResponseStringListStream = apiResponseStringStream
+        .map((key, responseString) -> new KeyValue<>("haha", responseString))
+        .groupByKey()
+        .aggregate(
+            // the initializer
+            () -> {
+              return new ArrayList<>();
+            },
+            // the "add" aggregator
+            (windowTime, record, list) -> {
+              list.add(record);
+              return list;
+            },
+            new ArrayListSerde<>(stringSerde)
+        ).toStream();
+
+    apiResponseStringListStream.print();
+
+
+    KStream<String, String> rawDataStream = builder.stream(rawDataTopic);
+
+    rawDataStream.print();
+
 
     // stream-to-table join using carId and window-ts
-    final KStream<String, ArrayList<String>> orderedRawData = rawDataStream
+    /*final KStream<String, ArrayList<String>> orderedRawData = rawDataStream
         .map(
             (key, rawDataString) ->
                 new KeyValue<>(SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getDeviceId(), rawDataString)
@@ -197,8 +185,7 @@ public class KafkaStreamTest {
 
     orderedRawData.print();*/
 
-    final KTable<String, ArrayList<String>> apiResponseListStream = builder.table(apiResponseTopic);
-    apiResponseListStream.toStream().print();
+
 
     /*final KStream<String, String> apiResponseListStream = builder.stream(apiResponseTopic);
     //apiResponseListStream.print();
@@ -253,18 +240,73 @@ public class KafkaStreamTest {
     return new KafkaStreams(builder, streamsConfiguration);
   }
 
-  static ArrayList<FixedFrequencyIntegrationData> filterAndConvertApiResponseListBasedOnDeviceId(ArrayList<String> apiResposneStringList, String deviceId) {
-    ArrayList<FixedFrequencyIntegrationData> apiResponseList = apiResposneStringList
-        .stream()
-        .map(apiResposneString ->
-            SampledDataCleanAndRet.convertToFixedFrequencyIntegrationDataPojo(apiResposneString)
+  static KafkaStreams buildApiResponseStream(String apiRequestTopic, String apiResponseTopic) {
+
+    AutoGraspApiClient autoGraspApiClient = AutoGraspApiClient.getInstance();
+
+    final Properties streamsConfiguration = new Properties();
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, UUID.randomUUID().toString());
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
+        BOOTSTRAP_SERVERS);
+    streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,
+        Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,
+        Serdes.String().getClass().getName());
+    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    //streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/Users/qianz/Documents/Misc/Work-beijing/state-store-test");
+
+    KStreamBuilder builder = new KStreamBuilder();
+    KStream<String, String> apiRequestStream = builder.stream(apiRequestTopic);
+
+    // get Gaode API response -- final KStream<String, ArrayList<String>>
+    final KTable<String, ArrayList<String>> gaodeApiResponseTable = apiRequestStream
+        .groupByKey()
+        .aggregate(
+            // the initializer
+            () -> {
+              return new ArrayList<>();
+            },
+            // the "add" aggregator
+            (windowTime, record, list) -> {
+              if (!list.contains(record))
+                list.add(record);
+              return list;
+            },
+            new ArrayListSerde<>(stringSerde)
         )
-        .filter(integrationData -> StringUtils.endsWithIgnoreCase(integrationData.getDeviceId(), deviceId))
-        .collect(Collectors.toCollection(ArrayList::new));
-    return apiResponseList;
+        .mapValues(apiRquestList -> {
+          ArrayList<String> results = new ArrayList<>();
+          List<Future<?>> futures = apiRquestList
+              .stream()
+              .map(
+                  apiRequest -> ExternalApiExecutorService.getExecutorService().submit(() -> {
+                    System.out.println("apiRequest: " + apiRequest);
+                    AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.convertToAutoGraspRequest(apiRequest);
+                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
+                    gaodeApiResponseList
+                        .stream()
+                        .forEach(gaodeApiResponse -> results.add(gaodeApiResponse.toString()));
+                  })
+              ).collect(Collectors.toList());
+          ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
+          return results;
+        });
+
+    KStream<String, String> gaodeApiResponseStream = gaodeApiResponseTable
+        .toStream()
+        .flatMapValues(
+            apiResponseList -> apiResponseList.stream().collect(Collectors.toList())
+        );
+
+    gaodeApiResponseStream.to(stringSerde, stringSerde, apiResponseTopic);
+    //gaodeApiResponseStream.print();
+
+
+    return new KafkaStreams(builder, streamsConfiguration);
+
   }
 
-  static KafkaStreams buildSampleDataStream(String inputTopic, String outputTopic) {
+  /*static KafkaStreams buildSampleDataStream(String inputTopic, String apiReuqestTopic) {
     final Properties streamsConfiguration = new Properties();
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, UUID.randomUUID().toString());
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -321,10 +363,21 @@ public class KafkaStreamTest {
           return new KeyValue<>(String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime)), valueString);
         })
         .filter((key, autoGraspRequestParamString) -> StringUtils.isNotEmpty(autoGraspRequestParamString))
-        .to(stringSerde, stringSerde, outputTopic);
+        .to(stringSerde, stringSerde, apiReuqestTopic);
 
     return new KafkaStreams(builder, streamsConfiguration);
 
+  }*/
+
+  static ArrayList<FixedFrequencyIntegrationData> filterAndConvertApiResponseListBasedOnDeviceId(ArrayList<String> apiResposneStringList, String deviceId) {
+    ArrayList<FixedFrequencyIntegrationData> apiResponseList = apiResposneStringList
+        .stream()
+        .map(apiResposneString ->
+            SampledDataCleanAndRet.convertToFixedFrequencyIntegrationDataPojo(apiResposneString)
+        )
+        .filter(integrationData -> StringUtils.endsWithIgnoreCase(integrationData.getDeviceId(), deviceId))
+        .collect(Collectors.toCollection(ArrayList::new));
+    return apiResponseList;
   }
 
 }
