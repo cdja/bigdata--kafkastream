@@ -24,7 +24,7 @@ public class RoadInfo {
   private String crosspoint; // 交叉点坐标
 
   @JsonProperty(ROAD_NAME)
-  private String roadname; // 道路名称
+  private Object roadname; // 道路名称
 
   @JsonProperty(POLYLINE)
   private String polyline; // 道路经纬度坐标
@@ -49,11 +49,11 @@ public class RoadInfo {
     this.crosspoint = crosspoint;
   }
 
-  public String getRoadname() {
+  public Object getRoadname() {
     return roadname;
   }
 
-  public void setRoadname(String roadname) {
+  public void setRoadname(Object roadname) {
     this.roadname = roadname;
   }
 

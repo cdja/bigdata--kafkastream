@@ -164,7 +164,7 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
     String validGPS = getValidGPS(index, autoGraspRequestGpsList, roadInfoList);
     integrationData.setRoadApiStatus(autoGraspResponse.getStatus());
     integrationData.setCrosspoint(validGPS);
-    integrationData.setRoadName(roadInfo.getRoadname());
+    integrationData.setRoadName(roadInfo.getRoadname().toString());
     integrationData.setMaxSpeed(roadInfo.getMaxspeed());
     integrationData.setRoadLevel(roadInfo.getRoadlevel());
     integrationData.setIntersection(roadInfo.getIntersection().toString());
