@@ -1,3 +1,5 @@
+package com.chedaojunan.report.serdes;
+
 import java.util.Map;
 
 import org.apache.kafka.common.serialization.Deserializer;

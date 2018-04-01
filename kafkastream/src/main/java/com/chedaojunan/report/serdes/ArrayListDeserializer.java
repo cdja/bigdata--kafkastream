@@ -1,3 +1,5 @@
+package com.chedaojunan.report.serdes;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;

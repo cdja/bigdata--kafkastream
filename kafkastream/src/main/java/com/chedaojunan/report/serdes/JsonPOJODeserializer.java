@@ -1,3 +1,5 @@
+package com.chedaojunan.report.serdes;
+
 import java.util.Map;
 
 import org.apache.commons.lang3.SerializationException;

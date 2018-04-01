@@ -1,30 +1,31 @@
+package com.chedaojunan.report.serdes;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
-import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 
-public class WindowedSerde<T> implements Serde<Windowed<T>> {
+public class ArrayListSerde<T> implements Serde<ArrayList<T>> {
 
-  private final Serde<Windowed<T>> inner;
+  private final Serde<ArrayList<T>> inner;
 
-  public WindowedSerde(Serde<T> serde) {
-    inner = Serdes.serdeFrom(
-        new WindowedSerializer<>(serde.serializer()),
-        new WindowedDeserializer<>(serde.deserializer()));
+  public ArrayListSerde(Serde<T> serde) {
+    inner =
+        Serdes.serdeFrom(
+            new ArrayListSerializer<>(serde.serializer()),
+            new ArrayListDeserializer<>(serde.deserializer()));
   }
 
   @Override
-  public Serializer<Windowed<T>> serializer() {
+  public Serializer<ArrayList<T>> serializer() {
     return inner.serializer();
   }
 
   @Override
-  public Deserializer<Windowed<T>> deserializer() {
+  public Deserializer<ArrayList<T>> deserializer() {
     return inner.deserializer();
   }
 

@@ -1,3 +1,5 @@
+package com.chedaojunan.report.serdes;
+
 import java.util.Map;
 
 import org.apache.commons.lang3.SerializationException;
@@ -9,7 +11,7 @@ public class JsonPOJOSerializer<T> implements Serializer<T> {
 
   /*private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public JsonPOJOSerializer() {
+  public com.chedaojunan.report.serdes.JsonPOJOSerializer() {
   }
 
   @Override
