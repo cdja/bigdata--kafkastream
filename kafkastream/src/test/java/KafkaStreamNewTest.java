@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.chedaojunan.report.serdes.ArrayListSerde;
+import com.chedaojunan.report.utils.FixedFrequencyAccessDataTimestampExtractor;
 import com.chedaojunan.report.utils.WriteDatahubUtil;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,7 +20,6 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.Windowed;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.chedaojunan.report.model.AutoGraspRequest;
@@ -145,7 +145,7 @@ public class KafkaStreamNewTest {
         Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,
         Serdes.String().getClass().getName());
-    streamsConfiguration.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, FixedFrequencyAccessDataTimestampExtractor.class);
+    streamsConfiguration.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, com.chedaojunan.report.utils.FixedFrequencyAccessDataTimestampExtractor.class);
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     //streamsConfiguration.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "10");
     //streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/Users/qianz/Documents/Misc/Work-beijing/state-store-test");

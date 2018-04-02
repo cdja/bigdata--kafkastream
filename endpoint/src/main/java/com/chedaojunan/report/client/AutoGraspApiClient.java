@@ -122,7 +122,7 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
               String validGPS1 = ResponseUtils.getValidGPS(index - 1, autoGraspRequestGpsList, roadInfoList);
               String validGPS2 = ResponseUtils.getValidGPS(index, autoGraspRequestGpsList, roadInfoList);
               String trafficInfoRequestRectangle = String.join(SEMI_COLON, validGPS1, validGPS2);
-              String requestTimestamp = Instant.now().toString();
+              String requestTimestamp = String.valueOf(Instant.now().toEpochMilli());
               String requestId = UUID.randomUUID().toString();
 
               FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
@@ -142,7 +142,7 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
 
     FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
     integrationData.setDeviceId(autoGraspRequest.getCarId());
-    String requestTimestamp = Instant.now().toString();
+    String requestTimestamp = String.valueOf(Instant.now().toEpochMilli());
     String requestId = UUID.randomUUID().toString();
 
     FixedFrequencyIntegrationData integrationDataCopy = integrationDataList.get(integrationDataList.size() - 1);
