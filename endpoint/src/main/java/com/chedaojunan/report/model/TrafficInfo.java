@@ -12,20 +12,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrafficInfo {
 
-  private static final String DESCRIPTION = "description";
-  private static final String EVALUATION = "evaluation";
+  public static final String DESCRIPTION = "description";
+  public static final String EVALUATION = "evaluation";
 
   @JsonProperty(DESCRIPTION)
-  private Object description; // 路况综述
+  private String description; // 路况综述
 
   @JsonProperty(EVALUATION)
   private Evaluation evaluation; // 路况评价
 
-  public Object getDescription() {
+  public String getDescription() {
     return description;
   }
 
-  public void setDescription(Object description) {
+  public void setDescription(String description) {
     this.description = description;
   }
 

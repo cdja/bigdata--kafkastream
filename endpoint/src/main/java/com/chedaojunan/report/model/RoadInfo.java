@@ -12,19 +12,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoadInfo {
 
-  private static final String CROSS_POINT = "crosspoint";
-  private static final String ROAD_NAME = "roadname";
-  private static final String POLYLINE = "ployline";
-  private static final String ROAD_LEVEL = "roadlevel";
-  private static final String MAX_SPEED = "maxspeed";
-  private static final String INTERSECTION = "intersection";
-  private static final String INTERSECTION_DISTANCE = "intersectiondistance";
+  public static final String CROSS_POINT = "crosspoint";
+  public static final String ROAD_NAME = "roadname";
+  public static final String POLYLINE = "ployline";
+  public static final String ROAD_LEVEL = "roadlevel";
+  public static final String MAX_SPEED = "maxspeed";
+  public static final String INTERSECTION = "intersection";
+  public static final String INTERSECTION_DISTANCE = "intersectiondistance";
 
   @JsonProperty(CROSS_POINT)
   private String crosspoint; // 交叉点坐标
 
   @JsonProperty(ROAD_NAME)
-  private Object roadname; // 道路名称
+  private String roadname; // 道路名称
 
   @JsonProperty(POLYLINE)
   private String polyline; // 道路经纬度坐标
@@ -36,7 +36,7 @@ public class RoadInfo {
   private int maxspeed; // 道路最高限速
 
   @JsonProperty(INTERSECTION)
-  private Object intersection; // 临近路口
+  private String intersection; // 临近路口
 
   @JsonProperty(INTERSECTION_DISTANCE)
   private String intersectiondistance; // 距离临近路口距离
@@ -49,11 +49,11 @@ public class RoadInfo {
     this.crosspoint = crosspoint;
   }
 
-  public Object getRoadname() {
+  public String getRoadname() {
     return roadname;
   }
 
-  public void setRoadname(Object roadname) {
+  public void setRoadname(String roadname) {
     this.roadname = roadname;
   }
 
@@ -81,11 +81,11 @@ public class RoadInfo {
     this.maxspeed = maxspeed;
   }
 
-  public Object getIntersection() {
+  public String getIntersection() {
     return intersection;
   }
 
-  public void setIntersection(Object intersection) {
+  public void setIntersection(String intersection) {
     this.intersection = intersection;
   }
 

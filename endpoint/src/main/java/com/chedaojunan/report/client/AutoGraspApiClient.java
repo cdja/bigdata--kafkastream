@@ -1,12 +1,12 @@
 package com.chedaojunan.report.client;
 
+import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -25,8 +25,11 @@ import com.chedaojunan.report.model.RectangleTrafficInfoRequest;
 import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
 import com.chedaojunan.report.model.RoadInfo;
 import com.chedaojunan.report.utils.EndpointConstants;
-import com.chedaojunan.report.utils.Pair;
+import com.chedaojunan.report.utils.ObjectMapperUtils;
 import com.chedaojunan.report.utils.PrepareAutoGraspRequest;
+import com.chedaojunan.report.utils.ResponseUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -36,7 +39,6 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
   private static final Logger LOG = LoggerFactory.getLogger(AutoGraspApiClient.class);
   private static final String API_NAME = "AUTO_GRASP_API";
 
-  private static final String INVALID_CROSSPOINT = "0,0";
   private static final String SEMI_COLON = ";";
 
   private static AutoGraspApiClient instance = null;
@@ -85,12 +87,13 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
   }
 
   public AutoGraspResponse getAutoGraspResponse(AutoGraspRequest autoGraspRequest) {
-    return getClientJsonPojo(createRequest(autoGraspRequest), AutoGraspResponse.class);
+    String autoGraspResponseString = getClientResponseJson(createRequest(autoGraspRequest));
+    return ResponseUtils.convertStringToAutoGraspResponse(autoGraspResponseString);
   }
 
   public List<FixedFrequencyIntegrationData> getTrafficInfoFromAutoGraspResponse(AutoGraspRequest autoGraspRequest) {
 
-    AutoGraspResponse autoGraspResponse = getClientJsonPojo(createRequest(autoGraspRequest), AutoGraspResponse.class);
+    AutoGraspResponse autoGraspResponse = getAutoGraspResponse(autoGraspRequest);
 
     List<String> autoGraspRequestGpsList = Arrays.asList(autoGraspRequest.getLocations().split(Constants.ESCAPE_PIPE));
 
@@ -114,71 +117,41 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
     List<RoadInfo> roadInfoList = autoGraspResponse.getRoadInfoList();
 
     List<FixedFrequencyIntegrationData> integrationDataList =
-      IntStream.range(1, Math.min(autoGraspRequestGpsList.size(), autoGraspResponse.getCount()))
-        .mapToObj(index -> {
-          String validGPS1 = getValidGPS(index - 1, autoGraspRequestGpsList, roadInfoList);
-          String validGPS2 = getValidGPS(index, autoGraspRequestGpsList, roadInfoList);
-          String trafficInfoRequestRectangle = String.join(SEMI_COLON, validGPS1, validGPS2);
-          String requestTimestamp = Instant.now().toString();
-          String requestId = UUID.randomUUID().toString();
+        IntStream.range(1, Math.min(autoGraspRequestGpsList.size(), autoGraspResponse.getCount()))
+            .mapToObj(index -> {
+              String validGPS1 = ResponseUtils.getValidGPS(index - 1, autoGraspRequestGpsList, roadInfoList);
+              String validGPS2 = ResponseUtils.getValidGPS(index, autoGraspRequestGpsList, roadInfoList);
+              String trafficInfoRequestRectangle = String.join(SEMI_COLON, validGPS1, validGPS2);
+              String requestTimestamp = Instant.now().toString();
+              String requestId = UUID.randomUUID().toString();
 
-          FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
-          integrationData.setDeviceId(autoGraspRequest.getCarId());
-          enrichDataWithAutoGraspResponse(integrationData, index - 1, autoGraspRequestGpsList, roadInfoList, autoGraspResponse, requestTimestamp, requestId);
+              FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
+              integrationData.setDeviceId(autoGraspRequest.getCarId());
+              ResponseUtils.enrichDataWithAutoGraspResponse(integrationData, index - 1, autoGraspRequestGpsList, roadInfoList, autoGraspResponse, requestTimestamp, requestId);
 
-          RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, requestId, requestTimestamp, null);
-          RectangleTrafficInfoResponse trafficInfoResponse = rectangleTrafficInfoClient.getTrafficInfoResponse(trafficInfoRequest);
+              RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, requestId, requestTimestamp, null);
+              RectangleTrafficInfoResponse trafficInfoResponse = rectangleTrafficInfoClient.getTrafficInfoResponse(trafficInfoRequest);
 
-          enrichDataWithTrafficInfoResponse(integrationData, trafficInfoResponse.getStatus(), trafficInfoResponse.getTrafficInfo().toString());
+              ResponseUtils.enrichDataWithTrafficInfoResponse(integrationData, trafficInfoResponse.getStatus(), trafficInfoResponse.getTrafficInfo().toString());
 
-          return integrationData;
-        }).collect(Collectors.toList());
+              return integrationData;
+            }).collect(Collectors.toList());
 
     //replicate traffic info for the last GPS
     int requestGpsListSize = autoGraspRequestGpsList.size();
 
     FixedFrequencyIntegrationData integrationData = new FixedFrequencyIntegrationData();
+    integrationData.setDeviceId(autoGraspRequest.getCarId());
     String requestTimestamp = Instant.now().toString();
     String requestId = UUID.randomUUID().toString();
 
     FixedFrequencyIntegrationData integrationDataCopy = integrationDataList.get(integrationDataList.size() - 1);
-    enrichDataWithAutoGraspResponse(integrationData, requestGpsListSize-1, autoGraspRequestGpsList, roadInfoList, autoGraspResponse, requestTimestamp, requestId);
-    enrichDataWithTrafficInfoResponse(integrationData, integrationDataCopy.getTrafficApiStatus(), integrationDataCopy.getCongestionInfo());
+    ResponseUtils.enrichDataWithAutoGraspResponse(integrationData, requestGpsListSize - 1, autoGraspRequestGpsList, roadInfoList, autoGraspResponse, requestTimestamp, requestId);
+    ResponseUtils.enrichDataWithTrafficInfoResponse(integrationData, integrationDataCopy.getTrafficApiStatus(), integrationDataCopy.getCongestionInfo());
     integrationDataList.add(integrationData);
 
     return integrationDataList;
   }
 
-  public String getValidGPS(int index, List<String> autoGraspRequestGpsList, List<RoadInfo> autoGraspResponseRoadInfoList) {
-    String crosspoint = autoGraspResponseRoadInfoList.get(index).getCrosspoint();
-    if(crosspoint.equals(INVALID_CROSSPOINT))
-      return autoGraspRequestGpsList.get(index);
-    else
-      return crosspoint;
-  }
-
-  public void enrichDataWithAutoGraspResponse(FixedFrequencyIntegrationData integrationData,
-                                              int index, List<String> autoGraspRequestGpsList, List<RoadInfo> roadInfoList,
-                                              AutoGraspResponse autoGraspResponse, String requestTimestamp, String requestId) {
-    RoadInfo roadInfo = roadInfoList.get(index);
-    String validGPS = getValidGPS(index, autoGraspRequestGpsList, roadInfoList);
-    integrationData.setRoadApiStatus(autoGraspResponse.getStatus());
-    integrationData.setCrosspoint(validGPS);
-    integrationData.setRoadName(roadInfo.getRoadname().toString());
-    integrationData.setMaxSpeed(roadInfo.getMaxspeed());
-    integrationData.setRoadLevel(roadInfo.getRoadlevel());
-    integrationData.setIntersection(roadInfo.getIntersection().toString());
-    integrationData.setIntersectionDistance(roadInfo.getIntersectiondistance());
-    integrationData.setTrafficRequestId(requestId);
-    integrationData.setTrafficRequestTimesamp(requestTimestamp);
-  }
-
-  public FixedFrequencyIntegrationData enrichDataWithTrafficInfoResponse (FixedFrequencyIntegrationData integrationData,
-                                                                          int trafficInfoResponseStatus, String congestionInfo) {
-    integrationData.setTrafficApiStatus(trafficInfoResponseStatus);
-    integrationData.setCongestionInfo(congestionInfo);
-
-    return integrationData;
-  }
 
 }

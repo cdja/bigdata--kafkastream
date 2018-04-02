@@ -1,6 +1,7 @@
 package com.chedaojunan.report.model;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -186,7 +187,10 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
   public String toString() {
     ObjectMapper mapper = new ObjectMapper();
     try {
-      return mapper.writeValueAsString(this);
+      return mapper.writeValueAsString(this)
+          .replaceAll("\\\\", "")
+          .replaceAll("\"\\{", "{")
+          .replaceAll("\\}\"", "}");
     } catch (IOException e) {
       return null;
     }

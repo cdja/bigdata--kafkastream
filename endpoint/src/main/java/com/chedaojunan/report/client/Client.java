@@ -8,9 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.utils.EndpointConfiguration;
-import com.chedaojunan.report.utils.EndpointUtils;
 import com.chedaojunan.report.utils.ObjectMapperUtils;
 import com.chedaojunan.report.utils.UrlUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class Client<R> {
@@ -57,51 +58,41 @@ public abstract class Client<R> {
     this.pathSegment = pathSegment;
   }
 
-  R getClientJsonPojo(okhttp3.Request request, Class<R> classType) {
+  R getClientResponseJsonPojo(okhttp3.Request request, Class<R> classType) {
     try {
       long start = Instant.now().toEpochMilli();
-      String json = urlUtils.getJsonFromRequest(request, apiName);
-      if (json == null)
+      String responseJson = urlUtils.getJsonFromRequest(request, apiName);
+      if (responseJson == null)
         return null;
       long end = Instant.now().toEpochMilli();
       LOG.info("api query latency: {} for API {} ", (end - start), apiName);
-      return objectMapper.readValue(json, classType);
+      return objectMapper.readValue(responseJson, classType);
     } catch (IOException e) {
       LOG.error("failed to convert to {} from {}", classType, url, e);
       return null;
     }
   }
 
-  /*
-  R getClientJsonPojo(String url, Class<R> classType) {
-    try {
-      long start = Instant.now().toEpochMilli();
-      String json = urlUtils.getJsonFromUrl(url, apiName);
-      if (json == null)
-        return null;
-      long end = Instant.now().toEpochMilli();
-      LOG.info("api query latency: {} for API {} ", (end - start), apiName);
-      return objectMapper.readValue(json, classType);
-    } catch (IOException e) {
-      LOG.error("failed to convert to {} from {}", classType, url, e);
+
+  String getClientResponseJson(okhttp3.Request request) {
+    long start = Instant.now().toEpochMilli();
+    String responseJson = urlUtils.getJsonFromRequest(request, apiName);
+    if (responseJson == null)
       return null;
-    }
+    long end = Instant.now().toEpochMilli();
+    LOG.info("api query latency: {} for API {} ", (end - start), apiName);
+    return responseJson;
   }
 
-  List<R> getClientJsonListPojo(String url, Class<R> classType) {
+  /*List<String> convertJsonNodeToStringList (JsonNode jsonNode) {
     try {
-      long start = Instant.now().toEpochMilli();
-      String json = urlUtils.getJsonFromUrl(url, apiName);
-      if (json == null)
-        return null;
-      long end = Instant.now().toEpochMilli();
-      LOG.info("api query latency: {} for API {} ", (end - start), apiName);
-      return objectMapper.readValue(json, objectMapper.getTypeFactory().constructCollectionType(List.class, classType));
-    } catch (Exception e) {
-      LOG.error("failed to convert to {}, from {}", classType, url, e);
+      List<String> resultList = objectMapper.readValue(jsonNode.traverse(), new TypeReference<List<String>>(){});
+      return resultList;
+    } catch (IOException e) {
+      LOG.error("failed to convert to a String list, from {}", jsonNode.toString(), e);
       return null;
     }
- }*/
+  }*/
 
   public void setUrlUtils(UrlUtils urlUtils) {
     this.urlUtils = urlUtils;

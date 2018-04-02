@@ -1,6 +1,7 @@
 package com.chedaojunan.report.model;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -12,76 +13,76 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Evaluation {
 
-  private static final String EXPEDITE = "expedite";
-  private static final String CONGESTED = "congested";
-  private static final String BLOCKED = "blocked";
-  private static final String UNKNOWN = "unknown";
-  private static final String STATUS = "status";
-  private static final String DESCRIPTION = "description";
+  public static final String EXPEDITE = "expedite";
+  public static final String CONGESTED = "congested";
+  public static final String BLOCKED = "blocked";
+  public static final String UNKNOWN = "unknown";
+  public static final String STATUS = "status";
+  public static final String DESCRIPTION = "description";
 
   @JsonProperty(EXPEDITE)
-  private Object expedite; // 畅通所占百分比
+  private String expedite; // 畅通所占百分比
 
   @JsonProperty(CONGESTED)
-  private Object congested; // 缓行所占百分比
+  private String congested; // 缓行所占百分比
 
   @JsonProperty(BLOCKED)
-  private Object blocked; // 拥堵所占百分比
+  private String blocked; // 拥堵所占百分比
 
   @JsonProperty(UNKNOWN)
-  private Object unknown; // 未知路段所占百分比
+  private String unknown; // 未知路段所占百分比
 
   @JsonProperty(STATUS)
-  private Object status; // 路况
+  private String status; // 路况
 
   @JsonProperty(DESCRIPTION)
-  private Object description; // 道路描述
+  private String description; // 道路描述
 
-  public Object getExpedite() {
+  public String getExpedite() {
     return expedite;
   }
 
-  public void setExpedite(Object expedite) {
+  public void setExpedite(String expedite) {
     this.expedite = expedite;
   }
 
-  public Object getCongested() {
+  public String getCongested() {
     return congested;
   }
 
-  public void setCongested(Object congested) {
+  public void setCongested(String congested) {
     this.congested = congested;
   }
 
-  public Object getBlocked() {
+  public String getBlocked() {
     return blocked;
   }
 
-  public void setBlocked(Object blocked) {
+  public void setBlocked(String blocked) {
     this.blocked = blocked;
   }
 
-  public Object getUnknown() {
+  public String getUnknown() {
     return unknown;
   }
 
-  public void setUnknown(Object unknown) {
+  public void setUnknown(String unknown) {
     this.unknown = unknown;
   }
 
-  public Object getStatus() {
+  public String getStatus() {
     return status;
   }
 
-  public void setStatus(Object status) {
+  public void setStatus(String status) {
     this.status = status;
   }
 
-  public Object getDescription() {
+  public String getDescription() {
     return description;
   }
 
-  public void setDescription(Object description) {
+  public void setDescription(String description) {
     this.description = description;
   }
 
@@ -89,7 +90,7 @@ public class Evaluation {
   public String toString() {
     ObjectMapper mapper = new ObjectMapper();
     try {
-      return mapper.writeValueAsString(this);
+      return mapper.writer().writeValueAsString(this);
     } catch (IOException e) {
       return null;
     }

@@ -1,11 +1,20 @@
 package com.chedaojunan.report.client;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chedaojunan.report.model.Evaluation;
+import com.chedaojunan.report.model.GaoDeApiResponse;
 import com.chedaojunan.report.model.RectangleTrafficInfoRequest;
 import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
+import com.chedaojunan.report.model.RoadInfo;
+import com.chedaojunan.report.model.TrafficInfo;
 import com.chedaojunan.report.utils.EndpointConstants;
+import com.chedaojunan.report.utils.ObjectMapperUtils;
+import com.chedaojunan.report.utils.ResponseUtils;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -53,6 +62,8 @@ public class RectangleTrafficInfoClient extends Client<RectangleTrafficInfoRespo
   }
 
   public RectangleTrafficInfoResponse getTrafficInfoResponse(RectangleTrafficInfoRequest rectangleTrafficInfoRequest) {
-    return getClientJsonPojo(createRequest(rectangleTrafficInfoRequest), RectangleTrafficInfoResponse.class);
+    String trafficInfoResponseString = getClientResponseJson(createRequest(rectangleTrafficInfoRequest));
+    return ResponseUtils.convertToTrafficInfoResponse(trafficInfoResponseString);
   }
+
 }

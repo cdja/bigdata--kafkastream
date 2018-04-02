@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RectangleTrafficInfoResponse extends GaoDeApiResponse {
 
-  private static final String TRAFFIC_INFO = "trafficinfo";
+  public static final String TRAFFIC_INFO = "trafficinfo";
 
   @JsonProperty(TRAFFIC_INFO)
   private TrafficInfo trafficInfo;
