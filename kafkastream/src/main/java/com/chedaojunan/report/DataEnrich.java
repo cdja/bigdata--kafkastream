@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +31,7 @@ import com.chedaojunan.report.model.AutoGraspRequest;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.serdes.ArrayListSerde;
+import com.chedaojunan.report.serdes.SerdeFactory;
 import com.chedaojunan.report.service.ExternalApiExecutorService;
 import com.chedaojunan.report.utils.EndpointConstants;
 import com.chedaojunan.report.utils.EndpointUtils;
@@ -48,9 +51,11 @@ public class DataEnrich {
 
   private static final int kafkaWindowLengthInSeconds;
 
-  private static final Serde<String> stringSerde = Serdes.String();
+  private static final Serde<String> stringSerde;
 
-  private static Comparator<String> sortingByServerTime;
+  private static final Serde<FixedFrequencyAccessData> fixedFrequencyAccessDataSerde;
+
+  private static Comparator<FixedFrequencyAccessData> sortingByServerTime;
 
   private static AutoGraspApiClient autoGraspApiClient;
 
@@ -58,16 +63,19 @@ public class DataEnrich {
     try (InputStream inputStream = EndpointUtils.class.getClassLoader().getResourceAsStream(KafkaConstants.PROPERTIES_FILE_NAME)) {
       kafkaProperties = new Properties();
       kafkaProperties.load(inputStream);
-      inputStream.close();
+      //inputStream.close();
     } catch (IOException e) {
       LOG.error("Error occurred while reading properties file. ", e);
       exit(1);
     }
+    stringSerde = Serdes.String();
+    Map<String, Object> serdeProp = new HashMap<>();
+    fixedFrequencyAccessDataSerde = SerdeFactory.createSerde(FixedFrequencyAccessData.class, serdeProp);
     kafkaWindowLengthInSeconds = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.KAFKA_WINDOW_DURATION));
     autoGraspApiClient = AutoGraspApiClient.getInstance();
-    sortingByServerTime  =
-        (s1, s2)-> (int) (Long.parseLong(SampledDataCleanAndRet.convertToFixedAccessDataPojo(s1).getServerTime()) -
-            Long.parseLong(SampledDataCleanAndRet.convertToFixedAccessDataPojo(s2).getServerTime()));
+    sortingByServerTime =
+        (o1, o2) -> (int) (Long.parseLong(o1.getServerTime()) -
+            Long.parseLong(o2.getServerTime()));
   }
 
   public static void main(String[] args) {
@@ -110,37 +118,32 @@ public class DataEnrich {
     KStream<String, String> kStream = builder.stream(inputTopic);
     WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
 
-    //final KStream<Windowed<String>, ArrayList<String>> orderedDataStream = kStream
     final KStream<String, FixedFrequencyIntegrationData> enrichedDataStream = kStream
         .map(
             (key, rawDataString) ->
-                new KeyValue<>(SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getDeviceId(), rawDataString)
+                new KeyValue<>(SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getDeviceId(), SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString))
         )
-        .groupByKey()
+        .groupByKey(stringSerde, fixedFrequencyAccessDataSerde)
         .aggregate(
             // the initializer
             () -> {
               return new ArrayList<>();
             },
             // the "add" aggregator
-            (windowedCarId, record, queue) -> {
-              if (!queue.contains(record))
-                queue.add(record);
-              return queue;
+            (windowedCarId, record, list) -> {
+              if (!list.contains(record))
+                list.add(record);
+              return list;
             },
             TimeWindows.of(TimeUnit.SECONDS.toMillis(kafkaWindowLengthInSeconds)),
-            new ArrayListSerde<>(stringSerde)
+            new ArrayListSerde<>(fixedFrequencyAccessDataSerde)
         )
         .toStream()
-
-        //orderedDataStream.print();
-
-        //final KStream<String, FixedFrequencyIntegrationData> enrichedDataStream = orderedDataStream
         .map((windowedString, accessDataList) -> {
           long windowStartTime = windowedString.window().start();
           long windowEndTime = windowedString.window().end();
           accessDataList.sort(sortingByServerTime);
-          ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(accessDataList);
+          ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaDataNew(accessDataList);
           AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
           System.out.println("apiQuest: " + autoGraspRequest);
           String dataKey = String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime));
@@ -149,7 +152,6 @@ public class DataEnrich {
             gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
           ArrayList<FixedFrequencyAccessData> rawDataList = accessDataList
               .stream()
-              .map(rawDataString -> SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString))
               .collect(Collectors.toCollection(ArrayList::new));
           ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(rawDataList, sampledDataList, gaodeApiResponseList);
           // 整合数据入库datahub

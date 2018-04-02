@@ -85,7 +85,7 @@ public class SampledDataCleanAndRet {
     return sampleOver;
   }
 
-  public static ArrayList<FixedFrequencyAccessData> sampleKafkaData(List<String> batchList) {
+  public static ArrayList<FixedFrequencyAccessData> sampleKafkaDataNew (List<FixedFrequencyAccessData> batchList) {
 
     int batchListSize = batchList.size();
     ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
@@ -103,12 +103,12 @@ public class SampledDataCleanAndRet {
       FixedFrequencyAccessData accessData4;
       for (int i = 0; i < batchListSize; i += stepLength) {
         if (i == 0) {
-          accessData4 = convertToFixedAccessDataPojo(batchList.get(i));
+          accessData4 = batchList.get(i);
 //          gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
           sampleOver.add(accessData4);
         } else {
-          accessData1 = convertToFixedAccessDataPojo(batchList.get(i - stepLength));
-          accessData2 = convertToFixedAccessDataPojo(batchList.get(i));
+          accessData1 = batchList.get(i - stepLength);
+          accessData2 = batchList.get(i);
           // TODO 根据经纬度判断数据是否有效
           if (accessData1.getLatitude() == accessData2.getLatitude()
               && accessData1.getLongitude() == accessData2.getLongitude()) {
@@ -130,7 +130,7 @@ public class SampledDataCleanAndRet {
       // 车停止数据量不足3条，不做数据融合
     } else {
       for (int i = 0; i < batchListSize; i++) {
-        sampleOver.add(convertToFixedAccessDataPojo(batchList.get(i)));
+        sampleOver.add(batchList.get(i));
       }
     }
 
