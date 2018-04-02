@@ -13,11 +13,11 @@ import java.util.List;
 
 public class SampledDataCleanAndRetTest {
 
-    List<String> batchList;
+    List<FixedFrequencyAccessData> batchList;
     ArrayList<FixedFrequencyAccessData> listSample = null;
     FixedFrequencyAccessData accessData;
 
-    ArrayList<String> batchList02;
+    ArrayList<FixedFrequencyAccessData> batchList02;
     ArrayList<FixedFrequencyAccessData> listSample02 = null;
     FixedFrequencyAccessData accessData02;
 
@@ -51,7 +51,7 @@ public class SampledDataCleanAndRetTest {
             accessData.setPitchRate(20.7);
             accessData.setAccelerateY(20.8);
             accessData.setSourceId("source_id_" + (i + 1));
-            batchList.add(convertFromFixedAccessDataPojoToStr(accessData));
+            batchList.add(accessData);
         }
 
         batchList02 = new ArrayList<>();
@@ -75,7 +75,7 @@ public class SampledDataCleanAndRetTest {
             accessData02.setPitchRate(20.7);
             accessData02.setAccelerateY(20.8);
             accessData02.setSourceId("source_id_" + (i + 1));
-            batchList02.add(convertFromFixedAccessDataPojoToStr(accessData02));
+            batchList02.add(accessData02);
         }
 
         batchList03 = new ArrayList<>();

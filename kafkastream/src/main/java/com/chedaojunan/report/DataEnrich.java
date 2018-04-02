@@ -106,6 +106,7 @@ public class DataEnrich {
     streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,
         Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, FixedFrequencyAccessDataTimestampExtractor.class);
+    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getProperty(KafkaConstants.AUTO_OFFSET_RESET_CONFIG));
 
     // TODO: whether state store is needed
     /*String uuid = UUID.randomUUID().toString();
@@ -134,11 +135,11 @@ public class DataEnrich {
               return new ArrayList<>();
             },
             // the "add" aggregator
-            (windowedCarId, record, list) -> {
-              if (!list.contains(record))
-                list.add(record);
-              return list;
-            },
+                (windowedCarId, record, queue) -> {
+                  if (!queue.contains(record))
+                    queue.add(record);
+                  return queue;
+                },
             TimeWindows.of(TimeUnit.SECONDS.toMillis(kafkaWindowLengthInSeconds)),
             new ArrayListSerde<>(fixedFrequencyAccessDataSerde)
         )

@@ -57,11 +57,18 @@ public class ResponseUtils {
         int autoGraspStatus = autoGraspResponseNode.get(AutoGraspResponse.STATUS).asInt();
         String autoGraspInfoString = autoGraspResponseNode.get(AutoGraspResponse.INFO).asText();
         String autoGraspInfoCode = autoGraspResponseNode.get(AutoGraspResponse.INFO_CODE).asText();
-        int autoGraspCount = autoGraspResponseNode.get(AutoGraspResponse.COUNT).asInt();
+
+        int autoGraspCount = 0;
+        if (null != autoGraspResponseNode.get(AutoGraspResponse.COUNT)) {
+          autoGraspCount = autoGraspResponseNode.get(AutoGraspResponse.COUNT).asInt();
+        }
+//        int autoGraspCount = autoGraspResponseNode.get(AutoGraspResponse.COUNT).asInt();
         ArrayNode roadInfoArrayNode = (ArrayNode) autoGraspResponseNode.get(AutoGraspResponse.ROADS);
         List<RoadInfo> roadInfoList = new ArrayList<>();
-        roadInfoArrayNode
-            .forEach(roadInfoNode -> roadInfoList.add(convertJsonNodeToRoadInfo(roadInfoNode)));
+        if (null != roadInfoArrayNode) {
+          roadInfoArrayNode
+                  .forEach(roadInfoNode -> roadInfoList.add(convertJsonNodeToRoadInfo(roadInfoNode)));
+        }
 
         autoGraspResponse.setCount(autoGraspCount);
         autoGraspResponse.setRoadInfoList(roadInfoList);

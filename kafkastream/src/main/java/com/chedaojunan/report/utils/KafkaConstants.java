@@ -10,6 +10,7 @@ public class KafkaConstants {
   public static final String KAFKA_BOOTSTRAP_SERVERS = "bootstrap.servers";
   public static final String KAFKA_GROUP_ID = "kafka.group.id";
   public static final String KAFKA_WINDOW_DURATION = "kafka.window.duration.seconds"; //seconds
+  public static final String AUTO_OFFSET_RESET_CONFIG = "kafka.auto.offset.rest";
 
   public static final String HYPHEN = "-";
 
