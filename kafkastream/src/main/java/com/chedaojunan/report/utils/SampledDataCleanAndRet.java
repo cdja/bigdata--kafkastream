@@ -26,66 +26,11 @@ public class SampledDataCleanAndRet {
   private static final double DECIMAL_DIGITS = 0.000001;
 
   private static AutoGraspApiClient autoGraspApiClient;
-  //static AutoGraspRequestParam autoGraspRequestParam;
   static CalculateUtils calculateUtils = new CalculateUtils();
   private static final Logger LOG = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
 
-//  static HashMap gpsMap = new HashMap();
-
-  // 60s数据采样返回 -- String
-  public static ArrayList<String> sampleKafkaDataWithString (List<String> batchList) {
-
-    int batchListSize = batchList.size();
-    ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
-    CopyProperties copyProperties = new CopyProperties();
-    int numRange = 50; // 数值取值范围[0,50)
-
-
-    // 采集步长
-    int stepLength = batchListSize / MININUM_SAMPLE_COUNT;
-    // 60s内数据少于3条处理
-    if (batchListSize >= MININUM_SAMPLE_COUNT) {
-      FixedFrequencyAccessData accessData1;
-      FixedFrequencyAccessData accessData2;
-      FixedFrequencyAccessData accessData3;
-      FixedFrequencyAccessData accessData4;
-      for (int i = 0; i < batchListSize; i += stepLength) {
-        if (i == 0) {
-          accessData4 = convertToFixedAccessDataPojo(batchList.get(i));
-//          gpsMap.put(accessData4.getLongitude() + "," + accessData4.getLatitude(), accessData4.getLongitude() + "," + accessData4.getLatitude());
-          sampleOver.add(accessData4.toString());
-        } else {
-          accessData1 = convertToFixedAccessDataPojo(batchList.get(i - stepLength));
-          accessData2 = convertToFixedAccessDataPojo(batchList.get(i));
-          // TODO 根据经纬度判断数据是否有效
-          if (accessData1.getLatitude() == accessData2.getLatitude()
-              && accessData1.getLongitude() == accessData2.getLongitude()) {
-            accessData3 = copyProperties.clone(accessData2);
-            double longitude = calculateUtils.add(
-                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLongitude());
-            double latitude = calculateUtils.add(
-                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
-            accessData3.setLongitude(longitude);
-            accessData3.setLatitude(latitude);
-//            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
-            sampleOver.add(accessData3.toString());
-          } else {
-//            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
-            sampleOver.add(accessData2.toString());
-          }
-        }
-      }
-      // 车停止数据量不足3条，不做数据融合
-    } else {
-      for (int i = 0; i < batchListSize; i++) {
-        sampleOver.add(batchList.get(i).toString());
-      }
-    }
-
-    return sampleOver;
-  }
-
-  public static ArrayList<FixedFrequencyAccessData> sampleKafkaDataNew (List<FixedFrequencyAccessData> batchList) {
+  // 60s数据采样返回
+  public static ArrayList<FixedFrequencyAccessData> sampleKafkaData (List<FixedFrequencyAccessData> batchList) {
 
     int batchListSize = batchList.size();
     ArrayList sampleOver = new ArrayList(); // 用list存取样后数据

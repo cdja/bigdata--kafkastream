@@ -212,7 +212,7 @@ public class KafkaStreamNewTest {
               .map(
                   accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
                     accessDataList.sort(sortingByServerTime);
-                    ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaDataNew(new ArrayList<>(accessDataList));
+                    ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
                     System.out.println("apiQuest: " + autoGraspRequest);
                     List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,8 @@ import static java.lang.System.exit;
 public class DataEnrich {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataEnrich.class);
+  private static final long TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS = 10000000000L;
+  private static final String ALL_KEY = "ALL";
 
   private static Properties kafkaProperties = null;
 
@@ -143,7 +147,7 @@ public class DataEnrich {
           long windowStartTime = windowedString.window().start();
           long windowEndTime = windowedString.window().end();
           accessDataList.sort(sortingByServerTime);
-          ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaDataNew(accessDataList);
+          ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(accessDataList);
           AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
           System.out.println("apiQuest: " + autoGraspRequest);
           String dataKey = String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime));
@@ -164,6 +168,96 @@ public class DataEnrich {
             gaodeApiResponseList
                 .stream()
                 .collect(Collectors.toList()));
+
+    enrichedDataStream.print();
+
+    return new KafkaStreams(builder, streamsConfiguration);
+
+  }
+
+  static KafkaStreams buildDataStreamNew (String inputTopic) {
+    final Properties streamsConfiguration = getStreamConfig();
+
+    KStreamBuilder builder = new KStreamBuilder();
+    KStream<String, String> kStream = builder.stream(inputTopic);
+    WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
+
+    final KStream<Windowed<String>, FixedFrequencyIntegrationData> enrichedDataStream = kStream
+        //final KStream<Windowed<String>, String> enrichedDataStream = kStream
+        .map(
+            (key, rawDataString) ->
+                new KeyValue<>(ALL_KEY, rawDataString)
+        )
+        .groupByKey()
+        .aggregate(
+            // the initializer
+            () -> {
+              return new ArrayList<>();
+            },
+            // the "add" aggregator
+            (windowedCarId, record, queue) -> {
+              if (!queue.contains(record))
+                queue.add(record);
+              return queue;
+            },
+            TimeWindows.of(TimeUnit.SECONDS.toMillis(kafkaWindowLengthInSeconds)),
+            new ArrayListSerde<>(stringSerde)
+        )
+        .toStream()
+        .mapValues(accessDataStringList ->
+            accessDataStringList
+                .stream()
+                .map(rawAccessDataString ->
+                    SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawAccessDataString))
+                .collect(Collectors.toCollection(ArrayList::new))
+        )
+        //KStream<Windowed<String>, ArrayList<FixedFrequencyAccessData>> -> KStream<Windowed<String>, ArrayList<ArrayList<FixedFrequencyAccessData>>>
+        .mapValues(accessDataList -> {
+          ArrayList<ArrayList<FixedFrequencyAccessData>> accessDataByDeviceIdList = accessDataList
+              .stream()
+              .collect(Collectors.groupingBy(FixedFrequencyAccessData::getDeviceId))
+              .values()
+              .stream()
+              .map(list -> list.stream()
+                  .reduce(new ArrayList<FixedFrequencyAccessData>(),
+                      (list1, data) -> {
+                        list1.add(data);
+                        return list1;
+                      },
+                      (list1, list2) -> {
+                        list1.addAll(list2);
+                        return list1;
+                      })
+              ).collect(Collectors.toCollection(ArrayList::new));
+          return accessDataByDeviceIdList;
+        })
+        //KStream<Windowed<String>, ArrayList<ArrayList<FixedFrequencyAccessData>>>
+        .flatMapValues(accessDataByDeviceIdList -> {
+          ArrayList<FixedFrequencyIntegrationData> enrichedDatList = new ArrayList<>();
+          List<Future<?>> futures = accessDataByDeviceIdList
+              .stream()
+              .map(
+                  accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
+                    accessDataList.sort(sortingByServerTime);
+                    ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataList));
+                    AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
+                    System.out.println("apiQuest: " + autoGraspRequest);
+                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();
+                    if (autoGraspRequest != null)
+                      gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
+                    ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(accessDataList, sampledDataList, gaodeApiResponseList);
+                    enrichedData
+                        .stream()
+                        .forEach(data -> enrichedDatList.add(data));
+                  })
+              ).collect(Collectors.toList());
+          ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
+          // 整合数据入库datahub
+          if (CollectionUtils.isNotEmpty(enrichedDatList)) {
+            writeDatahubUtil.putRecords(enrichedDatList);
+          }
+          return enrichedDatList;
+        });
 
     enrichedDataStream.print();
 
