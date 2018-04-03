@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class KafkaProducerTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerTest.class);
-  private static final String BOOTSTRAP_SERVERS = "47.95.10.165:9090,47.93.24.115:9092,39.106.170.188:9092";
+  private static final String BOOTSTRAP_SERVERS = "47.95.10.165:9092,47.93.24.115:9092,39.106.170.188:9092";
 
   private Producer producer;
 

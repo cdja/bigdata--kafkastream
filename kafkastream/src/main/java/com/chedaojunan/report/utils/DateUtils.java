@@ -27,6 +27,18 @@ public class DateUtils {
 		return hm;
 	}
 
+	// 获取时
+	public String getHour() {
+		String hour = new SimpleDateFormat("HH").format(Calendar.getInstance().getTime());
+		return hour;
+	}
+
+	// 获取分
+	public String getMinute() {
+		String minute = new SimpleDateFormat("mm").format(Calendar.getInstance().getTime());
+		return minute;
+	}
+
 	// 从本地时间转化为UTC时间（10位）
 	public long getUTCTimeFromLocal(long localTime) {
 
@@ -68,6 +80,32 @@ public class DateUtils {
 		String strs = "";
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("HH_mm");
+			strs = sdf.format(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return strs;
+	}
+
+	// 根据时间戳获取时
+	public String getHourFromTime(long mill) {
+		Date date = new Date(mill);
+		String strs = "";
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("HH");
+			strs = sdf.format(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return strs;
+	}
+
+	// 根据时间戳获取分
+	public String getMinuteFromTime(long mill) {
+		Date date = new Date(mill);
+		String strs = "";
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("mm");
 			strs = sdf.format(date);
 		} catch (Exception e) {
 			e.printStackTrace();

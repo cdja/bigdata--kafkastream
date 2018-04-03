@@ -25,7 +25,7 @@ public class WriteDatahubUtilTest {
         accessData.setDeviceImei("64691168800");
         accessData.setTripId("100");
         accessData.setLocalTime("1521478861000");
-        accessData.setServerTime("1521478866000");
+        accessData.setServerTime("");
         accessData.setLatitude(39.00);
         accessData.setLongitude(129.01);
         accessData.setAltitude(30.98);

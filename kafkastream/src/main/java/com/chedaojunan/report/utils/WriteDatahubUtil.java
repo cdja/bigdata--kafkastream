@@ -89,10 +89,13 @@ public class WriteDatahubUtil {
             if (StringUtils.isNotEmpty(integrationData.getServerTime())) {
                 time = Long.valueOf(integrationData.getServerTime());
                 ymd = dateUtils.getYMDFromTime(time);
-                hm = dateUtils.getHMFromTime(time);
+//                hm = dateUtils.getHMFromTime(time);
+                hm = dateUtils.getHourFromTime(time) + "_" +
+                        String.format("%02d", Integer.parseInt(dateUtils.getMinuteFromTime(time))/5 * 5);
             } else {
                 ymd = dateUtils.getYMD();
-                hm = dateUtils.getHM();
+//                hm = dateUtils.getHM();
+                hm = dateUtils.getHour() + "_" + String.format("%02d", Integer.parseInt(dateUtils.getMinute())/5 * 5);
             }
 
             entry.setString(28, ymd);

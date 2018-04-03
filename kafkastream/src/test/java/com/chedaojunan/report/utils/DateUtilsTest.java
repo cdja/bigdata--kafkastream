@@ -51,4 +51,14 @@ public class DateUtilsTest {
         Assert.assertEquals("15_57", dateUtils.getHMFromTime(serverTime));
     }
 
+    @Test
+    public void testGetHourFromTime() throws Exception {
+        Assert.assertEquals("15", dateUtils.getHourFromTime(serverTime));
+    }
+
+    @Test
+    public void testGetMinuteFromTime() throws Exception {
+        Assert.assertEquals("57", dateUtils.getMinuteFromTime(serverTime));
+    }
+
 }
