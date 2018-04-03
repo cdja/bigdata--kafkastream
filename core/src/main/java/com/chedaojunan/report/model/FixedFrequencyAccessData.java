@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -211,5 +214,58 @@ public class FixedFrequencyAccessData {
     } catch (IOException e) {
       return null;
     }
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder()
+        .append(deviceId)
+        .append(deviceImei)
+        .append(localTime)
+        .append(serverTime)
+        .append(tripId)
+        .append(latitude)
+        .append(longitude)
+        .append(altitude)
+        .append(gpsSpeed)
+        .append(direction)
+        .append(yawRate)
+        .append(accelerateX)
+        .append(accelerateY)
+        .append(accelerateZ)
+        .append(rollRate)
+        .append(sourceId)
+        .append(pitchRate)
+        .toHashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == this) {
+      return true;
+    }
+    if ((other instanceof FixedFrequencyAccessData) == false) {
+      return false;
+    }
+    FixedFrequencyAccessData rhs = ((FixedFrequencyAccessData) other);
+    return new EqualsBuilder()
+        .append(deviceId, rhs.deviceId)
+        .append(deviceImei, rhs.deviceImei)
+        .append(localTime, rhs.localTime)
+        .append(serverTime, rhs.serverTime)
+        .append(latitude, rhs.latitude)
+        .append(longitude, rhs.longitude)
+        .append(tripId, rhs.tripId)
+        .append(altitude, rhs.altitude)
+        .append(rollRate, rhs.rollRate)
+        .append(yawRate, rhs.yawRate)
+        .append(pitchRate, rhs.pitchRate)
+        .append(sourceId, rhs.sourceId)
+        .append(accelerateX, rhs.accelerateX)
+        .append(accelerateY, rhs.accelerateY)
+        .append(accelerateZ, rhs.accelerateZ)
+        .append(gpsSpeed, rhs.gpsSpeed)
+        .append(direction, rhs.direction)
+        .isEquals();
   }
 }

@@ -28,18 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
-import com.chedaojunan.report.common.Constants;
 import com.chedaojunan.report.model.AutoGraspRequest;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.serdes.ArrayListSerde;
 import com.chedaojunan.report.serdes.SerdeFactory;
 import com.chedaojunan.report.service.ExternalApiExecutorService;
-import com.chedaojunan.report.utils.EndpointConstants;
 import com.chedaojunan.report.utils.EndpointUtils;
 import com.chedaojunan.report.utils.FixedFrequencyAccessDataTimestampExtractor;
 import com.chedaojunan.report.utils.KafkaConstants;
-import com.chedaojunan.report.utils.ReadProperties;
 import com.chedaojunan.report.utils.SampledDataCleanAndRet;
 import com.chedaojunan.report.utils.WriteDatahubUtil;
 
@@ -135,11 +132,11 @@ public class DataEnrich {
               return new ArrayList<>();
             },
             // the "add" aggregator
-                (windowedCarId, record, queue) -> {
-                  if (!queue.contains(record))
-                    queue.add(record);
-                  return queue;
-                },
+            (windowedCarId, record, list) -> {
+              if (!list.contains(record))
+                list.add(record);
+              return list;
+            },
             TimeWindows.of(TimeUnit.SECONDS.toMillis(kafkaWindowLengthInSeconds)),
             new ArrayListSerde<>(fixedFrequencyAccessDataSerde)
         )
