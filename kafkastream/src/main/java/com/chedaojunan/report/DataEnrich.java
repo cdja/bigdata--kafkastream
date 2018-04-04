@@ -257,7 +257,7 @@ public class DataEnrich {
           return enrichedDatList;
         });
 
-    enrichedDataStream.print();
+//    enrichedDataStream.print();
 
     return new KafkaStreams(builder, streamsConfiguration);
 

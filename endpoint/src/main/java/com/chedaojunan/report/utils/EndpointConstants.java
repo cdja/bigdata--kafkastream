@@ -2,7 +2,7 @@ package com.chedaojunan.report.utils;
 
 public class EndpointConstants {
 
-  public static final String PROPERTIES_FILE_NAME = "local/application.properties";
+  public static final String PROPERTIES_FILE_NAME = "endpoint.properties";
 
   // Gaode API
   public static final String GAODE_API_POOL_MAX_IDLE_CONNECTIONS = "gaode.api.pool.max.idle.connections";

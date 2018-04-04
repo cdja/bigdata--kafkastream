@@ -29,6 +29,7 @@
     <java.version>1.8</java.version>
     <okhttp.version>3.10.0</okhttp.version>
     <jackson.version>2.9.4</jackson.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <profiles>
@@ -40,7 +41,7 @@
       <build>
         <resources>
           <resource>
-            <directory>src/main/resources</directory>
+            <directory>src/main/resources/${env}</directory>
             <filtering>true</filtering>
           </resource>
         </resources>
@@ -119,11 +120,11 @@
   </dependencyManagement>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
+    <!--<resources>-->
+      <!--<resource>-->
+        <!--<directory>src/main/resources</directory>-->
+      <!--</resource>-->
+    <!--</resources>-->
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -141,7 +142,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>test.java.KafkaStreamTest</mainClass>
+              <mainClass>com.chedaojunan.report.DataEnrich</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

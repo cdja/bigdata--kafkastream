@@ -2,7 +2,7 @@ package com.chedaojunan.report.utils;
 
 public class KafkaConstants {
 
-  public static final String PROPERTIES_FILE_NAME = "local/application.properties";
+  public static final String PROPERTIES_FILE_NAME = "kafkastream.properties";
 
   // Kafka brokers
   public static final String KAFKA_STREAM_APPLICATION_NAME = "data.enrich.with.traffic.info";
