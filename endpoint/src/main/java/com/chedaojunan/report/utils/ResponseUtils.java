@@ -144,26 +144,33 @@ public class ResponseUtils {
         String trafficInfoCode = trafficInfoResponseNode.get(GaoDeApiResponse.INFO_CODE).asText();
 
         JsonNode trafficInfoNode = trafficInfoResponseNode.get(RectangleTrafficInfoResponse.TRAFFIC_INFO);
-        TrafficInfo trafficInfo = new TrafficInfo();
-        String trafficDescription = trafficInfoNode.get(TrafficInfo.DESCRIPTION).asText();
+        // start mod for null check by 2018.04.05
+        TrafficInfo trafficInfo = null;
+        if (null != trafficInfoNode) {
+          trafficInfo = new TrafficInfo();
+        // end mod for null check by 2018.04.05
+          String trafficDescription = trafficInfoNode.get(TrafficInfo.DESCRIPTION).asText();
 
-        JsonNode evaluationNode = trafficInfoNode.get(TrafficInfo.EVALUATION);
-        Evaluation evaluation = new Evaluation();
-        String evaluationExpedite = evaluationNode.get(Evaluation.EXPEDITE).asText();
-        String evaluationCongested = evaluationNode.get(Evaluation.CONGESTED).asText();
-        String evaluationBlocked = evaluationNode.get(Evaluation.BLOCKED).asText();
-        String evaluationUnknown = evaluationNode.get(Evaluation.UNKNOWN).asText();
-        String evaluationDescription = evaluationNode.get(Evaluation.DESCRIPTION).asText();
-        String evaluationStatus = evaluationNode.get(Evaluation.STATUS).asText();
-        evaluation.setBlocked(evaluationBlocked);
-        evaluation.setCongested(evaluationCongested);
-        evaluation.setDescription(evaluationDescription);
-        evaluation.setExpedite(evaluationExpedite);
-        evaluation.setStatus(evaluationStatus);
-        evaluation.setUnknown(evaluationUnknown);
+          JsonNode evaluationNode = trafficInfoNode.get(TrafficInfo.EVALUATION);
+          Evaluation evaluation = new Evaluation();
+          String evaluationExpedite = evaluationNode.get(Evaluation.EXPEDITE).asText();
+          String evaluationCongested = evaluationNode.get(Evaluation.CONGESTED).asText();
+          String evaluationBlocked = evaluationNode.get(Evaluation.BLOCKED).asText();
+          String evaluationUnknown = evaluationNode.get(Evaluation.UNKNOWN).asText();
+          String evaluationDescription = evaluationNode.get(Evaluation.DESCRIPTION).asText();
+          String evaluationStatus = evaluationNode.get(Evaluation.STATUS).asText();
+          evaluation.setBlocked(evaluationBlocked);
+          evaluation.setCongested(evaluationCongested);
+          evaluation.setDescription(evaluationDescription);
+          evaluation.setExpedite(evaluationExpedite);
+          evaluation.setStatus(evaluationStatus);
+          evaluation.setUnknown(evaluationUnknown);
 
-        trafficInfo.setDescription(trafficDescription);
-        trafficInfo.setEvaluation(evaluation);
+          trafficInfo.setDescription(trafficDescription);
+          trafficInfo.setEvaluation(evaluation);
+        // start mod for null check by 2018.04.05
+        }
+        // end mod for null check by 2018.04.05
 
         trafficInfoResponse.setTrafficInfo(trafficInfo);
         trafficInfoResponse.setInfo(trafficInfoString);
