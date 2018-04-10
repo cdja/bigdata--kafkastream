@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,6 +29,11 @@ public class SampledDataCleanAndRet {
   private static AutoGraspApiClient autoGraspApiClient;
   static CalculateUtils calculateUtils = new CalculateUtils();
   private static final Logger LOG = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
+
+  @SuppressWarnings("unchecked")
+  public static Comparator<FixedFrequencyAccessData> sortingByServerTime  =
+      (o1, o2) -> (int) (Long.parseLong(o1.getServerTime()) -
+      Long.parseLong(o2.getServerTime()));
 
   // 60s数据采样返回
   public static ArrayList<FixedFrequencyAccessData> sampleKafkaData (List<FixedFrequencyAccessData> batchList) {
