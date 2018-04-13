@@ -25,6 +25,7 @@ public class SampledDataCleanAndRet {
   private static final String TIME_PATTERN = "MM-dd-yy HH:mm:ss";
   private static final int MININUM_SAMPLE_COUNT = 3;
   private static final double DECIMAL_DIGITS = 0.000001;
+  private static final String HEAD_CODE = "001";
 
   private static AutoGraspApiClient autoGraspApiClient;
   static CalculateUtils calculateUtils = new CalculateUtils();
@@ -90,6 +91,19 @@ public class SampledDataCleanAndRet {
 
   // 返回抓路服务请求参数
   public static AutoGraspRequest autoGraspRequestRet(ArrayList<FixedFrequencyAccessData> listSample) {
+    if (listSample.size() > 0) {
+      FixedFrequencyAccessData accessData = listSample.get(0);
+      if (HEAD_CODE.equals(accessData.getSourceId())) {
+        return sampleDataHaveDirection(listSample);
+      } else {
+        return sampleDataNoDirection(listSample);
+      }
+    }
+    return null;
+  }
+
+  // 采样数据中无direction
+  public static AutoGraspRequest sampleDataNoDirection(ArrayList<FixedFrequencyAccessData> listSample) {
     FixedFrequencyAccessData accessData1;
     FixedFrequencyAccessData accessData2;
     List<Long> times = new ArrayList<>();
@@ -108,8 +122,6 @@ public class SampledDataCleanAndRet {
     if (listSampleCount > 2) {
       for (int i = 0; i < listSampleCount; i++) {
         if (i == listSampleCount - 1) {
-          /*accessData1 = convertToFixedAccessDataPojo(listSample.get(i - 1));
-          accessData2 = convertToFixedAccessDataPojo(listSample.get(i));*/
           accessData1 = listSample.get(i - 1);
           accessData2 = listSample.get(i);
 
@@ -119,8 +131,6 @@ public class SampledDataCleanAndRet {
           location = new Pair<>(accessData2.getLongitude(), accessData2.getLatitude());
           locations.add(location);
         } else {
-          /*accessData1 = convertToFixedAccessDataPojo(listSample.get(i));
-          accessData2 = convertToFixedAccessDataPojo(listSample.get(i + 1));*/
           accessData1 = listSample.get(i);
           accessData2 = listSample.get(i + 1);
 
@@ -154,7 +164,46 @@ public class SampledDataCleanAndRet {
       String speedString  = PrepareAutoGraspRequest.convertSpeedToRequestString(speeds);
       String directionString = PrepareAutoGraspRequest.convertDirectionToRequestString(directions);
 
-      autoGraspApiClient = AutoGraspApiClient.getInstance();
+      AutoGraspRequest autoGraspRequest = new AutoGraspRequest(apiKey, carId, locationString, timeString, directionString, speedString);
+      return autoGraspRequest;
+    } else
+      return null;
+  }
+
+  // 采样数据中无direction
+  public static AutoGraspRequest sampleDataHaveDirection(ArrayList<FixedFrequencyAccessData> listSample) {
+    FixedFrequencyAccessData accessData;
+    List<Long> times = new ArrayList<>();
+    List<Double> directions = new ArrayList<>();
+    List<Double> speeds = new ArrayList<>();
+    String apiKey = "";
+    String carId = "";
+    Pair<Double, Double> location;
+    List<Pair<Double, Double>> locations = new ArrayList<>();
+    DateUtils dateUtils = new DateUtils();
+    int listSampleCount = listSample.size();
+    if (listSampleCount > 2) {
+      for (int i = 0; i < listSampleCount; i++) {
+        accessData = listSample.get(i);
+
+        // TODO 需确认数据端收集的数据格式，并转化为UTC格式
+        times.add(accessData.getServerTime() == "" ? 0L : dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData.getServerTime())));
+        speeds.add(accessData.getGpsSpeed());
+        location = new Pair<>(accessData.getLongitude(), accessData.getLatitude());
+        locations.add(location);
+
+        if (i == 0) {
+          apiKey = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_KEY);
+          carId = accessData.getDeviceId();
+        }
+          directions.add(accessData.getDirection());
+      }
+
+      String locationString = PrepareAutoGraspRequest.convertLocationsToRequestString(locations);
+      String timeString = PrepareAutoGraspRequest.convertTimeToRequstString(times);
+      String speedString  = PrepareAutoGraspRequest.convertSpeedToRequestString(speeds);
+      String directionString = PrepareAutoGraspRequest.convertDirectionToRequestString(directions);
+
       AutoGraspRequest autoGraspRequest = new AutoGraspRequest(apiKey, carId, locationString, timeString, directionString, speedString);
       return autoGraspRequest;
     } else
