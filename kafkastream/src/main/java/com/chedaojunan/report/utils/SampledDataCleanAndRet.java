@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SampledDataCleanAndRet {
 
-  private static final String TIME_PATTERN = "MM-dd-yy HH:mm:ss";
   private static final int MININUM_SAMPLE_COUNT = 3;
   private static final double DECIMAL_DIGITS = 0.000001;
 
@@ -289,12 +288,4 @@ public class SampledDataCleanAndRet {
       return null;
     }
   }
-
-  public static long convertTimeStringToEpochSecond(String timeString) {
-    //System.out.println("haha:" + timeString);
-    ZonedDateTime dateTime = ZonedDateTime.parse(timeString, DateTimeFormatter
-        .ofPattern(TIME_PATTERN).withZone(ZoneId.of("UTC")));
-    return dateTime.toEpochSecond();
-  }
-
 }

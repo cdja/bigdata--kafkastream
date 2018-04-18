@@ -141,7 +141,7 @@ public class DataEnrich {
         })
         .flatMapValues(accessDataList -> accessDataList.stream().collect(Collectors.toList()));
 
-    KStream<String, Map<String, ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
+    /*KStream<String, Map<String, ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
         orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());
 
     dedupOrderedDataStream
@@ -174,7 +174,7 @@ public class DataEnrich {
             writeDatahubUtil.putRecords(enrichedDatList);
           }
           return enrichedDatList;
-        });
+        });*/
 
     return new KafkaStreams(builder.build(), streamsConfiguration);
 

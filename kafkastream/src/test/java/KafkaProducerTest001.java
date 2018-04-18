@@ -9,11 +9,13 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class KafkaProducerTest001 {
 
   private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerTest001.class);
-  private static final String BOOTSTRAP_SERVERS = "47.95.10.165:9092,47.93.24.115:9092,39.106.170.188:9092";
+  //private static final String BOOTSTRAP_SERVERS = "47.95.10.165:9092,47.93.24.115:9092,39.106.170.188:9092";
+  private static final String BOOTSTRAP_SERVERS = "127.0.0.1:9092";
 
   private Producer producer;
 
@@ -49,6 +51,7 @@ public class KafkaProducerTest001 {
     accessData.setAccelerateY(20.8);
     accessData.setSourceId("001");
     try {
+      System.out.println(new ObjectMapper().writeValueAsString(accessData));
       producer.send(new ProducerRecord<String, String>(inputTopic, new ObjectMapper().writeValueAsString(accessData)));
     } catch (Exception ex) {
       ex.printStackTrace();//handle exception here
@@ -64,7 +67,7 @@ public class KafkaProducerTest001 {
 
   public static void main(String[] args) {
     KafkaProducerTest001 producerTest = new KafkaProducerTest001();
-    String inputTopic = "test001";
+    String inputTopic = "data-test4";
     try {
       int i=0;
       while(true){

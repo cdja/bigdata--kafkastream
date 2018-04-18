@@ -3,10 +3,17 @@ package com.chedaojunan.report.utils;
 import com.chedaojunan.report.common.Constants;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class DateUtils {
+
+	private static final String TIME_PATTERN = "MM-dd-yy HH:mm:ss";
+	private static int SECOND_PER_MINUTE = 60;
 
 	// 取得本地时间：
 	private Calendar cal = Calendar.getInstance();
@@ -111,6 +118,19 @@ public class DateUtils {
 			e.printStackTrace();
 		}
 		return strs;
+	}
+
+	public static long convertTimeStringToEpochSecond(String timeString) {
+		//System.out.println("haha:" + timeString);
+		ZonedDateTime dateTime = ZonedDateTime.parse(timeString, DateTimeFormatter
+				.ofPattern(TIME_PATTERN).withZone(ZoneId.of("UTC")));
+		return dateTime.toEpochSecond();
+	}
+
+	public static String roundMilliSecondToNextMinute(String millisecondString) {
+		long millisecond = Long.parseLong(millisecondString);
+		long nextMinute = TimeUnit.MILLISECONDS.toMinutes(millisecond);
+		return String.valueOf(TimeUnit.MINUTES.toMillis(nextMinute));
 	}
 
 }
