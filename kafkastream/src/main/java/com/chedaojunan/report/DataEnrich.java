@@ -103,12 +103,12 @@ public class DataEnrich {
     final Properties streamsConfiguration = getStreamConfig();
 
     StreamsBuilder builder = new StreamsBuilder();
-
     StoreBuilder<KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>> rawDataStore = Stores.keyValueStoreBuilder(
         Stores.persistentKeyValueStore("rawDataStore"),
         Serdes.String(),
         new ArrayListSerde(fixedFrequencyAccessDataSerde))
         .withCachingEnabled();
+
 
     WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
 
@@ -141,18 +141,31 @@ public class DataEnrich {
         })
         .flatMapValues(accessDataList -> accessDataList.stream().collect(Collectors.toList()));
 
-    /*KStream<String, Map<String, ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
+    //orderedDataStream.print();
+
+    KStream<String, ArrayList<ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
         orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());
 
     dedupOrderedDataStream
-        .flatMapValues(accessDataMap -> {
+        .flatMapValues(eventLists ->
+            eventLists
+                .stream()
+                .map(
+                    eventList ->
+                        eventList.stream()
+                            .map(data -> data.getTripId())
+                            .collect(Collectors.toList())
+                ).collect(Collectors.toList())
+        )
+        .print();
+
+    dedupOrderedDataStream
+        .flatMapValues(accessDataLists -> {
           ArrayList<FixedFrequencyIntegrationData> enrichedDatList = new ArrayList<>();
-          List<Future<?>> futures = accessDataMap
-              .entrySet()
+          List<Future<?>> futures = accessDataLists
               .stream()
               .map(
-                  accessDataMapEntry -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    ArrayList<FixedFrequencyAccessData> accessDataList = accessDataMapEntry.getValue();
+                  accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
                     accessDataList.sort(SampledDataCleanAndRet.sortingByServerTime);
                     ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
@@ -170,11 +183,11 @@ public class DataEnrich {
           // 整合数据入库datahub
           if (CollectionUtils.isNotEmpty(enrichedDatList)) {
             System.out.println("write to DataHub: " + Instant.now().toString());
-            enrichedDatList.stream().forEach(System.out::println);
+            //enrichedDatList.stream().forEach(System.out::println);
             writeDatahubUtil.putRecords(enrichedDatList);
           }
           return enrichedDatList;
-        });*/
+        });
 
     return new KafkaStreams(builder.build(), streamsConfiguration);
 

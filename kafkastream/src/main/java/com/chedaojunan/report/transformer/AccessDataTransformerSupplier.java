@@ -17,6 +17,7 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import com.chedaojunan.report.utils.DateUtils;
 import com.chedaojunan.report.utils.KafkaConstants;
+import com.chedaojunan.report.utils.ReadProperties;
 import com.chedaojunan.report.utils.SampledDataCleanAndRet;
 
 public class AccessDataTransformerSupplier
@@ -25,10 +26,10 @@ public class AccessDataTransformerSupplier
   private static int schedulePunctuateInMilliSeconds;
 
   static {
-    /*schedulePunctuateInMilliSeconds = Integer.parseInt(
+    schedulePunctuateInMilliSeconds = Integer.parseInt(
         ReadProperties.getProperties(KafkaConstants.PROPERTIES_FILE_NAME, KafkaConstants.KAFKA_WINDOW_DURATION)
-    ) * 1000;*/
-    schedulePunctuateInMilliSeconds = 60000; // for test only
+    ) * 1000;
+    //schedulePunctuateInMilliSeconds = 30000; // for test only
   }
 
   final private String stateStoreName;
