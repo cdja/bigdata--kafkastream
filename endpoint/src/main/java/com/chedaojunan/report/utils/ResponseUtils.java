@@ -4,16 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.chedaojunan.report.common.Constants;
+import com.chedaojunan.report.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.chedaojunan.report.model.AutoGraspResponse;
-import com.chedaojunan.report.model.Evaluation;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
-import com.chedaojunan.report.model.GaoDeApiResponse;
-import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
-import com.chedaojunan.report.model.RoadInfo;
-import com.chedaojunan.report.model.TrafficInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -124,6 +119,11 @@ public class ResponseUtils {
     integrationData.setTrafficRequestTimesamp(requestTimestamp);
   }
 
+  public static void enrichDataWithCoordinateConvertResponse(FixedFrequencyAccessData accessData, String coordinateConvertResponseGps) throws NumberFormatException{
+    accessData.setLongitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[0]));
+    accessData.setAltitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[1]));
+  }
+
   public static FixedFrequencyIntegrationData enrichDataWithTrafficInfoResponse(FixedFrequencyIntegrationData integrationData,
                                                                          int trafficInfoResponseStatus, String congestionInfo) {
     integrationData.setTrafficApiStatus(trafficInfoResponseStatus);
@@ -144,26 +144,33 @@ public class ResponseUtils {
         String trafficInfoCode = trafficInfoResponseNode.get(GaoDeApiResponse.INFO_CODE).asText();
 
         JsonNode trafficInfoNode = trafficInfoResponseNode.get(RectangleTrafficInfoResponse.TRAFFIC_INFO);
-        TrafficInfo trafficInfo = new TrafficInfo();
-        String trafficDescription = trafficInfoNode.get(TrafficInfo.DESCRIPTION).asText();
+        // start mod for null check by 2018.04.05
+        TrafficInfo trafficInfo = null;
+        if (null != trafficInfoNode) {
+          trafficInfo = new TrafficInfo();
+        // end mod for null check by 2018.04.05
+          String trafficDescription = trafficInfoNode.get(TrafficInfo.DESCRIPTION).asText();
 
-        JsonNode evaluationNode = trafficInfoNode.get(TrafficInfo.EVALUATION);
-        Evaluation evaluation = new Evaluation();
-        String evaluationExpedite = evaluationNode.get(Evaluation.EXPEDITE).asText();
-        String evaluationCongested = evaluationNode.get(Evaluation.CONGESTED).asText();
-        String evaluationBlocked = evaluationNode.get(Evaluation.BLOCKED).asText();
-        String evaluationUnknown = evaluationNode.get(Evaluation.UNKNOWN).asText();
-        String evaluationDescription = evaluationNode.get(Evaluation.DESCRIPTION).asText();
-        String evaluationStatus = evaluationNode.get(Evaluation.STATUS).asText();
-        evaluation.setBlocked(evaluationBlocked);
-        evaluation.setCongested(evaluationCongested);
-        evaluation.setDescription(evaluationDescription);
-        evaluation.setExpedite(evaluationExpedite);
-        evaluation.setStatus(evaluationStatus);
-        evaluation.setUnknown(evaluationUnknown);
+          JsonNode evaluationNode = trafficInfoNode.get(TrafficInfo.EVALUATION);
+          Evaluation evaluation = new Evaluation();
+          String evaluationExpedite = evaluationNode.get(Evaluation.EXPEDITE).asText();
+          String evaluationCongested = evaluationNode.get(Evaluation.CONGESTED).asText();
+          String evaluationBlocked = evaluationNode.get(Evaluation.BLOCKED).asText();
+          String evaluationUnknown = evaluationNode.get(Evaluation.UNKNOWN).asText();
+          String evaluationDescription = evaluationNode.get(Evaluation.DESCRIPTION).asText();
+          String evaluationStatus = evaluationNode.get(Evaluation.STATUS).asText();
+          evaluation.setBlocked(evaluationBlocked);
+          evaluation.setCongested(evaluationCongested);
+          evaluation.setDescription(evaluationDescription);
+          evaluation.setExpedite(evaluationExpedite);
+          evaluation.setStatus(evaluationStatus);
+          evaluation.setUnknown(evaluationUnknown);
 
-        trafficInfo.setDescription(trafficDescription);
-        trafficInfo.setEvaluation(evaluation);
+          trafficInfo.setDescription(trafficDescription);
+          trafficInfo.setEvaluation(evaluation);
+        // start mod for null check by 2018.04.05
+        }
+        // end mod for null check by 2018.04.05
 
         trafficInfoResponse.setTrafficInfo(trafficInfo);
         trafficInfoResponse.setInfo(trafficInfoString);
@@ -177,5 +184,29 @@ public class ResponseUtils {
       return null;
     }
 
+  }
+
+  public static CoordinateConvertResponse convertStringToCoordinateConvertResponse(String coordinateConvertResponseString) {
+    CoordinateConvertResponse coordinateConvertResponse = new CoordinateConvertResponse();
+    try {
+      JsonNode coordinateConvertResponseNode = ObjectMapperUtils.getObjectMapper().readTree(coordinateConvertResponseString);
+      if (coordinateConvertResponseNode == null)
+        return null;
+      else {
+        int coordinateConvertStatus = coordinateConvertResponseNode.get(CoordinateConvertResponse.STATUS).asInt();
+        String coordinateConvertInfoString = coordinateConvertResponseNode.get(CoordinateConvertResponse.INFO).asText();
+        String coordinateConvertInfoCode = coordinateConvertResponseNode.get(CoordinateConvertResponse.INFO_CODE).asText();
+        String coordinateConvertLocations = coordinateConvertResponseNode.get(CoordinateConvertResponse.LOCATIONS).asText();
+
+        coordinateConvertResponse.setInfo(coordinateConvertInfoString);
+        coordinateConvertResponse.setInfoCode(coordinateConvertInfoCode);
+        coordinateConvertResponse.setStatus(coordinateConvertStatus);
+        coordinateConvertResponse.setLocations(coordinateConvertLocations);
+        return coordinateConvertResponse;
+      }
+    } catch (IOException e) {
+      LOG.debug("cannot get coordinate convert string %s", e.getMessage());
+      return null;
+    }
   }
 }
