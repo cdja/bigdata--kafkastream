@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import com.chedaojunan.report.client.CoordinateConvertClient;
 import com.chedaojunan.report.model.CoordinateConvertRequest;
-import com.chedaojunan.report.utils.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
@@ -39,6 +38,11 @@ import com.chedaojunan.report.serdes.ArrayListSerde;
 import com.chedaojunan.report.serdes.SerdeFactory;
 import com.chedaojunan.report.service.ExternalApiExecutorService;
 import com.chedaojunan.report.transformer.AccessDataTransformerSupplier;
+import com.chedaojunan.report.utils.FixedFrequencyAccessDataTimestampExtractor;
+import com.chedaojunan.report.utils.KafkaConstants;
+import com.chedaojunan.report.utils.ReadProperties;
+import com.chedaojunan.report.utils.SampledDataCleanAndRet;
+import com.chedaojunan.report.utils.WriteDatahubUtil;
 
 public class DataEnrich {
 
@@ -141,7 +145,7 @@ public class DataEnrich {
         })
         .flatMapValues(accessDataList -> accessDataList.stream().collect(Collectors.toList()));
 
-    KStream<String, Map<String, ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
+    /*KStream<String, Map<String, ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
         orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());
 
     dedupOrderedDataStream
@@ -153,18 +157,6 @@ public class DataEnrich {
               .map(
                   accessDataMapEntry -> ExternalApiExecutorService.getExecutorService().submit(() -> {
                     ArrayList<FixedFrequencyAccessData> accessDataList = accessDataMapEntry.getValue();
-                    // TODO 坐标转化接口调用
-                      List<FixedFrequencyAccessData> accessDataListNew;
-                      List<FixedFrequencyAccessData> coordinateConvertResponseList;
-                      for (int i = 0; i < accessDataList.size(); i += 30) {
-                          accessDataListNew = accessDataList.subList(i, i + 30);
-                          CoordinateConvertRequest coordinateConvertRequest = SampledDataCleanAndRet.coordinateConvertRequestParm(accessDataListNew);
-                          if (coordinateConvertRequest != null) {
-                              coordinateConvertResponseList = coordinateConvertClient.getCoordinateConvertFromResponse(accessDataListNew, coordinateConvertRequest);
-                              accessDataListNew.addAll(coordinateConvertResponseList);
-                          }
-                      }
-
                     accessDataList.sort(SampledDataCleanAndRet.sortingByServerTime);
                     ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
@@ -186,7 +178,7 @@ public class DataEnrich {
             writeDatahubUtil.putRecords(enrichedDatList);
           }
           return enrichedDatList;
-        });
+        });*/
 
     return new KafkaStreams(builder.build(), streamsConfiguration);
 

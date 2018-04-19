@@ -15,7 +15,8 @@ import org.slf4j.LoggerFactory;
 public class KafkaProducerTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerTest.class);
-  private static final String BOOTSTRAP_SERVERS = "47.95.10.165:9092,47.93.24.115:9092,39.106.170.188:9092";
+  //private static final String BOOTSTRAP_SERVERS = "47.95.10.165:9092,47.93.24.115:9092,39.106.170.188:9092";
+  private static final String BOOTSTRAP_SERVERS = "localhost:9092";
 
   private Producer producer;
 
@@ -35,9 +36,14 @@ public class KafkaProducerTest {
       Path path = Paths.get(getClass().getClassLoader()
           .getResource(testDataFile).toURI());
       Stream<String> rawDataStream = Files.lines(path);
-      rawDataStream.forEach(message ->
-          producer.send(new ProducerRecord<String, String>(inputTopic, message))
-      );
+      rawDataStream.forEach(message -> {
+        producer.send(new ProducerRecord<String, String>(inputTopic, message));
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      });
     } catch (Exception ex) {
       ex.printStackTrace();//handle exception here
     }

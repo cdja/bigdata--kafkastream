@@ -1,8 +1,6 @@
 package com.chedaojunan.report.client;
 
-import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,11 +23,8 @@ import com.chedaojunan.report.model.RectangleTrafficInfoRequest;
 import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
 import com.chedaojunan.report.model.RoadInfo;
 import com.chedaojunan.report.utils.EndpointConstants;
-import com.chedaojunan.report.utils.ObjectMapperUtils;
 import com.chedaojunan.report.utils.PrepareAutoGraspRequest;
 import com.chedaojunan.report.utils.ResponseUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -132,8 +127,13 @@ public class AutoGraspApiClient extends Client<AutoGraspResponse> {
               RectangleTrafficInfoRequest trafficInfoRequest = new RectangleTrafficInfoRequest(apiKey, trafficInfoRequestRectangle, requestId, requestTimestamp, null);
               RectangleTrafficInfoResponse trafficInfoResponse = rectangleTrafficInfoClient.getTrafficInfoResponse(trafficInfoRequest);
 
-              ResponseUtils.enrichDataWithTrafficInfoResponse(integrationData, trafficInfoResponse.getStatus(), trafficInfoResponse.getTrafficInfo().toString());
-
+              // start mod for null check by 2018.04.05
+              if (null != trafficInfoResponse.getTrafficInfo()) {
+                ResponseUtils.enrichDataWithTrafficInfoResponse(integrationData, trafficInfoResponse.getStatus(), trafficInfoResponse.getTrafficInfo().toString());
+              } else {
+                ResponseUtils.enrichDataWithTrafficInfoResponse(integrationData, trafficInfoResponse.getStatus(), "");
+              }
+              // end mod for null check by 2018.04.05
               return integrationData;
             }).collect(Collectors.toList());
 

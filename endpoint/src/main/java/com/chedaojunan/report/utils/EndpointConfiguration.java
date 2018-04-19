@@ -3,6 +3,7 @@ package com.chedaojunan.report.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.chedaojunan.report.client.CoordinateConvertClient;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,14 @@ public class EndpointConfiguration {
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_RECTANGLE_API_MAX_CONNECT_RETRY)),
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_MAX_IDLE_CONNECTIONS)),
           Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_KEEP_ALIVE_DURATION))));
+      settingsMap.put(CoordinateConvertClient.class, new EndpointConfiguration(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_COORDINATE_CONVERT_API_URL),
+              EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_COORDINATE_CONVERT_API_VERSION),
+              EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_COORDINATE_CONVERT_API_PATH_SEGMENT),
+              Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_COORDINATE_CONVERT_API_READ_TIMEOUT)),
+              Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_COORDINATE_CONVERT_API_CONNECT_TIMEOUT)),
+              Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_COORDINATE_CONVERT_API_MAX_CONNECT_RETRY)),
+              Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_MAX_IDLE_CONNECTIONS)),
+              Integer.parseInt(EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_POOL_KEEP_ALIVE_DURATION))));
     }
 
     if (settingsMap.containsKey(clazz))

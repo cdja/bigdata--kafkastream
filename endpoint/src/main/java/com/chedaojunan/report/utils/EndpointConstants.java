@@ -25,6 +25,14 @@ public class EndpointConstants {
   public static final String GAODE_RECTANGLE_API_READ_TIMEOUT =  "gaode.rectangle.traffic.info.api.read.timeout";
   public static final String GAODE_RECTANGLE_API_MAX_CONNECT_RETRY =  "gaode.rectangle.traffic.info.api.max.connect.retry";
 
+  // Gaode Coordinate convert API
+  public static final String GAODE_COORDINATE_CONVERT_API_URL = "gaode.coordinate.convert.api.url";
+  public static final String GAODE_COORDINATE_CONVERT_API_VERSION = "gaode.coordinate.convert.api.version";
+  public static final String GAODE_COORDINATE_CONVERT_API_PATH_SEGMENT = "gaode.coordinate.convert.api.segment";
+  public static final String GAODE_COORDINATE_CONVERT_API_CONNECT_TIMEOUT = "gaode.coordinate.convert.api.connect.timeout";
+  public static final String GAODE_COORDINATE_CONVERT_API_READ_TIMEOUT =  "gaode.coordinate.convert.api.read.timeout";
+  public static final String GAODE_COORDINATE_CONVERT_API_MAX_CONNECT_RETRY =  "gaode.coordinate.convert.api.max.connect.retry";
+
   public static final String QUESTION_MARK_DELIMITER = "?";
   public static final String SLASH_DELIMITER = "/";
   public static final String AMPERSAND_DELIMITER = "&";

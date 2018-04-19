@@ -1,32 +1,34 @@
 package com.chedaojunan.report.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ExtensionParamEnum {
-  BASE("base"),
-  ALL("all");
+import java.util.HashMap;
+import java.util.Map;
 
-  private static Map<String, ExtensionParamEnum> constants = new HashMap<>();
+public enum CoordsysParamEnum {
+  GPS("gps"),
+  MAPBAR("mapbar"),
+  BAIDU("baidu"),
+  AUTONAVI("autonavi"); // 不进行转换
+
+  private static Map<String, CoordsysParamEnum> constants = new HashMap<>();
 
   static {
-    for (ExtensionParamEnum c : values()) {
+    for (CoordsysParamEnum c : values()) {
       constants.put(c.value, c);
     }
   }
 
   private String value;
 
-  ExtensionParamEnum(String value) {
+  CoordsysParamEnum(String value) {
     this.value = value;
   }
 
   @JsonCreator
-  public static ExtensionParamEnum fromValue(String value) {
-    ExtensionParamEnum constant = constants.get(value);
+  public static CoordsysParamEnum fromValue(String value) {
+    CoordsysParamEnum constant = constants.get(value);
     if (constant == null) {
       throw new IllegalArgumentException(value);
     } else {

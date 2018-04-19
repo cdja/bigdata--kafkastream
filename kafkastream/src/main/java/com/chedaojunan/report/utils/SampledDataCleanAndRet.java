@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chedaojunan.report.model.CoordinateConvertRequest;
 
 public class SampledDataCleanAndRet {
 

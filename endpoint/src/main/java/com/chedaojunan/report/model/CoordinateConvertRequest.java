@@ -1,20 +1,18 @@
 package com.chedaojunan.report.model;
 
-import com.chedaojunan.report.utils.Pair;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * 坐标转换请求参数实体类
  */
 
-public class CoordinateConvertRequestParam {
+public class CoordinateConvertRequest {
 
   public static final String KEY = "key";
   public static final String LOCATIONS = "locations";
@@ -24,16 +22,23 @@ public class CoordinateConvertRequestParam {
   private String key; // 用户唯一标识
 
   @NotNull
-  @Size(min = 1, max = 40)
-  private List<Pair<Double, Double>> locations; // 经纬度
+  @JsonProperty(LOCATIONS)
+  private String locations; // 经纬度
 
   @NotNull
-  private String coordsys; // 原坐标系
+  private CoordsysParamEnum coordsys; // 原坐标系
 
-  public CoordinateConvertRequestParam(String apiKey, List<Pair<Double, Double>> locations, String coordsys) {
+  private String sig; // 数字签名	可选
+
+  private String output; // 返回数据格式类型	可选
+
+  public CoordinateConvertRequest(String apiKey, String locations, CoordsysParamEnum coordsys) {
     setKey(apiKey);
     setLocations(locations);
-    setCoordsys(coordsys);
+    if(coordsys != null)
+      setCoordsys(coordsys);
+    else
+      setCoordsys(CoordsysParamEnum.GPS);
   }
 
   public String getKey() {
@@ -44,20 +49,36 @@ public class CoordinateConvertRequestParam {
     this.key = key;
   }
 
-  public List<Pair<Double, Double>> getLocations() {
+  public String getLocations() {
     return locations;
   }
 
-  public void setLocations(List<Pair<Double, Double>> locations) {
+  public void setLocations(String locations) {
     this.locations = locations;
   }
 
-  public String getCoordsys() {
+  public CoordsysParamEnum getCoordsys() {
     return coordsys;
   }
 
-  public void setCoordsys(String coordsys) {
+  public void setCoordsys(CoordsysParamEnum coordsys) {
     this.coordsys = coordsys;
+  }
+
+  public String getSig() {
+    return sig;
+  }
+
+  public void setSig(String sig) {
+    this.sig = sig;
+  }
+
+  public String getOutput() {
+    return output;
+  }
+
+  public void setOutput(String output) {
+    this.output = output;
   }
 
   @Override
@@ -73,10 +94,10 @@ public class CoordinateConvertRequestParam {
     if (other == this) {
       return true;
     }
-    if ((other instanceof CoordinateConvertRequestParam) == false) {
+    if ((other instanceof CoordinateConvertRequest) == false) {
       return false;
     }
-    CoordinateConvertRequestParam rhs = ((CoordinateConvertRequestParam) other);
+    CoordinateConvertRequest rhs = ((CoordinateConvertRequest) other);
     return new EqualsBuilder()
         .append(key, rhs.key)
         .append(locations, rhs.locations)

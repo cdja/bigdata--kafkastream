@@ -32,7 +32,7 @@ public class ReadProperties {
     Properties prop = new Properties();
     String value = null;
     try {
-      InputStream inputStream = ReadProperties.class.getResourceAsStream(filePath);
+      InputStream inputStream = ReadProperties.class.getClassLoader().getResourceAsStream(filePath);
       prop.load(inputStream);
       value = prop.getProperty(keyWord);
     } catch (IOException e) {
@@ -50,7 +50,7 @@ public class ReadProperties {
   public static Properties getProperties(String filePath){
     Properties prop = new Properties();
     try {
-      InputStream inputStream = ReadProperties.class.getResourceAsStream(filePath);
+      InputStream inputStream = ReadProperties.class.getClassLoader().getResourceAsStream(filePath);
       prop.load(inputStream);
     } catch (IOException e) {
       LOG.error("Exception {} in loading properties file {} ", e, filePath);
