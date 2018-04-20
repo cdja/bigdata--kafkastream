@@ -40,13 +40,9 @@ import com.chedaojunan.report.utils.WriteDatahubUtil;
 public class KafkaStreamNewTest {
 
   static final Serde<String> stringSerde = Serdes.String();
-  private static final String BOOTSTRAP_SERVERS = "localhost:9092";
+  private static final String BOOTSTRAP_SERVERS = "127.0.0.1:9092";
   private static final int WINDOW_LENGTH_IN_SECONDS = 60;
   private static final long TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS = 10000000000L;
-
-  static Comparator<FixedFrequencyAccessData> sortingByServerTime =
-      (o1, o2) -> (int) (Long.parseLong(o1.getServerTime()) -
-          Long.parseLong(o2.getServerTime()));
 
   static AutoGraspApiClient autoGraspApiClient = AutoGraspApiClient.getInstance();
 
@@ -62,7 +58,8 @@ public class KafkaStreamNewTest {
 
   public static void main(String[] args) {
 
-    String rawDataTopic = "hy-raw-data-test";
+    //String rawDataTopic = "hy-raw-data-test";
+    String rawDataTopic = "data-test4";
 
     final KafkaStreams sampledRawDataStream = buildDataStream(rawDataTopic);
 
@@ -94,7 +91,6 @@ public class KafkaStreamNewTest {
     //streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/state-store-test");
 
     StreamsBuilder builder = new StreamsBuilder();
-
     StoreBuilder<KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>> rawDataStore = Stores.keyValueStoreBuilder(
         Stores.persistentKeyValueStore("rawDataStore"),
         Serdes.String(),
@@ -135,24 +131,30 @@ public class KafkaStreamNewTest {
 
     //orderedDataStream.print();
 
-    KStream<String, Map<String, ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
+    KStream<String, ArrayList<ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
         orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());
 
-
-    //dedupOrderedDataStream
-    //    .flatMapValues(eventList -> eventList.stream().collect(Collectors.toList()))
-    //    .print();
-
     dedupOrderedDataStream
-        .flatMapValues(accessDataMap -> {
-          ArrayList<FixedFrequencyIntegrationData> enrichedDatList = new ArrayList<>();
-          List<Future<?>> futures = accessDataMap
-              .entrySet()
+        .flatMapValues(eventLists ->
+          eventLists
               .stream()
               .map(
-                  accessDataMapEntry -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    ArrayList<FixedFrequencyAccessData> accessDataList = accessDataMapEntry.getValue();
-                    accessDataList.sort(sortingByServerTime);
+                  eventList ->
+                    eventList.stream()
+                        .map(data -> data.getTripId())
+                        .collect(Collectors.toList())
+              ).collect(Collectors.toList())
+        )
+        .print();
+
+    dedupOrderedDataStream
+        .flatMapValues(accessDataLists -> {
+          ArrayList<FixedFrequencyIntegrationData> enrichedDatList = new ArrayList<>();
+          List<Future<?>> futures = accessDataLists
+              .stream()
+              .map(
+                  accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
+                    accessDataList.sort(SampledDataCleanAndRet.sortingByServerTime);
                     ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
                     System.out.println("apiQuest: " + autoGraspRequest);
@@ -169,8 +171,8 @@ public class KafkaStreamNewTest {
           // 整合数据入库datahub
           if (CollectionUtils.isNotEmpty(enrichedDatList)) {
             System.out.println("write to DataHub: " + Instant.now().toString());
-            enrichedDatList.stream().forEach(System.out::println);
-            writeDatahubUtil.putRecords(enrichedDatList);
+            //enrichedDatList.stream().forEach(System.out::println);
+            //writeDatahubUtil.putRecords(enrichedDatList);
           }
           return enrichedDatList;
         });

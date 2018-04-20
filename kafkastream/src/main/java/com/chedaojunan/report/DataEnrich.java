@@ -64,6 +64,8 @@ public class DataEnrich {
 
   private static CoordinateConvertClient coordinateConvertClient;
 
+  private static final int coordinateConvertLength;
+
   static {
     kafkaProperties = ReadProperties.getProperties(KafkaConstants.PROPERTIES_FILE_NAME);
     stringSerde = Serdes.String();
@@ -72,6 +74,8 @@ public class DataEnrich {
     arrayListStringSerde = new ArrayListSerde<>(stringSerde);
     kafkaWindowLengthInSeconds = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.KAFKA_WINDOW_DURATION));
     autoGraspApiClient = AutoGraspApiClient.getInstance();
+    coordinateConvertLength = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.COORDINATE_CONVERT_LENGTH));
+    coordinateConvertClient = CoordinateConvertClient.getInstance();
   }
 
   public static void main(String[] args) {
@@ -107,12 +111,12 @@ public class DataEnrich {
     final Properties streamsConfiguration = getStreamConfig();
 
     StreamsBuilder builder = new StreamsBuilder();
-
     StoreBuilder<KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>> rawDataStore = Stores.keyValueStoreBuilder(
         Stores.persistentKeyValueStore("rawDataStore"),
         Serdes.String(),
         new ArrayListSerde(fixedFrequencyAccessDataSerde))
         .withCachingEnabled();
+
 
     WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
 
@@ -145,26 +149,43 @@ public class DataEnrich {
         })
         .flatMapValues(accessDataList -> accessDataList.stream().collect(Collectors.toList()));
 
-    /*KStream<String, Map<String, ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
+    //orderedDataStream.print();
+
+    KStream<String, ArrayList<ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
         orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());
 
     dedupOrderedDataStream
-        .flatMapValues(accessDataMap -> {
+        .flatMapValues(eventLists ->
+            eventLists
+                .stream()
+                .map(
+                    eventList ->
+                        eventList.stream()
+                            .map(data -> data.getTripId())
+                            .collect(Collectors.toList())
+                ).collect(Collectors.toList())
+        )
+        .print();
+
+    dedupOrderedDataStream
+        .flatMapValues(accessDataLists -> {
           ArrayList<FixedFrequencyIntegrationData> enrichedDatList = new ArrayList<>();
-          List<Future<?>> futures = accessDataMap
-              .entrySet()
+          List<Future<?>> futures = accessDataLists
               .stream()
               .map(
-                  accessDataMapEntry -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    ArrayList<FixedFrequencyAccessData> accessDataList = accessDataMapEntry.getValue();
-                    accessDataList.sort(SampledDataCleanAndRet.sortingByServerTime);
-                    ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataList));
+                  accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
+                    // 坐标转化接口调用
+                    List<FixedFrequencyAccessData> coordinateConvertResponseList;
+                    coordinateConvertResponseList = SampledDataCleanAndRet.getCoordinateConvertResponseList(accessDataList);
+                    System.out.println("coordinateConvertResponseList: " + coordinateConvertResponseList.size());
+                    coordinateConvertResponseList.sort(SampledDataCleanAndRet.sortingByServerTime);
+                    ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(coordinateConvertResponseList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
                     System.out.println("apiQuest: " + autoGraspRequest);
                     List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();
                     if (autoGraspRequest != null)
                       gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
-                    ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(accessDataList, sampledDataList, gaodeApiResponseList);
+                    ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(coordinateConvertResponseList, sampledDataList, gaodeApiResponseList);
                     enrichedData
                         .stream()
                         .forEach(data -> enrichedDatList.add(data));
@@ -174,11 +195,11 @@ public class DataEnrich {
           // 整合数据入库datahub
           if (CollectionUtils.isNotEmpty(enrichedDatList)) {
             System.out.println("write to DataHub: " + Instant.now().toString());
-            enrichedDatList.stream().forEach(System.out::println);
+            //enrichedDatList.stream().forEach(System.out::println);
             writeDatahubUtil.putRecords(enrichedDatList);
           }
           return enrichedDatList;
-        });*/
+        });
 
     return new KafkaStreams(builder.build(), streamsConfiguration);
 

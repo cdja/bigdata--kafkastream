@@ -25,7 +25,7 @@ public class CoordinateConvertClient extends Client<CoordinateConvertResponse> {
   }
 
   public static synchronized CoordinateConvertClient getInstance() {
-    LOG.info("Creating AutoGraspApiClient connection");
+    LOG.info("Creating CoordinateConvertClient connection");
     return getInstance(instance, CoordinateConvertClient.class, API_NAME);
   }
 

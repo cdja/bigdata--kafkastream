@@ -121,7 +121,7 @@ public class ResponseUtils {
 
   public static void enrichDataWithCoordinateConvertResponse(FixedFrequencyAccessData accessData, String coordinateConvertResponseGps) throws NumberFormatException{
     accessData.setLongitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[0]));
-    accessData.setAltitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[1]));
+    accessData.setLatitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[1]));
   }
 
   public static FixedFrequencyIntegrationData enrichDataWithTrafficInfoResponse(FixedFrequencyIntegrationData integrationData,
