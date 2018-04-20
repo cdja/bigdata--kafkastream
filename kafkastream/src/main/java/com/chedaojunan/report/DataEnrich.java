@@ -154,18 +154,18 @@ public class DataEnrich {
     KStream<String, ArrayList<ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
         orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());
 
-    dedupOrderedDataStream
-        .flatMapValues(eventLists ->
-            eventLists
-                .stream()
-                .map(
-                    eventList ->
-                        eventList.stream()
-                            .map(data -> data.getTripId())
-                            .collect(Collectors.toList())
-                ).collect(Collectors.toList())
-        )
-        .print();
+//    dedupOrderedDataStream
+//        .flatMapValues(eventLists ->
+//            eventLists
+//                .stream()
+//                .map(
+//                    eventList ->
+//                        eventList.stream()
+//                            .map(data -> data.getTripId())
+//                            .collect(Collectors.toList())
+//                ).collect(Collectors.toList())
+//        )
+//        .print();
 
     dedupOrderedDataStream
         .flatMapValues(accessDataLists -> {
@@ -177,7 +177,7 @@ public class DataEnrich {
                     // 坐标转化接口调用
                     List<FixedFrequencyAccessData> coordinateConvertResponseList;
                     coordinateConvertResponseList = SampledDataCleanAndRet.getCoordinateConvertResponseList(accessDataList);
-                    System.out.println("coordinateConvertResponseList: " + coordinateConvertResponseList.size());
+//                    System.out.println("coordinateConvertResponseList: " + coordinateConvertResponseList.size());
                     coordinateConvertResponseList.sort(SampledDataCleanAndRet.sortingByServerTime);
                     ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(coordinateConvertResponseList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
