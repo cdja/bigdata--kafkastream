@@ -50,7 +50,7 @@ public class WriteDatahubUtil {
 
         FixedFrequencyIntegrationData integrationData;
         for (int i = 0; i < list.size(); i++) {
-            integrationData = (FixedFrequencyIntegrationData)list.get(i);
+            integrationData = list.get(i);
             // RecordData
             RecordEntry entry = new RecordEntry(schema);
             entry.setString(0, integrationData.getDeviceId());
@@ -102,7 +102,7 @@ public class WriteDatahubUtil {
             entry.setString(29, hm);
 
             // 写记录到不同的分片
-            String shardId = shards.get(i % Integer.parseInt(topicShardNum)).getShardId();
+            String shardId = shards.get((int)(Math.random() * Integer.parseInt(topicShardNum)) % Integer.parseInt(topicShardNum)).getShardId();
             entry.setShardId(shardId);
             recordEntries.add(entry);
         }

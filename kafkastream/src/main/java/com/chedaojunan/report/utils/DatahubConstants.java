@@ -9,6 +9,6 @@ public class DatahubConstants {
   public static final String ENDPOINT = "http://dh-cn-beijing.aliyuncs.com";
   public static final String PROJECT_NAME = "cdja_bigdata_test";
   public static final String TOPIC_NAME = "r_busicar_fixedfrequency_imu_detail_di";
-  public static final String TOPIC_SHARDNUM = "20";
+  public static final String TOPIC_SHARDNUM = "10";
 
 }
