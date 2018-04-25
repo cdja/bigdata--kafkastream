@@ -189,22 +189,25 @@ public class DataEnrich {
                     enrichedData
                         .stream()
                         .forEach(data -> enrichedDatList.add(data));
+                  })
+              ).collect(Collectors.toList());
+          ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
 
+          ExternalApiExecutorService.getExecutorService().submit(new Runnable() {
+              @Override
+              public void run() {
+                  try {
                       // 整合数据入库datahub
                       if (CollectionUtils.isNotEmpty(enrichedDatList)) {
                           System.out.println("write to DataHub: " + Instant.now().toString());
                           //enrichedDatList.stream().forEach(System.out::println);
                           writeDatahubUtil.putRecords(enrichedDatList);
                       }
-                  })
-              ).collect(Collectors.toList());
-          ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
-//          // 整合数据入库datahub
-//          if (CollectionUtils.isNotEmpty(enrichedDatList)) {
-//            System.out.println("write to DataHub: " + Instant.now().toString());
-//            //enrichedDatList.stream().forEach(System.out::println);
-//            writeDatahubUtil.putRecords(enrichedDatList);
-//          }
+                  } catch (Exception e) {
+                      e.printStackTrace();
+                  }
+              }
+          });
           return enrichedDatList;
         });
 

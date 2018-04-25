@@ -53,58 +53,60 @@ public class WriteDatahubUtil {
             integrationData = list.get(i);
             // RecordData
             RecordEntry entry = new RecordEntry(schema);
-            entry.setString(0, integrationData.getDeviceId());
-            entry.setString(1, integrationData.getDeviceImei());
-            entry.setString(2, integrationData.getLocalTime());
-            entry.setString(3, integrationData.getTripId());
-            entry.setString(4, integrationData.getServerTime());
-            entry.setDouble(5, integrationData.getLatitude());
-            entry.setDouble(6, integrationData.getLongitude());
-            entry.setDouble(7, integrationData.getAltitude());
-            entry.setDouble(8, integrationData.getDirection());
-            entry.setDouble(9, integrationData.getGpsSpeed());
-            entry.setDouble(10, integrationData.getYawRate());
-            entry.setDouble(11, integrationData.getAccelerateZ());
-            entry.setDouble(12, integrationData.getRollRate());
-            entry.setDouble(13, integrationData.getAccelerateX());
-            entry.setDouble(14, integrationData.getPitchRate());
-            entry.setDouble(15, integrationData.getAccelerateY());
-            entry.setBigint(16, (long)integrationData.getRoadApiStatus());
-            entry.setString(17, integrationData.getCrosspoint());
-            entry.setString(18, integrationData.getRoadName());
-            entry.setBigint(19, (long)integrationData.getRoadLevel());
-            entry.setBigint(20, (long)integrationData.getMaxSpeed());
-            entry.setString(21, integrationData.getIntersection());
-            entry.setString(22, integrationData.getIntersectionDistance());
-            entry.setString(23, integrationData.getTrafficRequestTimesamp());
-            entry.setString(24, integrationData.getTrafficRequestId());
-            entry.setBigint(25, (long)integrationData.getTrafficApiStatus());
-            entry.setString(26, integrationData.getCongestionInfo());
+            if (integrationData != null) {
+                entry.setString(0, integrationData.getDeviceId());
+                entry.setString(1, integrationData.getDeviceImei());
+                entry.setString(2, integrationData.getLocalTime());
+                entry.setString(3, integrationData.getTripId());
+                entry.setString(4, integrationData.getServerTime());
+                entry.setDouble(5, integrationData.getLatitude());
+                entry.setDouble(6, integrationData.getLongitude());
+                entry.setDouble(7, integrationData.getAltitude());
+                entry.setDouble(8, integrationData.getDirection());
+                entry.setDouble(9, integrationData.getGpsSpeed());
+                entry.setDouble(10, integrationData.getYawRate());
+                entry.setDouble(11, integrationData.getAccelerateZ());
+                entry.setDouble(12, integrationData.getRollRate());
+                entry.setDouble(13, integrationData.getAccelerateX());
+                entry.setDouble(14, integrationData.getPitchRate());
+                entry.setDouble(15, integrationData.getAccelerateY());
+                entry.setBigint(16, (long) integrationData.getRoadApiStatus());
+                entry.setString(17, integrationData.getCrosspoint());
+                entry.setString(18, integrationData.getRoadName());
+                entry.setBigint(19, (long) integrationData.getRoadLevel());
+                entry.setBigint(20, (long) integrationData.getMaxSpeed());
+                entry.setString(21, integrationData.getIntersection());
+                entry.setString(22, integrationData.getIntersectionDistance());
+                entry.setString(23, integrationData.getTrafficRequestTimesamp());
+                entry.setString(24, integrationData.getTrafficRequestId());
+                entry.setBigint(25, (long) integrationData.getTrafficApiStatus());
+                entry.setString(26, integrationData.getCongestionInfo());
 
-            // 使用自定义分区方式
-            entry.setString(27, integrationData.getSourceId());
+                // 使用自定义分区方式
+                entry.setString(27, integrationData.getSourceId());
 
-            // 根据server_time设置，为空则根据系统当前时间
-            dateUtils = new DateUtils();
-            if (StringUtils.isNotEmpty(integrationData.getServerTime())) {
-                time = Long.valueOf(integrationData.getServerTime());
-                ymd = dateUtils.getYMDFromTime(time);
-//                hm = dateUtils.getHMFromTime(time);
-                hm = dateUtils.getHourFromTime(time) + "_" +
-                        String.format("%02d", Integer.parseInt(dateUtils.getMinuteFromTime(time))/5 * 5);
-            } else {
-                ymd = dateUtils.getYMD();
-//                hm = dateUtils.getHM();
-                hm = dateUtils.getHour() + "_" + String.format("%02d", Integer.parseInt(dateUtils.getMinute())/5 * 5);
+                // 根据server_time设置，为空则根据系统当前时间
+                dateUtils = new DateUtils();
+                if (StringUtils.isNotEmpty(integrationData.getServerTime())) {
+                    time = Long.valueOf(integrationData.getServerTime());
+                    ymd = dateUtils.getYMDFromTime(time);
+    //                hm = dateUtils.getHMFromTime(time);
+                    hm = dateUtils.getHourFromTime(time) + "_" +
+                            String.format("%02d", Integer.parseInt(dateUtils.getMinuteFromTime(time)) / 5 * 5);
+                } else {
+                    ymd = dateUtils.getYMD();
+    //                hm = dateUtils.getHM();
+                    hm = dateUtils.getHour() + "_" + String.format("%02d", Integer.parseInt(dateUtils.getMinute()) / 5 * 5);
+                }
+
+                entry.setString(28, ymd);
+                entry.setString(29, hm);
+
+                // 写记录到不同的分片
+                String shardId = shards.get((int) (Math.random() * Integer.parseInt(topicShardNum)) % Integer.parseInt(topicShardNum)).getShardId();
+                entry.setShardId(shardId);
+                recordEntries.add(entry);
             }
-
-            entry.setString(28, ymd);
-            entry.setString(29, hm);
-
-            // 写记录到不同的分片
-            String shardId = shards.get((int)(Math.random() * Integer.parseInt(topicShardNum)) % Integer.parseInt(topicShardNum)).getShardId();
-            entry.setShardId(shardId);
-            recordEntries.add(entry);
         }
 
         // 尝试次数
