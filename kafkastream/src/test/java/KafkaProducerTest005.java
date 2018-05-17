@@ -32,25 +32,25 @@ public class KafkaProducerTest005 {
 
     String serverTime = System.currentTimeMillis() + "";
 
-    for (int j = 0; j < 100; j++) {
+    for (int j = 0; j < 1; j++) {
       FixedFrequencyAccessData accessData;
       accessData = new FixedFrequencyAccessData();
-      accessData.setDeviceId(100000 + j +"");
-      accessData.setDeviceImei("64691168800");
-      accessData.setTripId(i+"");
+      accessData.setDeviceId("00000000000000" + j +"");
+      accessData.setDeviceImei("000000000000000");
+      accessData.setTripId("8c09580045634d72a9d2912d0a8c6c9b");
       accessData.setLocalTime("1521478861000");
       accessData.setServerTime(serverTime);
-      accessData.setLatitude(39.990475+0.00001*j);
-      accessData.setLongitude(116.481499+0.00001*j);
-      accessData.setAltitude(30.98);
-      accessData.setDirection(98.00);
-      accessData.setGpsSpeed(98.00);
-      accessData.setYawRate(20.3);
-      accessData.setAccelerateZ(20.4);
-      accessData.setRollRate(20.5);
-      accessData.setAccelerateX(20.6);
-      accessData.setPitchRate(20.7);
-      accessData.setAccelerateY(20.8);
+      accessData.setLatitude(29.999921798706055+0.00001*j);
+      accessData.setLongitude(121.2059555053711+0.00001*j);
+      accessData.setAltitude(12.899999618530273);
+      accessData.setDirection(111.4);
+      accessData.setGpsSpeed(77.1626205444336);
+      accessData.setYawRate(0.007675438653677702);
+      accessData.setAccelerateZ(-0.8040000200271606);
+      accessData.setRollRate(-0.01864035055041313);
+      accessData.setAccelerateX(-0.32499998807907104);
+      accessData.setPitchRate(-0.017543859779834747);
+      accessData.setAccelerateY(-8.581000328063965);
       accessData.setSourceId("001");
       try {
         System.out.println(new ObjectMapper().writeValueAsString(accessData));
@@ -70,7 +70,7 @@ public class KafkaProducerTest005 {
 
   public static void main(String[] args) {
     KafkaProducerTest005 producerTest = new KafkaProducerTest005();
-    String inputTopic = "test001";
+    String inputTopic = "test003";
     try {
       int i=0;
       while(true){

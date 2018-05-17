@@ -30,9 +30,19 @@ public class WriteDatahubUtil {
     private DatahubConfiguration conf;
     DateUtils dateUtils = null;
 
+    private static WriteDatahubUtil single = null;
+
     public WriteDatahubUtil() {
         conf = new DatahubConfiguration(new AliyunAccount(accessId, accessKey), endpoint);
         client = new DatahubClient(conf);
+    }
+
+    //静态工厂方法
+    public static synchronized  WriteDatahubUtil getInstance() {
+        if (single == null) {
+            single = new WriteDatahubUtil();
+        }
+        return single;
     }
 
     // 存数据到datahub的固定频率采集数据表中

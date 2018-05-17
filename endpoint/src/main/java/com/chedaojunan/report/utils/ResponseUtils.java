@@ -119,9 +119,14 @@ public class ResponseUtils {
     integrationData.setTrafficRequestTimesamp(requestTimestamp);
   }
 
-  public static void enrichDataWithCoordinateConvertResponse(FixedFrequencyAccessData accessData, String coordinateConvertResponseGps) throws NumberFormatException{
-    accessData.setLongitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[0]));
-    accessData.setLatitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[1]));
+  public static void enrichDataWithCoordinateConvertResponse(FixedFrequencyAccessData accessData, String coordinateConvertResponseGps) {
+    try {
+      accessData.setLongitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[0]));
+      accessData.setLatitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[1]));
+    } catch (Exception e) {
+      LOG.debug("parse gps string %s", e.getMessage());
+    }
+
   }
 
   public static FixedFrequencyIntegrationData enrichDataWithTrafficInfoResponse(FixedFrequencyIntegrationData integrationData,

@@ -62,10 +62,6 @@ public class DataEnrich {
 
   private static AutoGraspApiClient autoGraspApiClient;
 
-  private static CoordinateConvertClient coordinateConvertClient;
-
-  private static final int coordinateConvertLength;
-
   static {
     kafkaProperties = ReadProperties.getProperties(KafkaConstants.PROPERTIES_FILE_NAME);
     stringSerde = Serdes.String();
@@ -74,8 +70,6 @@ public class DataEnrich {
     arrayListStringSerde = new ArrayListSerde<>(stringSerde);
     kafkaWindowLengthInSeconds = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.KAFKA_WINDOW_DURATION));
     autoGraspApiClient = AutoGraspApiClient.getInstance();
-    coordinateConvertLength = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.COORDINATE_CONVERT_LENGTH));
-    coordinateConvertClient = CoordinateConvertClient.getInstance();
   }
 
   public static void main(String[] args) {

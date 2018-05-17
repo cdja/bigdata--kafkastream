@@ -7,6 +7,7 @@ import com.chedaojunan.report.utils.PrepareCoordinateConvertRequest;
 import com.chedaojunan.report.utils.ResponseUtils;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,7 @@ public class CoordinateConvertClient extends Client<CoordinateConvertResponse> {
     FixedFrequencyAccessData accessData;
     for (int i = 0; i < accessDataListNew.size(); i++) {
       accessData = accessDataListNew.get(i);
-      if (!StringUtils.isEmpty(coordinateConvertResponseGpsList.get(i))) {
+      if (!CollectionUtils.isEmpty(coordinateConvertResponseGpsList) && !StringUtils.isEmpty(coordinateConvertResponseGpsList.get(i))) {
         ResponseUtils.enrichDataWithCoordinateConvertResponse(accessData, coordinateConvertResponseGpsList.get(i));
       }
       accessDataList.add(accessData);
