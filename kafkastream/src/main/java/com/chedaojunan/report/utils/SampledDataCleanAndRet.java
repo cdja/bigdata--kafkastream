@@ -1,21 +1,14 @@
 package com.chedaojunan.report.utils;
 
 import java.io.IOException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import com.chedaojunan.report.client.CoordinateConvertClient;
 import com.chedaojunan.report.model.*;
-import com.chedaojunan.report.serdes.ArrayListSerde;
-import com.chedaojunan.report.serdes.SerdeFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.common.serialization.Serdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.chedaojunan.report.model.CoordinateConvertRequest;
 
@@ -28,7 +21,6 @@ public class SampledDataCleanAndRet {
   private static Properties kafkaProperties = null;
   private static CoordinateConvertClient coordinateConvertClient;
 
-  private static AutoGraspApiClient autoGraspApiClient;
   static CalculateUtils calculateUtils = new CalculateUtils();
   private static final Logger LOG = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
 
@@ -68,22 +60,24 @@ public class SampledDataCleanAndRet {
         } else {
           accessData1 = batchList.get(i - stepLength);
           accessData2 = batchList.get(i);
-          // TODO 根据经纬度判断数据是否有效
-          if (accessData1.getLatitude() == accessData2.getLatitude()
-                  && accessData1.getLongitude() == accessData2.getLongitude()) {
-            accessData3 = copyProperties.clone(accessData2);
-            double longitude = calculateUtils.add(
-                    calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLongitude());
-            double latitude = calculateUtils.add(
-                    calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
-            accessData3.setLongitude(longitude);
-            accessData3.setLatitude(latitude);
+            // TODO 根据经纬度判断数据是否有效
+            if (accessData1.getLatitude() == accessData2.getLatitude()
+                    && accessData1.getLongitude() == accessData2.getLongitude()
+                    && Double.doubleToLongBits(accessData2.getLatitude())!=0.0
+                    && Double.doubleToLongBits(accessData2.getLongitude())!=0.0) {
+              accessData3 = copyProperties.clone(accessData2);
+              double longitude = calculateUtils.add(
+                      calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLongitude());
+              double latitude = calculateUtils.add(
+                      calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
+              accessData3.setLongitude(longitude);
+              accessData3.setLatitude(latitude);
 //            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
-            sampleOver.add(accessData3);
-          } else {
+              sampleOver.add(accessData3);
+            } else {
 //            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
-            sampleOver.add(accessData2);
-          }
+              sampleOver.add(accessData2);
+            }
         }
       }
       // 车停止数据量不足3条，不做数据融合

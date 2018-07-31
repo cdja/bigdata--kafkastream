@@ -8,23 +8,31 @@ import com.aliyun.datahub.model.PutRecordsResult;
 import com.aliyun.datahub.model.RecordEntry;
 import com.aliyun.datahub.model.ShardEntry;
 import com.aliyun.datahub.wrapper.Topic;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
+import com.chedaojunan.report.model.DatahubDeviceData;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class WriteDatahubUtil {
 
-    private static final Logger logger = Logger.getLogger(WriteDatahubUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(WriteDatahubUtil.class);
 
-    private static String accessId = DatahubConstants.ACCESS_ID;
-    private static String accessKey = DatahubConstants.ACCESS_KEY;
-    private static String endpoint = DatahubConstants.ENDPOINT;
-    private static String projectName = DatahubConstants.PROJECT_NAME;
-    private static String topicName = DatahubConstants.TOPIC_NAME;
-    private static String topicShardNum = DatahubConstants.TOPIC_SHARDNUM;
+    private static Properties datahubProperties = null;
+
+    static {
+        datahubProperties = ReadProperties.getProperties(DatahubConstants.PROPERTIES_FILE_NAME);
+    }
+
+    private static String accessId = datahubProperties.getProperty(DatahubConstants.ACCESS_ID);
+    private static String accessKey = datahubProperties.getProperty(DatahubConstants.ACCESS_KEY);
+    private static String endpoint = datahubProperties.getProperty(DatahubConstants.ENDPOINT);
+    private static String projectName = datahubProperties.getProperty(DatahubConstants.PROJECT_NAME);
+    private static String topicName = datahubProperties.getProperty(DatahubConstants.TOPIC_NAME);
+    private static String topicShardNum = datahubProperties.getProperty(DatahubConstants.TOPIC_SHARDNUM);
 
     private DatahubClient client;
     private DatahubConfiguration conf;
@@ -46,7 +54,7 @@ public class WriteDatahubUtil {
     }
 
     // 存数据到datahub的固定频率采集数据表中
-    public int putRecords(ArrayList<FixedFrequencyIntegrationData> list) {
+    public int putRecords(ArrayList<DatahubDeviceData> list) {
         if (list == null || list.size()==0) {
             return -1;
         }
@@ -58,7 +66,7 @@ public class WriteDatahubUtil {
         String hm;
         long time;
 
-        FixedFrequencyIntegrationData integrationData;
+        DatahubDeviceData integrationData;
         for (int i = 0; i < list.size(); i++) {
             integrationData = list.get(i);
             // RecordData
@@ -111,6 +119,10 @@ public class WriteDatahubUtil {
 
                 entry.setString(28, ymd);
                 entry.setString(29, hm);
+
+                // 增加adcode和towncode
+                entry.setString(30, integrationData.getAdCode());
+                entry.setString(31, integrationData.getTownCode());
 
                 // 写记录到不同的分片
                 String shardId = shards.get((int) (Math.random() * Integer.parseInt(topicShardNum)) % Integer.parseInt(topicShardNum)).getShardId();

@@ -1,4 +1,4 @@
-package com.chedao.model;
+package com.chedaojunan.report.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,7 @@ import java.io.IOException;
 public class RegeoRequest {
 
   public static final String KEY = "key";
-  public static final String LOCATIONS = "locations";
+  public static final String LOCATION = "location";
   public static final String POITYPE = "poitype";
   public static final String RADIUS = "radius";
   public static final String EXTENSIONS = "extensions";
@@ -28,8 +28,8 @@ public class RegeoRequest {
   @NotNull
   private String key; // 用户唯一标识
   @NotNull
-  @JsonProperty(LOCATIONS)
-  private String locations; // 经纬度
+  @JsonProperty(LOCATION)
+  private String location; // 经纬度
   private String poitype; // 返回附近POI类型
   private String radius; // 搜索半径
   private String extensions; // 返回结果控制
@@ -104,12 +104,12 @@ public class RegeoRequest {
     this.key = key;
   }
 
-  public String getLocations() {
-    return locations;
+  public String getLocation() {
+    return location;
   }
 
-  public void setLocations(String locations) {
-    this.locations = locations;
+  public void setLocation(String location) {
+    this.location = location;
   }
 
   public String getSig() {
@@ -130,7 +130,7 @@ public class RegeoRequest {
 
   public RegeoRequest(String apiKey, String locations, String extensions, String batch, String roadlevel) {
     setKey(apiKey);
-    setLocations(locations);
+    setLocation(locations);
     if (null!=radius) {
       setRadius(radius);
     } else {
@@ -168,7 +168,7 @@ public class RegeoRequest {
   public int hashCode() {
     return new HashCodeBuilder()
         .append(key)
-        .append(locations)
+        .append(location)
         .append(poitype)
         .append(radius)
         .append(extensions)
@@ -191,7 +191,7 @@ public class RegeoRequest {
     RegeoRequest rhs = ((RegeoRequest) other);
     return new EqualsBuilder()
         .append(key, rhs.key)
-        .append(locations, rhs.locations)
+        .append(location, rhs.location)
         .append(poitype, rhs.poitype)
         .append(radius, rhs.radius)
         .append(extensions, rhs.extensions)

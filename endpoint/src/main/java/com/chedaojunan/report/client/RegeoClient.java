@@ -1,13 +1,17 @@
-package com.chedao.gaode;
+package com.chedaojunan.report.client;
 
-import com.chedao.model.*;
-import com.chedao.util.EndpointConstants;
-import com.chedao.util.EndpointUtils;
-import com.chedao.util.OKHttpUtil;
-import com.chedao.util.ObjectMapperUtils;
+import com.chedaojunan.report.model.*;
+import com.chedaojunan.report.utils.EndpointConstants;
+import com.chedaojunan.report.utils.EndpointUtils;
+import com.chedaojunan.report.utils.Pair;
+import com.chedaojunan.report.utils.PrepareCoordinateConvertRequest;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,38 +19,87 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegeoClient {
+public class RegeoClient extends Client<RegeoResponse>{
 
   private static final Logger logger = LoggerFactory.getLogger(RegeoClient.class);
-
-  // 高德应用API调用
-  private static String geocodeUrl = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GEOCODEURL);
-
-  private static OKHttpUtil oKHttpUtil = null;
-
+  private static final String API_NAME = "REGEO_API";
   private static RegeoClient instance = null;
 
-  private RegeoClient() {}
+  private static ObjectMapper objectMapper;
 
-  public static synchronized RegeoClient getInstance() {
-    if (instance == null) {
-      instance = new RegeoClient();
-    }
-    return instance;
+  static {
+    objectMapper = new ObjectMapper();
   }
 
-  public List<DatahubDeviceData> getRegeoFromResponse(List<DeviceDataPush1007> deviceDataPushListNew, RegeoRequest regeoRequest) {
-    DatahubDeviceData datahubDeviceData = new DatahubDeviceData();
-    List<DatahubDeviceData> datahubDeviceDataList = new ArrayList<>();
+  protected RegeoClient() {
+    super();
+  }
+
+  public static synchronized RegeoClient getInstance() {
+    logger.info("Creating Regeo connection");
+    return getInstance(instance, RegeoClient.class, API_NAME);
+  }
+
+  protected Request createRequest(RegeoRequest regeoRequest) {
+    HttpUrl httpUrl = new HttpUrl.Builder()
+            .scheme("http")
+            .host(url)
+            .addPathSegment(apiVersion)
+            .addPathSegments(pathSegment)
+            .addQueryParameter(RegeoRequest.KEY, regeoRequest.getKey())
+            .addQueryParameter(RegeoRequest.LOCATION, regeoRequest.getLocation())
+            .addQueryParameter(RegeoRequest.EXTENSIONS, regeoRequest.getExtensions())
+            .addQueryParameter(RegeoRequest.BATCH, regeoRequest.getBatch())
+            .addQueryParameter(RegeoRequest.ROADLEVEL, regeoRequest.getRoadlevel())
+            .build();
+
+    Request request = new Request.Builder()
+            .url(httpUrl)
+            .build();
+    return request;
+  }
+
+  // regeo request parameter
+  public static RegeoRequest regeoRequestParm(List<FixedFrequencyIntegrationData> fixedFrequencyDataList) {
+    FixedFrequencyIntegrationData fixedFrequency;
+    Pair<Double, Double> location;
+    List<Pair<Double, Double>> locations = new ArrayList<>();
+
+    if (!CollectionUtils.isEmpty(fixedFrequencyDataList) && ObjectUtils.allNotNull(fixedFrequencyDataList.get(0))) {
+      fixedFrequency = fixedFrequencyDataList.get(0);
+      location = new Pair<>(fixedFrequency.getLongitude(), fixedFrequency.getLatitude());
+      locations.add(location);
+
+      String locationsString = PrepareCoordinateConvertRequest.convertLocationsToRequestString(locations);
+      String apiKey = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_KEY);
+
+      RegeoRequest regeoRequest = new RegeoRequest(apiKey, locationsString, null, null, null);
+      return regeoRequest;
+    } else {
+      return null;
+    }
+  }
+
+  public ArrayList<DatahubDeviceData> getRegeoFromResponse(List<FixedFrequencyIntegrationData> fixedFrequencyList) {
+    DatahubDeviceData datahubDeviceData;
+    ArrayList<DatahubDeviceData> datahubDeviceDataList = new ArrayList<>();
+
+    RegeoRequest regeoRequest = regeoRequestParm(fixedFrequencyList);
+
     RegeoResponse regeoResponse = getRegeoResponse(regeoRequest);
 
-    List<Regeocodes> regeoResponseList = regeoResponse.getRegeocodes();
+    List<Regeocodes> regeoResponseList=null;
+    if (regeoResponse != null) {
+      regeoResponseList = regeoResponse.getRegeocodes();
+    }
 
-    DeviceDataPush1007 deviceDataPush1007;
-    for (int i = 0; i < deviceDataPushListNew.size(); i++) {
-      deviceDataPush1007 = deviceDataPushListNew.get(i);
-      if (!CollectionUtils.isEmpty(regeoResponseList) && ObjectUtils.allNotNull(regeoResponseList.get(i))) {
-        datahubDeviceData = enrichDataWithRegeoResponse(deviceDataPush1007, regeoResponseList.get(i));
+    FixedFrequencyIntegrationData fixedFrequencyIntegrationData;
+    for (int i = 0; i < fixedFrequencyList.size(); i++) {
+      fixedFrequencyIntegrationData = fixedFrequencyList.get(i);
+      if (ObjectUtils.allNotNull(fixedFrequencyIntegrationData) && null!=regeoResponseList) {
+        datahubDeviceData = enrichDataWithRegeoResponse(fixedFrequencyIntegrationData, regeoResponseList.get(0));
+      } else {
+        datahubDeviceData = enrichDataWithRegeoResponse(fixedFrequencyIntegrationData, null);
       }
       if (ObjectUtils.allNotNull(datahubDeviceData)) {
         datahubDeviceDataList.add(datahubDeviceData);
@@ -56,10 +109,15 @@ public class RegeoClient {
     return datahubDeviceDataList;
   }
 
-  public static DatahubDeviceData enrichDataWithRegeoResponse(DeviceDataPush1007 deviceDataPush1007, Regeocodes regeocodes) {
+  public static DatahubDeviceData enrichDataWithRegeoResponse(FixedFrequencyIntegrationData fixedFrequency, Regeocodes regeocodes) {
     DatahubDeviceData datahubDeviceData;
     try {
-      datahubDeviceData = new DatahubDeviceData(deviceDataPush1007, regeocodes.getAddressComponent().getAdcode(), regeocodes.getAddressComponent().getTowncode());
+      if (null!=regeocodes) {
+        datahubDeviceData = new DatahubDeviceData(fixedFrequency, regeocodes.getAddressComponent().getAdcode(), regeocodes.getAddressComponent().getTowncode());
+      } else {
+        datahubDeviceData = new DatahubDeviceData(fixedFrequency, null, null);
+      }
+
     } catch (Exception e) {
       logger.debug("parse regeo string %s", e.getMessage());
       return null;
@@ -68,58 +126,35 @@ public class RegeoClient {
   }
 
   public RegeoResponse getRegeoResponse(RegeoRequest regeoRequest) {
-    String regeoResponseString = getRegeoInfo(regeoRequest);
+    String regeoResponseString = getClientResponseJson(createRequest(regeoRequest));
     return convertToRegeo(regeoResponseString);
-  }
-
-  /**
-   * 逆地理编码
-   * @param regeoRequest
-   * @return 返回getRegeoInfo
-   */
-  public static String getRegeoInfo(RegeoRequest regeoRequest) {
-    oKHttpUtil = new OKHttpUtil();
-    String result = null;
-    // 参数校验
-    if (!regeoRequest.getKey().isEmpty() && !regeoRequest.getLocations().isEmpty()) {
-      try {
-        String params = "key=" + regeoRequest.getKey()
-                +"&location=" + regeoRequest.getLocations()
-                +"&extensions=" + regeoRequest.getExtensions()
-                +"&batch=" + regeoRequest.getBatch()
-                +"&roadlevel=" + regeoRequest.getRoadlevel();
-
-//				logger.info("高德地图params:" + params);
-        result = oKHttpUtil.httpPost(geocodeUrl, params);
-//				logger.info("高德地图返回结果:" + result);
-      } catch (Exception e) {
-        logger.error("高德坐标转换接口请求出错!!!!");
-        return null;
-      }
-    }
-    return result;
   }
 
   public static RegeoResponse convertToRegeo(String convertToRegeoResponseString) {
     RegeoResponse regeoResponse = new RegeoResponse();
     try {
-      JsonNode convertToRegeoResponseNode = ObjectMapperUtils.getObjectMapper().readTree(convertToRegeoResponseString);
+      if (StringUtils.isEmpty(convertToRegeoResponseString)) {
+        return null;
+      }
+      JsonNode convertToRegeoResponseNode = objectMapper.readTree(convertToRegeoResponseString);
       if (convertToRegeoResponseNode == null)
         return null;
       else {
-        int convertToRegeoStatus = convertToRegeoResponseNode.get(RegeoResponse.STATUS).asInt();
-        String convertToRegeoInfoString = convertToRegeoResponseNode.get(RegeoResponse.INFO).asText();
-        String convertToRegeoInfoCode = convertToRegeoResponseNode.get(RegeoResponse.INFO_CODE).asText();
-        JsonNode convertToRegeoRegeocodes = convertToRegeoResponseNode.get(RegeoResponse.REGEOCODES);
+        regeoResponse.setInfo(ObjectUtils.allNotNull(convertToRegeoResponseNode.get(RegeoResponse.INFO))
+                ?convertToRegeoResponseNode.get(RegeoResponse.INFO).asText():"");
+        regeoResponse.setInfoCode(ObjectUtils.allNotNull(convertToRegeoResponseNode.get(RegeoResponse.INFO_CODE))
+                ?convertToRegeoResponseNode.get(RegeoResponse.INFO_CODE).asText():"");
+        regeoResponse.setStatus(ObjectUtils.allNotNull(convertToRegeoResponseNode.get(RegeoResponse.STATUS))
+                ?convertToRegeoResponseNode.get(RegeoResponse.STATUS).asInt():0);
 
-        regeoResponse.setInfo(convertToRegeoInfoString);
-        regeoResponse.setInfoCode(convertToRegeoInfoCode);
-        regeoResponse.setStatus(convertToRegeoStatus);
-        regeoResponse.setRegeocodes(parserArray(convertToRegeoRegeocodes));
+        JsonNode convertToRegeoRegeocodes = convertToRegeoResponseNode.get(RegeoResponse.REGEOCODES);
+        if (null!=convertToRegeoRegeocodes) {
+          regeoResponse.setRegeocodes(parserArray(convertToRegeoRegeocodes));
+        }
         return regeoResponse;
       }
     } catch (IOException e) {
-      logger.warn("cannot get coordinate convert string %s", e.getMessage());
+      logger.warn("cannot get regeo string %s", e.getMessage());
       return null;
     }
   }

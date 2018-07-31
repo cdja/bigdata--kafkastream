@@ -1,11 +1,11 @@
-package com.chedao.model;
+package com.chedaojunan.report.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
-public class DatahubDeviceData extends DeviceDataPush1007 {
+public class DatahubDeviceData extends FixedFrequencyIntegrationData {
 
     @JsonProperty("adCode")
     private String adCode; // adcode
@@ -30,34 +30,36 @@ public class DatahubDeviceData extends DeviceDataPush1007 {
 
     public DatahubDeviceData(){}
 
-    public DatahubDeviceData(DeviceDataPush1007 deviceData, String adCode, String townCode) {
-        setDevice_vin(deviceData.getDevice_vin());
-        setGpstime(deviceData.getGpstime());
-        setLat(deviceData.getLat());
-        setLng(deviceData.getLng());
-        setDirection(deviceData.getDirection());
-        setGps_speed(deviceData.getGps_speed());
-        setCanSpeed(deviceData.getCanSpeed());
-        setAcc(deviceData.getAcc());
-        setRealTimeFuel(deviceData.getRealTimeFuel());
-        setLicensePlate(deviceData.getLicensePlate());
-        setEcuMileage(deviceData.getEcuMileage());
-        setTotalFuelConsumption(deviceData.getTotalFuelConsumption());
-        setIntegralGasConsumption(deviceData.getIntegralGasConsumption());
-        setAvgGasConsumption(deviceData.getAvgGasConsumption());
-        setTotalGasConsumption(deviceData.getTotalGasConsumption());
-        setRotations(deviceData.getRotations());
-        setLng1Surplus(deviceData.getLng1Surplus());
-        setLng2Surplus(deviceData.getLng2Surplus());
-        setLng3Surplus(deviceData.getLng3Surplus());
-        setLng4Surplus(deviceData.getLng4Surplus());
-        setActualEnginePercentTor(deviceData.getActualEnginePercentTor());
-        setEngineTorMode(deviceData.getEngineTorMode());
-        setDriverEnginePercentTor(deviceData.getDriverEnginePercentTor());
-        setAccPedalPos(deviceData.getAccPedalPos());
-        setCoolingWaterTem(deviceData.getCoolingWaterTem());
-        setOilPressure(deviceData.getOilPressure());
-        setTimestamp(deviceData.getTimestamp());
+    public DatahubDeviceData(FixedFrequencyIntegrationData fixedFrequency, String adCode, String townCode) {
+        setDeviceId(fixedFrequency.getDeviceId());
+        setDeviceImei(fixedFrequency.getDeviceImei());
+        setLocalTime(fixedFrequency.getLocalTime());
+        setServerTime(fixedFrequency.getServerTime());
+        setTripId(fixedFrequency.getTripId());
+        setLatitude(fixedFrequency.getLatitude());
+        setLongitude(fixedFrequency.getLongitude());
+        setAltitude(fixedFrequency.getAltitude());
+        setGpsSpeed(fixedFrequency.getGpsSpeed());
+        setDirection(fixedFrequency.getDirection());
+        setYawRate(fixedFrequency.getYawRate());
+        setAccelerateZ(fixedFrequency.getAccelerateZ());
+        setRollRate(fixedFrequency.getRollRate());
+        setAccelerateX(fixedFrequency.getAccelerateX());
+        setPitchRate(fixedFrequency.getPitchRate());
+        setAccelerateY(fixedFrequency.getAccelerateY());
+        setSourceId(fixedFrequency.getSourceId());
+
+        setRoadApiStatus(fixedFrequency.getRoadApiStatus());
+        setCrosspoint(fixedFrequency.getCrosspoint());
+        setRoadName(fixedFrequency.getRoadName());
+        setRoadLevel(fixedFrequency.getRoadLevel());
+        setMaxSpeed(fixedFrequency.getMaxSpeed());
+        setIntersection(fixedFrequency.getIntersection());
+        setIntersectionDistance(fixedFrequency.getIntersectionDistance());
+        setTrafficRequestTimesamp(fixedFrequency.getTrafficRequestTimesamp());
+        setTrafficRequestId(fixedFrequency.getTrafficRequestId());
+        setTrafficApiStatus(fixedFrequency.getTrafficApiStatus());
+        setCongestionInfo(fixedFrequency.getCongestionInfo());
 
         setAdCode(adCode);
         setTownCode(townCode);

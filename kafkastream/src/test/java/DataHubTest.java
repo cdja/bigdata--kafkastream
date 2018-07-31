@@ -1,20 +1,9 @@
-import com.chedaojunan.report.model.FixedFrequencyAccessData;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
-import com.chedaojunan.report.service.ExternalApiExecutorService;
+import com.chedaojunan.report.model.DatahubDeviceData;
 import com.chedaojunan.report.utils.WriteDatahubUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.Serdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Properties;
 
 public class DataHubTest {
 
@@ -26,11 +15,11 @@ public class DataHubTest {
     WriteDatahubUtil datahubUtil = WriteDatahubUtil.getInstance();
     long serverTime = System.currentTimeMillis();
 
-    ArrayList<FixedFrequencyIntegrationData> list = new ArrayList<>();
+    ArrayList<DatahubDeviceData> list = new ArrayList<>();
     System.out.println("serverTime Start:="+serverTime);
     for (int j = 0; j < 1000; j++) {
-      FixedFrequencyAccessData accessData;
-      accessData = new FixedFrequencyAccessData();
+      DatahubDeviceData accessData;
+      accessData = new DatahubDeviceData();
       accessData.setDeviceId("test000000" + j +"");
       accessData.setDeviceImei("test000000");
       accessData.setTripId(i+"");
@@ -49,7 +38,11 @@ public class DataHubTest {
       accessData.setAccelerateY(20.8);
       accessData.setSourceId("001");
 
-      list.add(new FixedFrequencyIntegrationData(accessData));
+      // 增加 adCode和townCode
+      accessData.setAdCode("101010");
+      accessData.setTownCode("1010101010");
+
+      list.add(accessData);
     }
     try {
       datahubUtil.putRecords(list);

@@ -1,4 +1,4 @@
-package com.chedao.model;
+package com.chedaojunan.report.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;

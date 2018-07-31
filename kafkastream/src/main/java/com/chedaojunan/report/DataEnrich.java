@@ -11,8 +11,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.chedaojunan.report.client.CoordinateConvertClient;
-import com.chedaojunan.report.model.CoordinateConvertRequest;
+import com.chedaojunan.report.client.RegeoClient;
+import com.chedaojunan.report.model.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
@@ -31,9 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
-import com.chedaojunan.report.model.AutoGraspRequest;
-import com.chedaojunan.report.model.FixedFrequencyAccessData;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.serdes.ArrayListSerde;
 import com.chedaojunan.report.serdes.SerdeFactory;
 import com.chedaojunan.report.service.ExternalApiExecutorService;
@@ -59,6 +56,7 @@ public class DataEnrich {
 
   private static final ArrayListSerde<String> arrayListStringSerde;
 
+  private static RegeoClient regeoClient;
 
   private static AutoGraspApiClient autoGraspApiClient;
 
@@ -70,6 +68,7 @@ public class DataEnrich {
     arrayListStringSerde = new ArrayListSerde<>(stringSerde);
     kafkaWindowLengthInSeconds = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.KAFKA_WINDOW_DURATION));
     autoGraspApiClient = AutoGraspApiClient.getInstance();
+    regeoClient = RegeoClient.getInstance();
   }
 
   public static void main(String[] args) {
@@ -163,7 +162,7 @@ public class DataEnrich {
 
     dedupOrderedDataStream
         .flatMapValues(accessDataLists -> {
-          ArrayList<FixedFrequencyIntegrationData> enrichedDatList = new ArrayList<>();
+          ArrayList<DatahubDeviceData> enrichedDataList = new ArrayList<>();
           List<Future<?>> futures = accessDataLists
               .stream()
               .map(
@@ -180,9 +179,16 @@ public class DataEnrich {
                     if (autoGraspRequest != null)
                       gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
                     ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(coordinateConvertResponseList, sampledDataList, gaodeApiResponseList);
-                    enrichedData
-                        .stream()
-                        .forEach(data -> enrichedDatList.add(data));
+
+                    ArrayList<DatahubDeviceData> enrichedDataOver = null;
+                    if (enrichedData != null) {
+                        enrichedDataOver = regeoClient.getRegeoFromResponse(enrichedData);
+                    }
+                    if (enrichedDataOver != null) {
+                        enrichedDataOver
+                                .stream()
+                                .forEach(data -> enrichedDataList.add(data));
+                    }
                   })
               ).collect(Collectors.toList());
           ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
@@ -192,17 +198,17 @@ public class DataEnrich {
               public void run() {
                   try {
                       // 整合数据入库datahub
-                      if (CollectionUtils.isNotEmpty(enrichedDatList)) {
+                      if (CollectionUtils.isNotEmpty(enrichedDataList)) {
                           System.out.println("write to DataHub: " + Instant.now().toString());
                           //enrichedDatList.stream().forEach(System.out::println);
-                          writeDatahubUtil.putRecords(enrichedDatList);
+                          writeDatahubUtil.putRecords(enrichedDataList);
                       }
                   } catch (Exception e) {
                       e.printStackTrace();
                   }
               }
           });
-          return enrichedDatList;
+          return enrichedDataList;
         });
 
     return new KafkaStreams(builder.build(), streamsConfiguration);
