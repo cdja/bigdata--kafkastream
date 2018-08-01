@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+  <property name="LOG_HOME" value="/home/kafka/chedaoyun" />
+  <!-- 按照每天生成日志文件 -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <File>${LOG_HOME}/kafkastreams.log</File>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!--日志文件输出的文件名 -->
+      <FileNamePattern>${LOG_HOME}/kafkastreams-%d{yyyy-MM-dd}.log.%i</FileNamePattern>
+      <MaxHistory>10</MaxHistory>
+      <timeBasedFileNamingAndTriggeringPolicy
+              class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- or whenever the file size reaches 100MB -->
+        <maxFileSize>100MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+    <encoder>
+      <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{80} -%msg%n</Pattern>
+      <charset>UTF-8</charset>
+      <immediateFlush>true</immediateFlush>
+    </encoder>
+  </appender>
+
+  <logger name="org.apache.kafka" level="OFF"/>
+  <logger name="org.apache.kafka.common.metrics" level="WARN"/>
+  <logger name="log4j.logger.org.apache.kafka.streams" level="ERROR"/>
+
+  <root level="INFO">
+    <appender-ref ref="FILE" />
+  </root>
+</configuration>

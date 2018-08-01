@@ -32,7 +32,7 @@ public class KafkaProducerTest005 {
 
     String serverTime = System.currentTimeMillis() + "";
 
-    for (int j = 0; j < 1; j++) {
+    for (int j = 0; j < 5; j++) {
       FixedFrequencyAccessData accessData;
       accessData = new FixedFrequencyAccessData();
       accessData.setDeviceId("00000000000000" + j +"");
@@ -72,12 +72,14 @@ public class KafkaProducerTest005 {
     KafkaProducerTest005 producerTest = new KafkaProducerTest005();
     String inputTopic = "test003";
     try {
-      int i=0;
-      while(true){
-        i++;
+//      int i=0;
+//      while(true){
+//        i++;
+      for(int i=0;i<5;i++) {
         producerTest.runProducer(inputTopic,i);
-        Thread.sleep(910);
       }
+//        Thread.sleep(910);
+//      }
     } catch (Exception e) {
     }
     producerTest.close();
