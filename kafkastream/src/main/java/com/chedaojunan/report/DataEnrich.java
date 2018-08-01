@@ -190,7 +190,7 @@ public class DataEnrich {
                             if (CollectionUtils.isNotEmpty(enrichedDataOver)) {
                                 System.out.println("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
                                 logger.info("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
-//                                writeDatahubUtil.putRecords(enrichedDataList);
+                                writeDatahubUtil.putRecords(enrichedDataList);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
