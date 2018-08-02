@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.chedaojunan.report.client.CoordinateConvertClient;
 import com.chedaojunan.report.model.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -366,22 +367,28 @@ public class SampledDataCleanAndRet {
   public static List<FixedFrequencyAccessData> getCoordinateConvertResponseList(List<FixedFrequencyAccessData> accessDataList) {
     List<FixedFrequencyAccessData> accessDataListNew = null;
     List<FixedFrequencyAccessData> coordinateConvertResponse;
-    List<FixedFrequencyAccessData> coordinateConvertResponseList = new ArrayList<>();;
-    CoordinateConvertRequest coordinateConvertRequest;
+    List<FixedFrequencyAccessData> coordinateConvertResponseList = new ArrayList<>();
+    CoordinateConvertRequest coordinateConvertRequest = null;
     int num = accessDataList.size() / coordinateConvertLength;
     if (accessDataList.size() > 0) {
       for (int i = 0; i <= num; i++) {
+        if (accessDataListNew != null) {
+          accessDataListNew.clear();
+        }
         if (i < num) {
-          accessDataListNew = accessDataList.subList(i * coordinateConvertLength, (i + 1) * coordinateConvertLength);
+          accessDataListNew = new ArrayList<>(accessDataList.subList(i * coordinateConvertLength, (i + 1) * coordinateConvertLength));
         } else {
           if (accessDataList.size() - i * coordinateConvertLength > 0) {
-            accessDataListNew = accessDataList.subList(i * coordinateConvertLength, accessDataList.size());
+            accessDataListNew = new ArrayList<>(accessDataList.subList(i * coordinateConvertLength, accessDataList.size()));
           }
         }
 
-        coordinateConvertRequest = SampledDataCleanAndRet.coordinateConvertRequestParm(accessDataListNew);
+        if (accessDataListNew != null && accessDataListNew.size() != 0) {
+          coordinateConvertRequest = SampledDataCleanAndRet.coordinateConvertRequestParm(accessDataListNew);
+        }
         if (coordinateConvertRequest != null) {
           coordinateConvertResponse = coordinateConvertClient.getCoordinateConvertFromResponse(accessDataListNew, coordinateConvertRequest);
+          coordinateConvertRequest = null;
           coordinateConvertResponseList.addAll(coordinateConvertResponse);
         }
       }
