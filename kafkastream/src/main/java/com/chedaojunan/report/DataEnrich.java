@@ -85,8 +85,7 @@ public class DataEnrich {
   private static Properties getStreamConfig() {
     final Properties streamsConfiguration = new Properties();
     String kafkaApplicationName = kafkaProperties.getProperty(KafkaConstants.KAFKA_STREAM_APPLICATION_NAME);
-    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG,
-        String.join(KafkaConstants.HYPHEN, kafkaApplicationName, UUID.randomUUID().toString()));
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, kafkaApplicationName);
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
         kafkaProperties.getProperty(KafkaConstants.KAFKA_BOOTSTRAP_SERVERS));
     // Specify default (de)serializers for record keys and for record values.
