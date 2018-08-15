@@ -28,6 +28,12 @@ public class DateUtils {
 		return ymd;
 	}
 
+	// 获取年月日(增加5分钟)
+	public String getYMD_After5M() {
+		String ymd = new SimpleDateFormat(Constants.YMD_PATTERN).format(new Date().getTime() + 300000L);
+		return ymd;
+	}
+
 	// 获取时分
 	public String getHM() {
 		String hm = new SimpleDateFormat(Constants.HM_PATTERN).format(Calendar.getInstance().getTime());
@@ -40,9 +46,21 @@ public class DateUtils {
 		return hour;
 	}
 
+	// 获取时(增加5分钟)
+	public String getHour_After5M() {
+		String hour = new SimpleDateFormat("HH").format(new Date().getTime() + 300000L);
+		return hour;
+	}
+
 	// 获取分
 	public String getMinute() {
 		String minute = new SimpleDateFormat("mm").format(Calendar.getInstance().getTime());
+		return minute;
+	}
+
+	// 获取分(增加5分钟)
+	public String getMinute_After5M() {
+		String minute = new SimpleDateFormat("mm").format(new Date().getTime() + 300000L);
 		return minute;
 	}
 

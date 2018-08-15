@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
-  <property name="LOG_HOME" value="/home/kafka/chedaoyun" />
+  <property name="LOG_HOME" value="logs" />
   <!-- 按照每天生成日志文件 -->
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <File>${LOG_HOME}/kafkastreams.log</File>

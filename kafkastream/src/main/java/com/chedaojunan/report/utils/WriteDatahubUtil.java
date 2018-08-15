@@ -106,15 +106,28 @@ public class WriteDatahubUtil {
                 // 根据server_time设置，为空则根据系统当前时间
                 dateUtils = new DateUtils();
                 if (StringUtils.isNotEmpty(integrationData.getServerTime())) {
-                    time = Long.valueOf(integrationData.getServerTime());
+                    // time增加300000毫秒，分区时间后延
+                    time = Long.valueOf(integrationData.getServerTime()) + 300000L;
                     ymd = dateUtils.getYMDFromTime(time);
     //                hm = dateUtils.getHMFromTime(time);
-                    hm = dateUtils.getHourFromTime(time) + "_" +
-                            String.format("%02d", Integer.parseInt(dateUtils.getMinuteFromTime(time)) / 5 * 5);
+                    int hm_temp = Integer.parseInt(dateUtils.getMinuteFromTime(time)) / 5 * 5;
+                    if (hm_temp<60) {
+                        hm = dateUtils.getHourFromTime(time) + "_" +
+                                String.format("%02d", hm_temp);
+                    } else {
+                        hm = dateUtils.getHourFromTime(time) + "_" +
+                                String.format("%02d", 00);
+                    }
+
                 } else {
-                    ymd = dateUtils.getYMD();
+                    int hm_temp = Integer.parseInt(dateUtils.getMinute_After5M()) / 5 * 5;
+                    ymd = dateUtils.getYMD_After5M();
     //                hm = dateUtils.getHM();
-                    hm = dateUtils.getHour() + "_" + String.format("%02d", Integer.parseInt(dateUtils.getMinute()) / 5 * 5);
+                    if (hm_temp<60) {
+                        hm = dateUtils.getHour_After5M() + "_" + String.format("%02d", hm_temp);
+                    } else {
+                        hm = dateUtils.getHour_After5M() + "_" + String.format("%02d", 00);
+                    }
                 }
 
                 entry.setString(28, ymd);
