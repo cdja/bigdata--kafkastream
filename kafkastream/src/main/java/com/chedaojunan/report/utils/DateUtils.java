@@ -29,8 +29,8 @@ public class DateUtils {
 	}
 
 	// 获取年月日(增加5分钟)
-	public String getYMD_After5M() {
-		String ymd = new SimpleDateFormat(Constants.YMD_PATTERN).format(new Date().getTime() + 300000L);
+	public String getYMD_After5M(Long times) {
+		String ymd = new SimpleDateFormat(Constants.YMD_PATTERN).format(times);
 		return ymd;
 	}
 
@@ -47,8 +47,8 @@ public class DateUtils {
 	}
 
 	// 获取时(增加5分钟)
-	public String getHour_After5M() {
-		String hour = new SimpleDateFormat("HH").format(new Date().getTime() + 300000L);
+	public String getHour_After5M(Long times) {
+		String hour = new SimpleDateFormat("HH").format(times);
 		return hour;
 	}
 
@@ -59,8 +59,8 @@ public class DateUtils {
 	}
 
 	// 获取分(增加5分钟)
-	public String getMinute_After5M() {
-		String minute = new SimpleDateFormat("mm").format(new Date().getTime() + 300000L);
+	public String getMinute_After5M(Long times) {
+		String minute = new SimpleDateFormat("mm").format(times);
 		return minute;
 	}
 

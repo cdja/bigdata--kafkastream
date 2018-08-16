@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -109,25 +110,13 @@ public class WriteDatahubUtil {
                     // time增加300000毫秒，分区时间后延
                     time = Long.valueOf(integrationData.getServerTime()) + 300000L;
                     ymd = dateUtils.getYMDFromTime(time);
-    //                hm = dateUtils.getHMFromTime(time);
                     int hm_temp = Integer.parseInt(dateUtils.getMinuteFromTime(time)) / 5 * 5;
-                    if (hm_temp<60) {
-                        hm = dateUtils.getHourFromTime(time) + "_" +
-                                String.format("%02d", hm_temp);
-                    } else {
-                        hm = dateUtils.getHourFromTime(time) + "_" +
-                                String.format("%02d", 00);
-                    }
-
+                    hm = dateUtils.getHourFromTime(time) + "_" + String.format("%02d", hm_temp);
                 } else {
-                    int hm_temp = Integer.parseInt(dateUtils.getMinute_After5M()) / 5 * 5;
-                    ymd = dateUtils.getYMD_After5M();
-    //                hm = dateUtils.getHM();
-                    if (hm_temp<60) {
-                        hm = dateUtils.getHour_After5M() + "_" + String.format("%02d", hm_temp);
-                    } else {
-                        hm = dateUtils.getHour_After5M() + "_" + String.format("%02d", 00);
-                    }
+                    Long times = new Date().getTime() + 300000L;
+                    int hm_temp = Integer.parseInt(dateUtils.getMinute_After5M(times)) / 5 * 5;
+                    ymd = dateUtils.getYMD_After5M(times);
+                    hm = dateUtils.getHour_After5M(times) + "_" + String.format("%02d", hm_temp);
                 }
 
                 entry.setString(28, ymd);
