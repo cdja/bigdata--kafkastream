@@ -4,16 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.chedaojunan.report.common.Constants;
+import com.chedaojunan.report.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.chedaojunan.report.model.AutoGraspResponse;
-import com.chedaojunan.report.model.Evaluation;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
-import com.chedaojunan.report.model.GaoDeApiResponse;
-import com.chedaojunan.report.model.RectangleTrafficInfoResponse;
-import com.chedaojunan.report.model.RoadInfo;
-import com.chedaojunan.report.model.TrafficInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -124,6 +119,16 @@ public class ResponseUtils {
     integrationData.setTrafficRequestTimesamp(requestTimestamp);
   }
 
+  public static void enrichDataWithCoordinateConvertResponse(FixedFrequencyAccessData accessData, String coordinateConvertResponseGps) {
+    try {
+      accessData.setLongitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[0]));
+      accessData.setLatitude(Double.parseDouble(coordinateConvertResponseGps.split(Constants.COMMA)[1]));
+    } catch (Exception e) {
+      LOG.debug("parse gps string %s", e.getMessage());
+    }
+
+  }
+
   public static FixedFrequencyIntegrationData enrichDataWithTrafficInfoResponse(FixedFrequencyIntegrationData integrationData,
                                                                          int trafficInfoResponseStatus, String congestionInfo) {
     integrationData.setTrafficApiStatus(trafficInfoResponseStatus);
@@ -184,5 +189,29 @@ public class ResponseUtils {
       return null;
     }
 
+  }
+
+  public static CoordinateConvertResponse convertStringToCoordinateConvertResponse(String coordinateConvertResponseString) {
+    CoordinateConvertResponse coordinateConvertResponse = new CoordinateConvertResponse();
+    try {
+      JsonNode coordinateConvertResponseNode = ObjectMapperUtils.getObjectMapper().readTree(coordinateConvertResponseString);
+      if (coordinateConvertResponseNode == null)
+        return null;
+      else {
+        int coordinateConvertStatus = coordinateConvertResponseNode.get(CoordinateConvertResponse.STATUS).asInt();
+        String coordinateConvertInfoString = coordinateConvertResponseNode.get(CoordinateConvertResponse.INFO).asText();
+        String coordinateConvertInfoCode = coordinateConvertResponseNode.get(CoordinateConvertResponse.INFO_CODE).asText();
+        String coordinateConvertLocations = coordinateConvertResponseNode.get(CoordinateConvertResponse.LOCATIONS).asText();
+
+        coordinateConvertResponse.setInfo(coordinateConvertInfoString);
+        coordinateConvertResponse.setInfoCode(coordinateConvertInfoCode);
+        coordinateConvertResponse.setStatus(coordinateConvertStatus);
+        coordinateConvertResponse.setLocations(coordinateConvertLocations);
+        return coordinateConvertResponse;
+      }
+    } catch (IOException e) {
+      LOG.debug("cannot get coordinate convert string %s", e.getMessage());
+      return null;
+    }
   }
 }

@@ -14,4 +14,6 @@ public class KafkaConstants {
 
   public static final String HYPHEN = "-";
 
+  public static final String COORDINATE_CONVERT_LENGTH = "coordinate.convert.length";
+
 }

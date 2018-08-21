@@ -97,11 +97,22 @@ public class AccessDataTransformerSupplier
             int index = listSize > 1 ? listSize - 1 : 0;
             String latestEventTimeWindow = currentEventTimeWindowList.get(index);
             //System.out.println("latestEventTimeWindow: " + latestEventTimeWindow);
-            ArrayList<FixedFrequencyAccessData> backToStateStoreDataList = windowedAccessDataLists
-                .stream()
-                .filter(accessDataList -> DateUtils.roundMilliSecondToNextMinute(accessDataList.get(0).getServerTime()).equals(latestEventTimeWindow))
-                .collect(Collectors.toCollection(ArrayList::new))
-                .get(0);
+//            ArrayList<FixedFrequencyAccessData> backToStateStoreDataList = windowedAccessDataLists
+//                .stream()
+//                .filter(accessDataList -> DateUtils.roundMilliSecondToNextMinute(accessDataList.get(0).getServerTime()).equals(latestEventTimeWindow))
+//                .collect(Collectors.toCollection(ArrayList::new))
+//                .get(0);
+
+
+            ArrayList<ArrayList<FixedFrequencyAccessData>> lists = windowedAccessDataLists
+                    .stream()
+                    .filter(accessDataList -> DateUtils.roundMilliSecondToNextMinute(accessDataList.get(0).getServerTime()).equals(latestEventTimeWindow))
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            ArrayList<FixedFrequencyAccessData> backToStateStoreDataList = null;
+            if (lists.size()!=0) {
+                backToStateStoreDataList = lists.get(0);
+            }
             //System.out.println("backToStateStoreDataList");
             //backToStateStoreDataList.stream().map(FixedFrequencyAccessData::getTripId).forEach(System.out::print);
             //System.out.println();

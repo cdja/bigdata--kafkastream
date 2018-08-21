@@ -1,42 +1,43 @@
 package com.chedaojunan.report.utils;
 
 import java.io.IOException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+import com.chedaojunan.report.client.CoordinateConvertClient;
+import com.chedaojunan.report.model.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.chedaojunan.report.client.AutoGraspApiClient;
-import com.chedaojunan.report.model.AutoGraspRequest;
-import com.chedaojunan.report.model.ExtensionParamEnum;
-import com.chedaojunan.report.model.FixedFrequencyAccessData;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chedaojunan.report.model.CoordinateConvertRequest;
 
 public class SampledDataCleanAndRet {
 
   private static final int MININUM_SAMPLE_COUNT = 3;
   private static final double DECIMAL_DIGITS = 0.000001;
   private static final String HEAD_CODE = "001";
+  private static final int coordinateConvertLength;
+  private static Properties kafkaProperties = null;
+  private static CoordinateConvertClient coordinateConvertClient;
 
-  private static AutoGraspApiClient autoGraspApiClient;
   static CalculateUtils calculateUtils = new CalculateUtils();
   private static final Logger LOG = LoggerFactory.getLogger(SampledDataCleanAndRet.class);
 
+  static {
+    kafkaProperties = ReadProperties.getProperties(KafkaConstants.PROPERTIES_FILE_NAME);
+    coordinateConvertLength = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.COORDINATE_CONVERT_LENGTH));
+    coordinateConvertClient = CoordinateConvertClient.getInstance();
+  }
+
   @SuppressWarnings("unchecked")
-  public static Comparator<FixedFrequencyAccessData> sortingByServerTime  =
-      (o1, o2) -> (int) (Long.parseLong(o1.getServerTime()) -
-      Long.parseLong(o2.getServerTime()));
+  public static Comparator<FixedFrequencyAccessData> sortingByServerTime =
+          (o1, o2) -> (int) (Long.parseLong(o1.getServerTime()) -
+                  Long.parseLong(o2.getServerTime()));
 
   // 60s数据采样返回
-  public static ArrayList<FixedFrequencyAccessData> sampleKafkaData (List<FixedFrequencyAccessData> batchList) {
+  public static ArrayList<FixedFrequencyAccessData> sampleKafkaData(List<FixedFrequencyAccessData> batchList) {
 
     int batchListSize = batchList.size();
     ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
@@ -60,22 +61,24 @@ public class SampledDataCleanAndRet {
         } else {
           accessData1 = batchList.get(i - stepLength);
           accessData2 = batchList.get(i);
-          // TODO 根据经纬度判断数据是否有效
-          if (accessData1.getLatitude() == accessData2.getLatitude()
-              && accessData1.getLongitude() == accessData2.getLongitude()) {
-            accessData3 = copyProperties.clone(accessData2);
-            double longitude = calculateUtils.add(
-                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLongitude());
-            double latitude = calculateUtils.add(
-                calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
-            accessData3.setLongitude(longitude);
-            accessData3.setLatitude(latitude);
+            // TODO 根据经纬度判断数据是否有效
+            if (accessData1.getLatitude() == accessData2.getLatitude()
+                    && accessData1.getLongitude() == accessData2.getLongitude()
+                    && Double.doubleToLongBits(accessData2.getLatitude())!=0.0
+                    && Double.doubleToLongBits(accessData2.getLongitude())!=0.0) {
+              accessData3 = copyProperties.clone(accessData2);
+              double longitude = calculateUtils.add(
+                      calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLongitude());
+              double latitude = calculateUtils.add(
+                      calculateUtils.randomReturn(numRange, DECIMAL_DIGITS), accessData2.getLatitude());
+              accessData3.setLongitude(longitude);
+              accessData3.setLatitude(latitude);
 //            gpsMap.put(longitude + "," + latitude, accessData2.getLongitude() + "," + accessData2.getLatitude());
-            sampleOver.add(accessData3);
-          } else {
+              sampleOver.add(accessData3);
+            } else {
 //            gpsMap.put(accessData2.getLongitude() + "," + accessData2.getLatitude(), accessData2.getLongitude() + "," + accessData2.getLatitude());
-            sampleOver.add(accessData2);
-          }
+              sampleOver.add(accessData2);
+            }
         }
       }
       // 车停止数据量不足3条，不做数据融合
@@ -160,7 +163,7 @@ public class SampledDataCleanAndRet {
 
       String locationString = PrepareAutoGraspRequest.convertLocationsToRequestString(locations);
       String timeString = PrepareAutoGraspRequest.convertTimeToRequstString(times);
-      String speedString  = PrepareAutoGraspRequest.convertSpeedToRequestString(speeds);
+      String speedString = PrepareAutoGraspRequest.convertSpeedToRequestString(speeds);
       String directionString = PrepareAutoGraspRequest.convertDirectionToRequestString(directions);
 
       AutoGraspRequest autoGraspRequest = new AutoGraspRequest(apiKey, carId, locationString, timeString, directionString, speedString);
@@ -195,16 +198,38 @@ public class SampledDataCleanAndRet {
           apiKey = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_KEY);
           carId = accessData.getDeviceId();
         }
-          directions.add(accessData.getDirection());
+        directions.add(accessData.getDirection());
       }
 
       String locationString = PrepareAutoGraspRequest.convertLocationsToRequestString(locations);
       String timeString = PrepareAutoGraspRequest.convertTimeToRequstString(times);
-      String speedString  = PrepareAutoGraspRequest.convertSpeedToRequestString(speeds);
+      String speedString = PrepareAutoGraspRequest.convertSpeedToRequestString(speeds);
       String directionString = PrepareAutoGraspRequest.convertDirectionToRequestString(directions);
 
       AutoGraspRequest autoGraspRequest = new AutoGraspRequest(apiKey, carId, locationString, timeString, directionString, speedString);
       return autoGraspRequest;
+    } else
+      return null;
+  }
+
+  // 坐标转换请求参数
+  public static CoordinateConvertRequest coordinateConvertRequestParm(List<FixedFrequencyAccessData> accessDataList) {
+    FixedFrequencyAccessData accessData;
+    Pair<Double, Double> location;
+    List<Pair<Double, Double>> locations = new ArrayList<>();
+
+    if (accessDataList != null) {
+      for (int i = 0; i < accessDataList.size(); i++) {
+        accessData = accessDataList.get(i);
+        location = new Pair<>(accessData.getLongitude(), accessData.getLatitude());
+        locations.add(location);
+      }
+
+      String locationsString = PrepareCoordinateConvertRequest.convertLocationsToRequestString(locations);
+      String apiKey = EndpointUtils.getEndpointProperties().getProperty(EndpointConstants.GAODE_API_KEY);
+
+      CoordinateConvertRequest coordinateConvertRequest = new CoordinateConvertRequest(apiKey, locationsString, null);
+      return coordinateConvertRequest;
     } else
       return null;
   }
@@ -227,7 +252,7 @@ public class SampledDataCleanAndRet {
 
     // 采样数据和高德融合数据大于等于3条，并且两种数据条数相同时
     if (sampleListSize >= MININUM_SAMPLE_COUNT && gaodeApiResponseListSize >= MININUM_SAMPLE_COUNT
-        && sampleListSize == gaodeApiResponseListSize) {
+            && sampleListSize == gaodeApiResponseListSize) {
       for (int i = 0; i < gaodeApiResponseListSize; i++) {
         // TODO 获取高德数据整合后实体类
         integrationData = gaodeApiResponseList.get(i);
@@ -325,7 +350,7 @@ public class SampledDataCleanAndRet {
     }
   }
 
-  public static AutoGraspRequest convertToAutoGraspRequest (String apiRequest) {
+  public static AutoGraspRequest convertToAutoGraspRequest(String apiRequest) {
     if (StringUtils.isEmpty(apiRequest))
       return null;
     ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
@@ -336,5 +361,38 @@ public class SampledDataCleanAndRet {
       e.printStackTrace();
       return null;
     }
+  }
+
+  // 坐标转化调用，返回gps整合数据列表
+  public static List<FixedFrequencyAccessData> getCoordinateConvertResponseList(List<FixedFrequencyAccessData> accessDataList) {
+    List<FixedFrequencyAccessData> accessDataListNew = null;
+    List<FixedFrequencyAccessData> coordinateConvertResponse;
+    List<FixedFrequencyAccessData> coordinateConvertResponseList = new ArrayList<>();
+    CoordinateConvertRequest coordinateConvertRequest = null;
+    int num = accessDataList.size() / coordinateConvertLength;
+    if (accessDataList.size() > 0) {
+      for (int i = 0; i <= num; i++) {
+        if (accessDataListNew != null) {
+          accessDataListNew.clear();
+        }
+        if (i < num) {
+          accessDataListNew = new ArrayList<>(accessDataList.subList(i * coordinateConvertLength, (i + 1) * coordinateConvertLength));
+        } else {
+          if (accessDataList.size() - i * coordinateConvertLength > 0) {
+            accessDataListNew = new ArrayList<>(accessDataList.subList(i * coordinateConvertLength, accessDataList.size()));
+          }
+        }
+
+        if (accessDataListNew != null && accessDataListNew.size() != 0) {
+          coordinateConvertRequest = SampledDataCleanAndRet.coordinateConvertRequestParm(accessDataListNew);
+        }
+        if (coordinateConvertRequest != null) {
+          coordinateConvertResponse = coordinateConvertClient.getCoordinateConvertFromResponse(accessDataListNew, coordinateConvertRequest);
+          coordinateConvertRequest = null;
+          coordinateConvertResponseList.addAll(coordinateConvertResponse);
+        }
+      }
+    }
+    return coordinateConvertResponseList;
   }
 }

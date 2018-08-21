@@ -8,35 +8,54 @@ import com.aliyun.datahub.model.PutRecordsResult;
 import com.aliyun.datahub.model.RecordEntry;
 import com.aliyun.datahub.model.ShardEntry;
 import com.aliyun.datahub.wrapper.Topic;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
+import com.chedaojunan.report.model.DatahubDeviceData;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 public class WriteDatahubUtil {
 
-    private static final Logger logger = Logger.getLogger(WriteDatahubUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(WriteDatahubUtil.class);
 
-    private static String accessId = DatahubConstants.ACCESS_ID;
-    private static String accessKey = DatahubConstants.ACCESS_KEY;
-    private static String endpoint = DatahubConstants.ENDPOINT;
-    private static String projectName = DatahubConstants.PROJECT_NAME;
-    private static String topicName = DatahubConstants.TOPIC_NAME;
-    private static String topicShardNum = DatahubConstants.TOPIC_SHARDNUM;
+    private static Properties datahubProperties = null;
+
+    static {
+        datahubProperties = ReadProperties.getProperties(DatahubConstants.PROPERTIES_FILE_NAME);
+    }
+
+    private static String accessId = datahubProperties.getProperty(DatahubConstants.ACCESS_ID);
+    private static String accessKey = datahubProperties.getProperty(DatahubConstants.ACCESS_KEY);
+    private static String endpoint = datahubProperties.getProperty(DatahubConstants.ENDPOINT);
+    private static String projectName = datahubProperties.getProperty(DatahubConstants.PROJECT_NAME);
+    private static String topicName = datahubProperties.getProperty(DatahubConstants.TOPIC_NAME);
+    private static String topicShardNum = datahubProperties.getProperty(DatahubConstants.TOPIC_SHARDNUM);
 
     private DatahubClient client;
     private DatahubConfiguration conf;
     DateUtils dateUtils = null;
+
+    private static WriteDatahubUtil single = null;
 
     public WriteDatahubUtil() {
         conf = new DatahubConfiguration(new AliyunAccount(accessId, accessKey), endpoint);
         client = new DatahubClient(conf);
     }
 
+    //静态工厂方法
+    public static synchronized  WriteDatahubUtil getInstance() {
+        if (single == null) {
+            single = new WriteDatahubUtil();
+        }
+        return single;
+    }
+
     // 存数据到datahub的固定频率采集数据表中
-    public int putRecords(ArrayList<FixedFrequencyIntegrationData> list) {
+    public int putRecords(ArrayList<DatahubDeviceData> list) {
         if (list == null || list.size()==0) {
             return -1;
         }
@@ -48,63 +67,70 @@ public class WriteDatahubUtil {
         String hm;
         long time;
 
-        FixedFrequencyIntegrationData integrationData;
+        DatahubDeviceData integrationData;
         for (int i = 0; i < list.size(); i++) {
-            integrationData = (FixedFrequencyIntegrationData)list.get(i);
+            integrationData = list.get(i);
             // RecordData
             RecordEntry entry = new RecordEntry(schema);
-            entry.setString(0, integrationData.getDeviceId());
-            entry.setString(1, integrationData.getDeviceImei());
-            entry.setString(2, integrationData.getLocalTime());
-            entry.setString(3, integrationData.getTripId());
-            entry.setString(4, integrationData.getServerTime());
-            entry.setDouble(5, integrationData.getLatitude());
-            entry.setDouble(6, integrationData.getLongitude());
-            entry.setDouble(7, integrationData.getAltitude());
-            entry.setDouble(8, integrationData.getDirection());
-            entry.setDouble(9, integrationData.getGpsSpeed());
-            entry.setDouble(10, integrationData.getYawRate());
-            entry.setDouble(11, integrationData.getAccelerateZ());
-            entry.setDouble(12, integrationData.getRollRate());
-            entry.setDouble(13, integrationData.getAccelerateX());
-            entry.setDouble(14, integrationData.getPitchRate());
-            entry.setDouble(15, integrationData.getAccelerateY());
-            entry.setBigint(16, (long)integrationData.getRoadApiStatus());
-            entry.setString(17, integrationData.getCrosspoint());
-            entry.setString(18, integrationData.getRoadName());
-            entry.setBigint(19, (long)integrationData.getRoadLevel());
-            entry.setBigint(20, (long)integrationData.getMaxSpeed());
-            entry.setString(21, integrationData.getIntersection());
-            entry.setString(22, integrationData.getIntersectionDistance());
-            entry.setString(23, integrationData.getTrafficRequestTimesamp());
-            entry.setString(24, integrationData.getTrafficRequestId());
-            entry.setBigint(25, (long)integrationData.getTrafficApiStatus());
-            entry.setString(26, integrationData.getCongestionInfo());
+            if (integrationData != null) {
+                entry.setString(0, integrationData.getDeviceId());
+                entry.setString(1, integrationData.getDeviceImei());
+                entry.setString(2, integrationData.getLocalTime());
+                entry.setString(3, integrationData.getTripId());
+                entry.setString(4, integrationData.getServerTime());
+                entry.setDouble(5, integrationData.getLatitude());
+                entry.setDouble(6, integrationData.getLongitude());
+                entry.setDouble(7, integrationData.getAltitude());
+                entry.setDouble(8, integrationData.getDirection());
+                entry.setDouble(9, integrationData.getGpsSpeed());
+                entry.setDouble(10, integrationData.getYawRate());
+                entry.setDouble(11, integrationData.getAccelerateZ());
+                entry.setDouble(12, integrationData.getRollRate());
+                entry.setDouble(13, integrationData.getAccelerateX());
+                entry.setDouble(14, integrationData.getPitchRate());
+                entry.setDouble(15, integrationData.getAccelerateY());
+                entry.setBigint(16, (long) integrationData.getRoadApiStatus());
+                entry.setString(17, integrationData.getCrosspoint());
+                entry.setString(18, integrationData.getRoadName());
+                entry.setBigint(19, (long) integrationData.getRoadLevel());
+                entry.setBigint(20, (long) integrationData.getMaxSpeed());
+                entry.setString(21, integrationData.getIntersection());
+                entry.setString(22, integrationData.getIntersectionDistance());
+                entry.setString(23, integrationData.getTrafficRequestTimesamp());
+                entry.setString(24, integrationData.getTrafficRequestId());
+                entry.setBigint(25, (long) integrationData.getTrafficApiStatus());
+                entry.setString(26, integrationData.getCongestionInfo());
 
-            // 使用自定义分区方式
-            entry.setString(27, integrationData.getSourceId());
+                // 使用自定义分区方式
+                entry.setString(27, integrationData.getSourceId());
 
-            // 根据server_time设置，为空则根据系统当前时间
-            dateUtils = new DateUtils();
-            if (StringUtils.isNotEmpty(integrationData.getServerTime())) {
-                time = Long.valueOf(integrationData.getServerTime());
-                ymd = dateUtils.getYMDFromTime(time);
-//                hm = dateUtils.getHMFromTime(time);
-                hm = dateUtils.getHourFromTime(time) + "_" +
-                        String.format("%02d", Integer.parseInt(dateUtils.getMinuteFromTime(time))/5 * 5);
-            } else {
-                ymd = dateUtils.getYMD();
-//                hm = dateUtils.getHM();
-                hm = dateUtils.getHour() + "_" + String.format("%02d", Integer.parseInt(dateUtils.getMinute())/5 * 5);
+                // 根据server_time设置，为空则根据系统当前时间
+                dateUtils = new DateUtils();
+                if (StringUtils.isNotEmpty(integrationData.getServerTime())) {
+                    // time增加300000毫秒，分区时间后延
+                    time = Long.valueOf(integrationData.getServerTime()) + 300000L;
+                    ymd = dateUtils.getYMDFromTime(time);
+                    int hm_temp = Integer.parseInt(dateUtils.getMinuteFromTime(time)) / 5 * 5;
+                    hm = dateUtils.getHourFromTime(time) + "_" + String.format("%02d", hm_temp);
+                } else {
+                    Long times = new Date().getTime() + 300000L;
+                    int hm_temp = Integer.parseInt(dateUtils.getMinute_After5M(times)) / 5 * 5;
+                    ymd = dateUtils.getYMD_After5M(times);
+                    hm = dateUtils.getHour_After5M(times) + "_" + String.format("%02d", hm_temp);
+                }
+
+                entry.setString(28, ymd);
+                entry.setString(29, hm);
+
+                // 增加adcode和towncode
+                entry.setString(30, integrationData.getAdCode());
+                entry.setString(31, integrationData.getTownCode());
+
+                // 写记录到不同的分片
+                String shardId = shards.get((int) (Math.random() * Integer.parseInt(topicShardNum)) % Integer.parseInt(topicShardNum)).getShardId();
+                entry.setShardId(shardId);
+                recordEntries.add(entry);
             }
-
-            entry.setString(28, ymd);
-            entry.setString(29, hm);
-
-            // 写记录到不同的分片
-            String shardId = shards.get(i % Integer.parseInt(topicShardNum)).getShardId();
-            entry.setShardId(shardId);
-            recordEntries.add(entry);
         }
 
         // 尝试次数
