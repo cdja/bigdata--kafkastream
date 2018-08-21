@@ -88,6 +88,7 @@ public class DataEnrich {
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, kafkaApplicationName);
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
         kafkaProperties.getProperty(KafkaConstants.KAFKA_BOOTSTRAP_SERVERS));
+    streamsConfiguration.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 60000);
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,
         Serdes.String().getClass().getName());
@@ -173,7 +174,7 @@ public class DataEnrich {
                     coordinateConvertResponseList.sort(SampledDataCleanAndRet.sortingByServerTime);
                     ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(coordinateConvertResponseList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
-                    System.out.println("apiQuest: " + autoGraspRequest);
+//                    System.out.println("apiQuest: " + autoGraspRequest);
                     List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();
                     if (autoGraspRequest != null)
                       gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
@@ -187,7 +188,7 @@ public class DataEnrich {
                         try {
                             // 整合数据入库datahub
                             if (CollectionUtils.isNotEmpty(enrichedDataOver)) {
-                                System.out.println("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
+//                                System.out.println("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
                                 logger.info("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
                                 writeDatahubUtil.putRecords(enrichedDataOver);
                             }
@@ -195,9 +196,9 @@ public class DataEnrich {
                             e.printStackTrace();
                         }
 
-                        enrichedDataOver
-                                .stream()
-                                .forEach(data -> enrichedDataList.add(data));
+//                        enrichedDataOver
+//                                .stream()
+//                                .forEach(data -> enrichedDataList.add(data));
                     }
                   })
               ).collect(Collectors.toList());

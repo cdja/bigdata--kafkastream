@@ -22,6 +22,9 @@ public class KafkaProducerTest005 {
 
     Properties configProperties = new Properties();
     configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+    configProperties.put(ProducerConfig.BATCH_SIZE_CONFIG, 0);
+    configProperties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 30000);
+    configProperties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
     configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
         Serdes.String().serializer().getClass());
     configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
