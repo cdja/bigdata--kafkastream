@@ -67,7 +67,7 @@ public class RegeoClient extends Client<RegeoResponse>{
 
     if (!CollectionUtils.isEmpty(fixedFrequencyDataList) && ObjectUtils.allNotNull(fixedFrequencyDataList.get(0))) {
       fixedFrequency = fixedFrequencyDataList.get(0);
-      location = new Pair<>(fixedFrequency.getLongitude(), fixedFrequency.getLatitude());
+      location = new Pair<>(fixedFrequency.getCorrectedLongitude(), fixedFrequency.getCorrectedLatitude());
       locations.add(location);
 
       String locationsString = PrepareCoordinateConvertRequest.convertLocationsToRequestString(locations);

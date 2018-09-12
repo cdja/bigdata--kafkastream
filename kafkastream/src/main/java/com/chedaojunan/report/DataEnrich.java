@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -168,11 +167,11 @@ public class DataEnrich {
               .map(
                   accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
                     // 坐标转化接口调用
-                    List<FixedFrequencyAccessData> coordinateConvertResponseList;
+                    List<FixedFrequencyAccessGpsData> coordinateConvertResponseList;
                     coordinateConvertResponseList = SampledDataCleanAndRet.getCoordinateConvertResponseList(accessDataList);
 //                    System.out.println("coordinateConvertResponseList: " + coordinateConvertResponseList.size());
-                    coordinateConvertResponseList.sort(SampledDataCleanAndRet.sortingByServerTime);
-                    ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(coordinateConvertResponseList));
+//                    coordinateConvertResponseList.sort(SampledDataCleanAndRet.sortingByServerTime);
+                    ArrayList<FixedFrequencyAccessGpsData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(coordinateConvertResponseList));
                     AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
 //                    System.out.println("apiQuest: " + autoGraspRequest);
                     List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();

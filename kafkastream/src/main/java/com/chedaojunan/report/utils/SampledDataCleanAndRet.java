@@ -5,7 +5,6 @@ import java.util.*;
 
 import com.chedaojunan.report.client.CoordinateConvertClient;
 import com.chedaojunan.report.model.*;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ public class SampledDataCleanAndRet {
                   Long.parseLong(o2.getServerTime()));
 
   // 60s数据采样返回
-  public static ArrayList<FixedFrequencyAccessData> sampleKafkaData(List<FixedFrequencyAccessData> batchList) {
+  public static ArrayList<FixedFrequencyAccessGpsData> sampleKafkaData(List<FixedFrequencyAccessGpsData> batchList) {
 
     int batchListSize = batchList.size();
     ArrayList sampleOver = new ArrayList(); // 用list存取样后数据
@@ -49,10 +48,10 @@ public class SampledDataCleanAndRet {
     int stepLength = batchListSize / MININUM_SAMPLE_COUNT;
     // 60s内数据少于3条处理
     if (batchListSize >= MININUM_SAMPLE_COUNT) {
-      FixedFrequencyAccessData accessData1;
-      FixedFrequencyAccessData accessData2;
-      FixedFrequencyAccessData accessData3;
-      FixedFrequencyAccessData accessData4;
+      FixedFrequencyAccessGpsData accessData1;
+      FixedFrequencyAccessGpsData accessData2;
+      FixedFrequencyAccessGpsData accessData3;
+      FixedFrequencyAccessGpsData accessData4;
       for (int i = 0; i < batchListSize; i += stepLength) {
         if (i == 0) {
           accessData4 = batchList.get(i);
@@ -92,9 +91,9 @@ public class SampledDataCleanAndRet {
   }
 
   // 返回抓路服务请求参数
-  public static AutoGraspRequest autoGraspRequestRet(ArrayList<FixedFrequencyAccessData> listSample) {
+  public static AutoGraspRequest autoGraspRequestRet(ArrayList<FixedFrequencyAccessGpsData> listSample) {
     if (listSample.size() > 0) {
-      FixedFrequencyAccessData accessData = listSample.get(0);
+      FixedFrequencyAccessGpsData accessData = listSample.get(0);
       if (HEAD_CODE.equals(accessData.getSourceId())) {
         return sampleDataHaveDirection(listSample);
       } else {
@@ -105,9 +104,9 @@ public class SampledDataCleanAndRet {
   }
 
   // 采样数据中无direction
-  public static AutoGraspRequest sampleDataNoDirection(ArrayList<FixedFrequencyAccessData> listSample) {
-    FixedFrequencyAccessData accessData1;
-    FixedFrequencyAccessData accessData2;
+  public static AutoGraspRequest sampleDataNoDirection(ArrayList<FixedFrequencyAccessGpsData> listSample) {
+    FixedFrequencyAccessGpsData accessData1;
+    FixedFrequencyAccessGpsData accessData2;
     List<Long> times = new ArrayList<>();
     List<Double> directions = new ArrayList<>();
     Double direction;
@@ -130,7 +129,7 @@ public class SampledDataCleanAndRet {
           // TODO 需确认数据端收集的数据格式，并转化为UTC格式
           times.add(accessData2.getServerTime() == "" ? 0L : dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData2.getServerTime())));
           speeds.add(accessData2.getGpsSpeed());
-          location = new Pair<>(accessData2.getLongitude(), accessData2.getLatitude());
+          location = new Pair<>(accessData2.getCorrectedLongitude(), accessData2.getCorrectedLatitude());
           locations.add(location);
         } else {
           accessData1 = listSample.get(i);
@@ -139,7 +138,7 @@ public class SampledDataCleanAndRet {
           // TODO 需确认数据端收集的数据格式，并转化为UTC格式
           times.add(accessData1.getServerTime() == "" ? 0L : dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData1.getServerTime())));
           speeds.add(accessData1.getGpsSpeed());
-          location = new Pair<>(accessData1.getLongitude(), accessData1.getLatitude());
+          location = new Pair<>(accessData1.getCorrectedLongitude(), accessData1.getCorrectedLatitude());
           locations.add(location);
         }
 
@@ -149,8 +148,8 @@ public class SampledDataCleanAndRet {
         }
 
         // 根据经纬度计算得出
-        A = new AzimuthFromLogLatUtil(accessData1.getLongitude(), accessData1.getLatitude());
-        B = new AzimuthFromLogLatUtil(accessData2.getLongitude(), accessData2.getLatitude());
+        A = new AzimuthFromLogLatUtil(accessData1.getCorrectedLongitude(), accessData1.getCorrectedLatitude());
+        B = new AzimuthFromLogLatUtil(accessData2.getCorrectedLongitude(), accessData2.getCorrectedLatitude());
         azimuthFromLogLatUtil = new AzimuthFromLogLatUtil();
 
         direction = azimuthFromLogLatUtil.getAzimuth(A, B);
@@ -173,8 +172,8 @@ public class SampledDataCleanAndRet {
   }
 
   // 采样数据中无direction
-  public static AutoGraspRequest sampleDataHaveDirection(ArrayList<FixedFrequencyAccessData> listSample) {
-    FixedFrequencyAccessData accessData;
+  public static AutoGraspRequest sampleDataHaveDirection(ArrayList<FixedFrequencyAccessGpsData> listSample) {
+    FixedFrequencyAccessGpsData accessData;
     List<Long> times = new ArrayList<>();
     List<Double> directions = new ArrayList<>();
     List<Double> speeds = new ArrayList<>();
@@ -191,7 +190,7 @@ public class SampledDataCleanAndRet {
         // TODO 需确认数据端收集的数据格式，并转化为UTC格式
         times.add(accessData.getServerTime() == "" ? 0L : dateUtils.getUTCTimeFromLocal(Long.valueOf(accessData.getServerTime())));
         speeds.add(accessData.getGpsSpeed());
-        location = new Pair<>(accessData.getLongitude(), accessData.getLatitude());
+        location = new Pair<>(accessData.getCorrectedLongitude(), accessData.getCorrectedLatitude());
         locations.add(location);
 
         if (i == 0) {
@@ -235,7 +234,7 @@ public class SampledDataCleanAndRet {
   }
 
   // 数据整合
-  public static ArrayList<FixedFrequencyIntegrationData> dataIntegration(List<FixedFrequencyAccessData> batchList, List<FixedFrequencyAccessData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) {
+  public static ArrayList<FixedFrequencyIntegrationData> dataIntegration(List<FixedFrequencyAccessGpsData> batchList, List<FixedFrequencyAccessGpsData> sampleList, List<FixedFrequencyIntegrationData> gaodeApiResponseList) {
     ArrayList<FixedFrequencyIntegrationData> integrationDataList = new ArrayList<>();
     CopyProperties copyProperties = new CopyProperties();
 
@@ -248,7 +247,7 @@ public class SampledDataCleanAndRet {
 
 
     FixedFrequencyIntegrationData integrationData;
-    FixedFrequencyAccessData accessData;
+    FixedFrequencyAccessGpsData accessData;
 
     // 采样数据和高德融合数据大于等于3条，并且两种数据条数相同时
     if (sampleListSize >= MININUM_SAMPLE_COUNT && gaodeApiResponseListSize >= MININUM_SAMPLE_COUNT
@@ -276,7 +275,7 @@ public class SampledDataCleanAndRet {
     return integrationDataList;
   }
 
-  public static void addAccessDataToIntegrationData(FixedFrequencyIntegrationData integrationData, FixedFrequencyAccessData accessData) {
+  public static void addAccessDataToIntegrationData(FixedFrequencyIntegrationData integrationData, FixedFrequencyAccessGpsData accessData) {
     integrationData.setDeviceId(accessData.getDeviceId());
     integrationData.setDeviceImei(accessData.getDeviceImei());
     integrationData.setLocalTime(accessData.getLocalTime());
@@ -294,6 +293,9 @@ public class SampledDataCleanAndRet {
     integrationData.setPitchRate(accessData.getPitchRate());
     integrationData.setAccelerateY(accessData.getAccelerateY());
     integrationData.setSourceId(accessData.getSourceId());
+
+    integrationData.setCorrectedLatitude(accessData.getCorrectedLatitude());
+    integrationData.setCorrectedLongitude(accessData.getCorrectedLongitude());
   }
 
   public static void main(String[] args) throws Exception {
@@ -364,10 +366,10 @@ public class SampledDataCleanAndRet {
   }
 
   // 坐标转化调用，返回gps整合数据列表
-  public static List<FixedFrequencyAccessData> getCoordinateConvertResponseList(List<FixedFrequencyAccessData> accessDataList) {
+  public static List<FixedFrequencyAccessGpsData> getCoordinateConvertResponseList(List<FixedFrequencyAccessData> accessDataList) {
     List<FixedFrequencyAccessData> accessDataListNew = null;
-    List<FixedFrequencyAccessData> coordinateConvertResponse;
-    List<FixedFrequencyAccessData> coordinateConvertResponseList = new ArrayList<>();
+    List<FixedFrequencyAccessGpsData> coordinateConvertResponse;
+    List<FixedFrequencyAccessGpsData> coordinateConvertResponseList = new ArrayList<>();
     CoordinateConvertRequest coordinateConvertRequest = null;
     int num = accessDataList.size() / coordinateConvertLength;
     if (accessDataList.size() > 0) {

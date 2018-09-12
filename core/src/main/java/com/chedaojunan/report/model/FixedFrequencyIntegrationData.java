@@ -1,12 +1,10 @@
 package com.chedaojunan.report.model;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
+public class FixedFrequencyIntegrationData extends FixedFrequencyAccessGpsData {
 
   @JsonProperty(value = "road_api_status")
   private int roadApiStatus		    ; // 抓路接口返回结果状态：0表示请求失败；1表示请求成功',
@@ -41,9 +39,7 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
   @JsonProperty(value = "congestion_info")
   private String congestionInfo		; // 交通态势，以json串的方式存储',
 
-  public FixedFrequencyIntegrationData(){}
-
-  public FixedFrequencyIntegrationData(FixedFrequencyAccessData accessData, GaoDeFusionReturn gaoDeFusionReturn) {
+  public FixedFrequencyIntegrationData(FixedFrequencyAccessGpsData accessData, GaoDeFusionReturn gaoDeFusionReturn) {
     setDeviceId(accessData.getDeviceId());
     setDeviceImei(accessData.getDeviceImei());
     setLocalTime(accessData.getLocalTime());
@@ -61,6 +57,9 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
     setPitchRate(accessData.getPitchRate());
     setAccelerateY(accessData.getAccelerateY());
     setSourceId(accessData.getSourceId());
+
+    setCorrectedLatitude(accessData.getCorrectedLatitude());
+    setCorrectedLongitude(accessData.getCorrectedLongitude());
 
     setRoadApiStatus(gaoDeFusionReturn.getRoad_api_status());
     setCrosspoint(gaoDeFusionReturn.getCrosspoint());
@@ -75,7 +74,7 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
     setCongestionInfo(gaoDeFusionReturn.getCongestion_info());
   }
 
-  public FixedFrequencyIntegrationData(FixedFrequencyAccessData accessData) {
+  public FixedFrequencyIntegrationData(FixedFrequencyAccessGpsData accessData) {
     setDeviceId(accessData.getDeviceId());
     setDeviceImei(accessData.getDeviceImei());
     setLocalTime(accessData.getLocalTime());
@@ -93,6 +92,13 @@ public class FixedFrequencyIntegrationData extends FixedFrequencyAccessData {
     setPitchRate(accessData.getPitchRate());
     setAccelerateY(accessData.getAccelerateY());
     setSourceId(accessData.getSourceId());
+
+    setCorrectedLatitude(accessData.getCorrectedLatitude());
+    setCorrectedLongitude(accessData.getCorrectedLongitude());
+
+  }
+
+  public FixedFrequencyIntegrationData() {
   }
 
   public int getRoadApiStatus() {

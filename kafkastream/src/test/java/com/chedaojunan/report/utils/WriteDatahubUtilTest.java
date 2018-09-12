@@ -1,16 +1,11 @@
 package com.chedaojunan.report.utils;
 
 import com.chedaojunan.report.model.DatahubDeviceData;
-import com.chedaojunan.report.model.FixedFrequencyAccessData;
-import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
-import com.chedaojunan.report.model.GaoDeFusionReturn;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class WriteDatahubUtilTest {
 
@@ -38,6 +33,9 @@ public class WriteDatahubUtilTest {
         integrationData.setAccelerateY(20.8);
         integrationData.setSourceId("source_id");
 
+        integrationData.setCorrectedLatitude(39.00);
+        integrationData.setCorrectedLongitude(129.01);
+
         integrationData.setRoadApiStatus(1);
         integrationData.setCrosspoint("crosspoint");
         integrationData.setRoadName("roadname");
@@ -61,11 +59,11 @@ public class WriteDatahubUtilTest {
         integrationDataList.add(integrationData);
     }
 
-//    @Test
-//    public void testPutRecords() {
+    @Test
+    public void testPutRecords() {
 //        WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
 //        int failNum = writeDatahubUtil.putRecords(integrationDataList);
 //        Assert.assertEquals(0, failNum);
-//    }
+    }
 
 }

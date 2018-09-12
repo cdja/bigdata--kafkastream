@@ -101,8 +101,14 @@ public class WriteDatahubUtil {
                 entry.setBigint(25, (long) integrationData.getTrafficApiStatus());
                 entry.setString(26, integrationData.getCongestionInfo());
 
+                // 增加adcode和towncode
+                entry.setString(27, integrationData.getAdCode());
+                entry.setString(28, integrationData.getTownCode());
+                entry.setDouble(29, integrationData.getCorrectedLatitude());
+                entry.setDouble(30, integrationData.getCorrectedLongitude());
+
                 // 使用自定义分区方式
-                entry.setString(27, integrationData.getSourceId());
+                entry.setString(31, integrationData.getSourceId());
 
                 // 根据server_time设置，为空则根据系统当前时间
                 dateUtils = new DateUtils();
@@ -119,12 +125,8 @@ public class WriteDatahubUtil {
                     hm = dateUtils.getHour_After5M(times) + "_" + String.format("%02d", hm_temp);
                 }
 
-                entry.setString(28, ymd);
-                entry.setString(29, hm);
-
-                // 增加adcode和towncode
-                entry.setString(30, integrationData.getAdCode());
-                entry.setString(31, integrationData.getTownCode());
+                entry.setString(32, ymd);
+                entry.setString(33, hm);
 
                 // 写记录到不同的分片
                 String shardId = shards.get((int) (Math.random() * Integer.parseInt(topicShardNum)) % Integer.parseInt(topicShardNum)).getShardId();
