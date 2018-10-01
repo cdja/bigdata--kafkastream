@@ -73,7 +73,7 @@ public class KafkaProducerTest005 {
 
   public static void main(String[] args) {
     KafkaProducerTest005 producerTest = new KafkaProducerTest005();
-    String inputTopic = "test003";
+    String inputTopic = "deviceGpsTest";
     try {
 //      int i=0;
 //      while(true){
