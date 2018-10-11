@@ -1,5 +1,3 @@
-package com.chedaojunan.report;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +8,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.chedaojunan.report.client.RegeoClient;
-import com.chedaojunan.report.model.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
@@ -30,6 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
+import com.chedaojunan.report.client.RegeoClient;
+import com.chedaojunan.report.model.AutoGraspRequest;
+import com.chedaojunan.report.model.DatahubDeviceData;
+import com.chedaojunan.report.model.FixedFrequencyAccessData;
+import com.chedaojunan.report.model.FixedFrequencyAccessGpsData;
+import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.serdes.ArrayListSerde;
 import com.chedaojunan.report.serdes.SerdeFactory;
 import com.chedaojunan.report.service.ExternalApiExecutorService;
@@ -40,9 +42,9 @@ import com.chedaojunan.report.utils.ReadProperties;
 import com.chedaojunan.report.utils.SampledDataCleanAndRet;
 import com.chedaojunan.report.utils.WriteDatahubUtil;
 
-public class DataEnrich {
+public class DataEnrichTest {
 
-  private static final Logger logger = LoggerFactory.getLogger(DataEnrich.class);
+  private static final Logger logger = LoggerFactory.getLogger(DataEnrichTest.class);
   private static final long TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS = 10000000000L;
 
   private static Properties kafkaProperties = null;
@@ -87,7 +89,7 @@ public class DataEnrich {
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, kafkaApplicationName);
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
         kafkaProperties.getProperty(KafkaConstants.KAFKA_BOOTSTRAP_SERVERS));
-    streamsConfiguration.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 60000);
+    streamsConfiguration.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 100000);
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,
         Serdes.String().getClass().getName());
@@ -104,10 +106,10 @@ public class DataEnrich {
 
     StreamsBuilder builder = new StreamsBuilder();
     StoreBuilder<KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>> rawDataStore = Stores.keyValueStoreBuilder(
-        Stores.persistentKeyValueStore("rawDataStoreTest"),
+        Stores.persistentKeyValueStore("rawDataStoreTest1"),
         Serdes.String(),
-        new ArrayListSerde(fixedFrequencyAccessDataSerde))
-        .withCachingEnabled();
+        new ArrayListSerde(fixedFrequencyAccessDataSerde));
+        //.withCachingEnabled();
 
 
     WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
@@ -141,7 +143,7 @@ public class DataEnrich {
         })
         .flatMapValues(accessDataList -> accessDataList.stream().collect(Collectors.toList()));
 
-    //orderedDataStream.print();
+    orderedDataStream.print();
 
     KStream<String, ArrayList<ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
         orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());

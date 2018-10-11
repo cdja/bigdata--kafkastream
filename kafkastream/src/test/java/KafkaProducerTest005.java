@@ -57,7 +57,7 @@ public class KafkaProducerTest005 {
       accessData.setSourceId("001");
       try {
         System.out.println(new ObjectMapper().writeValueAsString(accessData));
-        producer.send(new ProducerRecord<String, String>(inputTopic, new ObjectMapper().writeValueAsString(accessData)));
+        producer.send(new ProducerRecord<>(inputTopic, accessData.getDeviceId(), new ObjectMapper().writeValueAsString(accessData)));
       } catch (Exception ex) {
         ex.printStackTrace();//handle exception here
       }
@@ -78,7 +78,7 @@ public class KafkaProducerTest005 {
 //      int i=0;
 //      while(true){
 //        i++;
-      for(int i=1;i<=60;i++) {
+      for(int i=1;i<=600;i++) {
         producerTest.runProducer(inputTopic,i);
       }
 //        Thread.sleep(910);

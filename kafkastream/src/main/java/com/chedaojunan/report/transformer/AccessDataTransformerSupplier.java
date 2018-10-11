@@ -7,10 +7,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.kstream.TransformerSupplier;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.PunctuationType;
+import org.apache.kafka.streams.processor.StateStore;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 
@@ -46,6 +48,16 @@ public class AccessDataTransformerSupplier
 
       private ProcessorContext context;
 
+      private StateStore waitUntilStoreIsQueryable(String stateStoreName) throws InterruptedException {
+        while(true){
+          try{
+            return context.getStateStore(stateStoreName);
+          } catch(InvalidStateStoreException e){
+            Thread.sleep(500);
+          }
+        }
+      }
+
       @SuppressWarnings("unchecked")
       @Override
       public void init(ProcessorContext context) {
@@ -68,6 +80,11 @@ public class AccessDataTransformerSupplier
       }
 
       public ArrayList<ArrayList<FixedFrequencyAccessData>> outputToDownstream() {
+        try{
+          stateStore = (KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>) waitUntilStoreIsQueryable(stateStoreName);
+        } catch(InterruptedException e){
+          e.printStackTrace();
+        }
         KeyValueIterator<String, ArrayList<FixedFrequencyAccessData>> iter = this.stateStore.all();
         ArrayList<String> currentEventTimeWindowList = new ArrayList<>();
         ArrayList<ArrayList<FixedFrequencyAccessData>> allDeviceAccessDataList = new ArrayList<>();
@@ -105,13 +122,13 @@ public class AccessDataTransformerSupplier
 
 
             ArrayList<ArrayList<FixedFrequencyAccessData>> lists = windowedAccessDataLists
-                    .stream()
-                    .filter(accessDataList -> DateUtils.roundMilliSecondToNextMinute(accessDataList.get(0).getServerTime()).equals(latestEventTimeWindow))
-                    .collect(Collectors.toCollection(ArrayList::new));
+                .stream()
+                .filter(accessDataList -> DateUtils.roundMilliSecondToNextMinute(accessDataList.get(0).getServerTime()).equals(latestEventTimeWindow))
+                .collect(Collectors.toCollection(ArrayList::new));
 
             ArrayList<FixedFrequencyAccessData> backToStateStoreDataList = null;
             if (lists.size()!=0) {
-                backToStateStoreDataList = lists.get(0);
+              backToStateStoreDataList = lists.get(0);
             }
             //System.out.println("backToStateStoreDataList");
             //backToStateStoreDataList.stream().map(FixedFrequencyAccessData::getTripId).forEach(System.out::print);
@@ -136,19 +153,24 @@ public class AccessDataTransformerSupplier
         //String currentWindowKey = key;
         String previousWindowKey = String.join(KafkaConstants.HYPHEN, stateStoreKey, "previous");
 
-        ArrayList<FixedFrequencyAccessData> currentEventList = stateStore.get(stateStoreKey);
-        ArrayList<FixedFrequencyAccessData> previousEventList = stateStore.get(previousWindowKey);
+        try {
+          stateStore = (KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>) waitUntilStoreIsQueryable(stateStoreName);
+          ArrayList<FixedFrequencyAccessData> currentEventList = stateStore.get(stateStoreKey);
+          stateStore = (KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>) waitUntilStoreIsQueryable(stateStoreName);
+          ArrayList<FixedFrequencyAccessData> previousEventList = stateStore.get(previousWindowKey);
 
-        if (CollectionUtils.isEmpty(previousEventList) ||
-            (CollectionUtils.isNotEmpty(previousEventList) && (!previousEventList.contains(accessData)))){
-          if (CollectionUtils.isEmpty(currentEventList))
-            stateStore.put(stateStoreKey, new ArrayList<>(Arrays.asList(accessData)));
-          else if (!currentEventList.contains(accessData)){
-            currentEventList.add(accessData);
-            stateStore.put(stateStoreKey, currentEventList);
+          if (CollectionUtils.isEmpty(previousEventList) ||
+              (CollectionUtils.isNotEmpty(previousEventList) && (!previousEventList.contains(accessData)))){
+            if (CollectionUtils.isEmpty(currentEventList))
+              stateStore.put(stateStoreKey, new ArrayList<>(Arrays.asList(accessData)));
+            else if (!currentEventList.contains(accessData)){
+              currentEventList.add(accessData);
+              stateStore.put(stateStoreKey, currentEventList);
+            }
           }
+        } catch(InterruptedException e) {
+          e.printStackTrace();
         }
-
         return null;
       }
 
