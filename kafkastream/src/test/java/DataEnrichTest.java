@@ -1,14 +1,12 @@
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -18,34 +16,34 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Printed;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.streams.state.WindowStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.chedaojunan.report.client.RegeoClient;
 import com.chedaojunan.report.model.AutoGraspRequest;
-import com.chedaojunan.report.model.DatahubDeviceData;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import com.chedaojunan.report.model.FixedFrequencyAccessGpsData;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
 import com.chedaojunan.report.serdes.ArrayListSerde;
 import com.chedaojunan.report.serdes.SerdeFactory;
-import com.chedaojunan.report.service.ExternalApiExecutorService;
-import com.chedaojunan.report.transformer.AccessDataTransformerSupplier;
 import com.chedaojunan.report.utils.FixedFrequencyAccessDataTimestampExtractor;
 import com.chedaojunan.report.utils.KafkaConstants;
 import com.chedaojunan.report.utils.ReadProperties;
 import com.chedaojunan.report.utils.SampledDataCleanAndRet;
-import com.chedaojunan.report.utils.WriteDatahubUtil;
 
 public class DataEnrichTest {
 
   private static final Logger logger = LoggerFactory.getLogger(DataEnrichTest.class);
   private static final long TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS = 10000000000L;
+  private static final String EVENT_ID_DELIMITER = "-";
+
+  private static final String dedupStoreName = "testStateStore";
 
   private static Properties kafkaProperties = null;
 
@@ -57,6 +55,8 @@ public class DataEnrichTest {
 
   private static final ArrayListSerde<String> arrayListStringSerde;
 
+  private static final ArrayListSerde<FixedFrequencyAccessData> arrayListFixedFrequencyDataSerde;
+
   private static RegeoClient regeoClient;
 
   private static AutoGraspApiClient autoGraspApiClient;
@@ -67,6 +67,7 @@ public class DataEnrichTest {
     Map<String, Object> serdeProp = new HashMap<>();
     fixedFrequencyAccessDataSerde = SerdeFactory.createSerde(FixedFrequencyAccessData.class, serdeProp);
     arrayListStringSerde = new ArrayListSerde<>(stringSerde);
+    arrayListFixedFrequencyDataSerde = new ArrayListSerde<>(fixedFrequencyAccessDataSerde);
     kafkaWindowLengthInSeconds = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.KAFKA_WINDOW_DURATION));
     autoGraspApiClient = AutoGraspApiClient.getInstance();
     regeoClient = RegeoClient.getInstance();
@@ -74,6 +75,13 @@ public class DataEnrichTest {
 
   public static void main(String[] args) {
     String rawDataTopic = kafkaProperties.getProperty(KafkaConstants.KAFKA_RAW_DATA_TOPIC);
+    //String outputTopic = kafkaProperties.getProperty(KafkaConstants.KAFKA_OUTPUT_TOPIC);
+
+    /*
+     * 1. sample data within the window
+     * 2. make gaode API calls
+     * 3. enrich raw data within the window and output to the output topic
+    */
 
     final KafkaStreams sampledRawDataStream = buildDataStream(rawDataTopic);
 
@@ -97,32 +105,52 @@ public class DataEnrichTest {
         Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, FixedFrequencyAccessDataTimestampExtractor.class);
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getProperty(KafkaConstants.AUTO_OFFSET_RESET_CONFIG));
+    // The commit interval for flushing records to state stores and downstream must be lower than
+    // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, TimeUnit.SECONDS.toMillis(30));
+    // Use a temporary directory for storing state, which will be automatically removed after the test.
+    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/Users/qianz/Documents/Misc/Work-beijing/");
 
     return streamsConfiguration;
   }
 
   static KafkaStreams buildDataStream(String inputTopic) {
+    long maintainDurationPerEventInMs = TimeUnit.MINUTES.toMillis(2);
+    // The number of segments has no impact on "correctness".
+    // Using more segments implies larger overhead but allows for more fined grained record expiration
+    // Note: the specified retention time is a _minimum_ time span and no strict upper time bound
+    int numberOfSegments = 3; //???
+
+    // retention period must be at least window size -- for this use case, we don't need a longer retention period
+    // and thus just use the window size as retention time
+    long retentionPeriod = maintainDurationPerEventInMs;
+
+
     final Properties streamsConfiguration = getStreamConfig();
 
     StreamsBuilder builder = new StreamsBuilder();
-    StoreBuilder<KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>> rawDataStore = Stores.keyValueStoreBuilder(
-        Stores.persistentKeyValueStore("rawDataStoreTest1"),
+    /*StoreBuilder<KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>> rawDataStore = Stores.keyValueStoreBuilder(
+        Stores.persistentKeyValueStore(dedupStoreName),
         Serdes.String(),
         new ArrayListSerde(fixedFrequencyAccessDataSerde));
-        //.withCachingEnabled();
+        //.withCachingEnabled();*/
 
 
-    WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
+    StoreBuilder<WindowStore<String, Long>> dedupStoreBuilder = Stores.windowStoreBuilder(
+        Stores.persistentWindowStore(dedupStoreName,
+            retentionPeriod,
+            numberOfSegments,
+            maintainDurationPerEventInMs,
+            false
+        ),
+        Serdes.String(),
+        Serdes.Long());
 
-    builder.addStateStore(rawDataStore);
+    builder.addStateStore(dedupStoreBuilder);
 
-    KStream<String, String> kStream = builder.stream(inputTopic);
+    KStream<String, String> inputStream = builder.stream(inputTopic);
 
-    final KStream<String, String> orderedDataStream = kStream
-        .map(
-            (key, rawDataString) ->
-                new KeyValue<>(SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getDeviceId(), rawDataString)
-        )
+    KStream<String, String> windowedRawData = inputStream
         .groupByKey()
         .windowedBy(TimeWindows.of(TimeUnit.SECONDS.toMillis(kafkaWindowLengthInSeconds)).until(TimeUnit.SECONDS.toMillis(kafkaWindowLengthInSeconds)))
         .aggregate(
@@ -138,167 +166,62 @@ public class DataEnrichTest {
         .map((windowedString, accessDataList) -> {
           long windowStartTime = windowedString.window().start();
           long windowEndTime = windowedString.window().end();
-          String dataKey = String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime));
-          return new KeyValue<>(dataKey, accessDataList);
+          String windowIdString = String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime));
+          return new KeyValue<>(windowIdString, accessDataList);
         })
-        .flatMapValues(accessDataList -> accessDataList.stream().collect(Collectors.toList()));
+        .flatMapValues(
+            accessDataList ->
+                accessDataList
+                    .stream()
+                    .collect(Collectors.toList())
+        );
 
-    orderedDataStream.print();
+    //windowedRawDataDedup: windowStart-windowEnd, rawDataString
+    KStream<String, String> windowedRawDataDedup = windowedRawData
+        .transform(
+            () -> new DataDuduplicationTransformer<>(
+                maintainDurationPerEventInMs,
+                (key, value) -> eventIdForDedup(value)),
+            dedupStoreName
+        );
 
-    KStream<String, ArrayList<ArrayList<FixedFrequencyAccessData>>> dedupOrderedDataStream =
-        orderedDataStream.transform(new AccessDataTransformerSupplier(rawDataStore.name()), rawDataStore.name());
+    windowedRawDataDedup.print(Printed.toSysOut());
 
-//    dedupOrderedDataStream
-//        .flatMapValues(eventLists ->
-//            eventLists
-//                .stream()
-//                .map(
-//                    eventList ->
-//                        eventList.stream()
-//                            .map(data -> data.getTripId())
-//                            .collect(Collectors.toList())
-//                ).collect(Collectors.toList())
-//        )
-//        .print();
-
-    dedupOrderedDataStream
-        .flatMapValues(accessDataLists -> {
-          ArrayList<DatahubDeviceData> enrichedDataList = new ArrayList<>();
-          List<Future<?>> futures = accessDataLists
-              .stream()
-              .map(
-                  accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    // 坐标转化接口调用
-                    List<FixedFrequencyAccessGpsData> coordinateConvertResponseList;
-                    coordinateConvertResponseList = SampledDataCleanAndRet.getCoordinateConvertResponseList(accessDataList);
-//                    System.out.println("coordinateConvertResponseList: " + coordinateConvertResponseList.size());
-//                    coordinateConvertResponseList.sort(SampledDataCleanAndRet.sortingByServerTime);
-                    ArrayList<FixedFrequencyAccessGpsData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(coordinateConvertResponseList));
-                    AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
-//                    System.out.println("apiQuest: " + autoGraspRequest);
-                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();
-                    if (autoGraspRequest != null)
-                      gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
-                    ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(coordinateConvertResponseList, sampledDataList, gaodeApiResponseList);
-
-                    ArrayList<DatahubDeviceData> enrichedDataOver = null;
-                    if (enrichedData != null) {
-                        enrichedDataOver = regeoClient.getRegeoFromResponse(enrichedData);
-                    }
-                    if (enrichedDataOver != null) {
-                        try {
-                            // 整合数据入库datahub
-                            if (CollectionUtils.isNotEmpty(enrichedDataOver)) {
-//                                System.out.println("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
-                                logger.info("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
-                                writeDatahubUtil.putRecords(enrichedDataOver);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-//                        enrichedDataOver
-//                                .stream()
-//                                .forEach(data -> enrichedDataList.add(data));
-                    }
-                  })
-              ).collect(Collectors.toList());
-          ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
-
-          return enrichedDataList;
-        });
-
-    return new KafkaStreams(builder.build(), streamsConfiguration);
-
-  }
-
-  /*static KafkaStreams buildDataStreamNew (String inputTopic) {
-    final Properties streamsConfiguration = getStreamConfig();
-
-    KStreamBuilder builder = new KStreamBuilder();
-    KStream<String, String> kStream = builder.stream(inputTopic);
-    WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
-
-    final KStream<Windowed<String>, FixedFrequencyIntegrationData> enrichedDataStream = kStream
-        //final KStream<Windowed<String>, String> enrichedDataStream = kStream
-        .map(
-            (key, rawDataString) ->
-                new KeyValue<>(ALL_KEY, rawDataString)
-        )
+    /*KStream<String, ArrayList<FixedFrequencyIntegrationData>> test1 = windowedRawDataDedup
+        .mapValues(rawDataString -> SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString))
         .groupByKey()
         .aggregate(
-            // the initializer
-            () -> {
-              return new ArrayList<>();
+            () -> new ArrayList<>(),
+            (windowedCarId, record, list) -> {
+              if (!list.contains(record))
+                list.add(record);
+              return list;
             },
-            // the "add" aggregator
-            (windowedCarId, record, queue) -> {
-              if (!queue.contains(record))
-                queue.add(record);
-              return queue;
-            },
-            TimeWindows.of(TimeUnit.SECONDS.toMillis(kafkaWindowLengthInSeconds)),
-            new ArrayListSerde<>(stringSerde)
+            Materialized.with(stringSerde, arrayListFixedFrequencyDataSerde)
         )
         .toStream()
-        .mapValues(accessDataStringList ->
-            accessDataStringList
-                .stream()
-                .map(rawAccessDataString ->
-                    SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawAccessDataString))
-                .collect(Collectors.toCollection(ArrayList::new))
-        )
-        //KStream<Windowed<String>, ArrayList<FixedFrequencyAccessData>> -> KStream<Windowed<String>, ArrayList<ArrayList<FixedFrequencyAccessData>>>
-        .mapValues(accessDataList -> {
-          ArrayList<ArrayList<FixedFrequencyAccessData>> accessDataByDeviceIdList = accessDataList
-              .stream()
-              .collect(Collectors.groupingBy(FixedFrequencyAccessData::getDeviceId))
-              .values()
-              .stream()
-              .map(list -> list.stream()
-                  .reduce(new ArrayList<FixedFrequencyAccessData>(),
-                      (list1, data) -> {
-                        list1.add(data);
-                        return list1;
-                      },
-                      (list1, list2) -> {
-                        list1.addAll(list2);
-                        return list1;
-                      })
-              ).collect(Collectors.toCollection(ArrayList::new));
-          return accessDataByDeviceIdList;
-        })
-        //KStream<Windowed<String>, ArrayList<ArrayList<FixedFrequencyAccessData>>>
-        .flatMapValues(accessDataByDeviceIdList -> {
-          ArrayList<FixedFrequencyIntegrationData> enrichedDatList = new ArrayList<>();
-          List<Future<?>> futures = accessDataByDeviceIdList
-              .stream()
-              .map(
-                  accessDataList -> ExternalApiExecutorService.getExecutorService().submit(() -> {
-                    accessDataList.sort(sortingByServerTime);
-                    ArrayList<FixedFrequencyAccessData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(accessDataList));
-                    AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
-                    System.out.println("apiQuest: " + autoGraspRequest);
-                    List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();
-                    if (autoGraspRequest != null)
-                      gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
-                    ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(accessDataList, sampledDataList, gaodeApiResponseList);
-                    enrichedData
-                        .stream()
-                        .forEach(data -> enrichedDatList.add(data));
-                  })
-              ).collect(Collectors.toList());
-          ExternalApiExecutorService.getFuturesWithTimeout(futures, TIMEOUT_PER_GAODE_API_REQUEST_IN_NANO_SECONDS, "calling Gaode API");
-          // 整合数据入库datahub
-          if (CollectionUtils.isNotEmpty(enrichedDatList)) {
-            writeDatahubUtil.putRecords(enrichedDatList);
-          }
-          return enrichedDatList;
+        .map((windowId, accessDataList) -> {
+            // 坐标转化接口调用
+            List<FixedFrequencyAccessGpsData> coordinateConvertResponseList;
+            coordinateConvertResponseList = SampledDataCleanAndRet.getCoordinateConvertResponseList(accessDataList);
+            ArrayList<FixedFrequencyAccessGpsData> sampledDataList = SampledDataCleanAndRet.sampleKafkaData(new ArrayList<>(coordinateConvertResponseList));
+            AutoGraspRequest autoGraspRequest = SampledDataCleanAndRet.autoGraspRequestRet(sampledDataList);
+            List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();
+            if (autoGraspRequest != null)
+              gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
+            ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(coordinateConvertResponseList, sampledDataList, gaodeApiResponseList);
+            return new KeyValue<>(windowId, enrichedData);
         });
 
-//    enrichedDataStream.print();
+    test1.print(Printed.toSysOut());*/
 
-    return new KafkaStreams(builder, streamsConfiguration);
+    return new KafkaStreams(builder.build(), streamsConfiguration);
+  }
 
-  }*/
+  private static String eventIdForDedup(String rawDataString){
+    return StringUtils.join(EVENT_ID_DELIMITER,
+        SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getDeviceId(),
+        SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getLocalTime()
+    );
+  }
 }

@@ -153,10 +153,23 @@ public class AccessDataTransformerSupplier
         //String currentWindowKey = key;
         String previousWindowKey = String.join(KafkaConstants.HYPHEN, stateStoreKey, "previous");
 
-        try {
-          stateStore = (KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>) waitUntilStoreIsQueryable(stateStoreName);
-          ArrayList<FixedFrequencyAccessData> currentEventList = stateStore.get(stateStoreKey);
-          stateStore = (KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>) waitUntilStoreIsQueryable(stateStoreName);
+       // try {
+          //stateStore = (KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>) waitUntilStoreIsQueryable(stateStoreName);
+        ArrayList<FixedFrequencyAccessData> currentEventList;
+        while(true) {
+          if (stateStore.isOpen()) {
+            currentEventList = stateStore.get(stateStoreKey);
+            break;
+          }
+          else {
+            try {
+              Thread.sleep(500);
+            } catch (InterruptedException e){
+              e.printStackTrace();
+            }
+          }
+        }
+          //stateStore = (KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>) waitUntilStoreIsQueryable(stateStoreName);
           ArrayList<FixedFrequencyAccessData> previousEventList = stateStore.get(previousWindowKey);
 
           if (CollectionUtils.isEmpty(previousEventList) ||
@@ -168,9 +181,9 @@ public class AccessDataTransformerSupplier
               stateStore.put(stateStoreKey, currentEventList);
             }
           }
-        } catch(InterruptedException e) {
+        /*} catch(InterruptedException e) {
           e.printStackTrace();
-        }
+        }*/
         return null;
       }
 
