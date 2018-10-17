@@ -1,3 +1,4 @@
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -6,6 +7,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.chedaojunan.report.client.AutoGraspApiClient;
 import com.chedaojunan.report.client.RegeoClient;
 import com.chedaojunan.report.model.AutoGraspRequest;
+import com.chedaojunan.report.model.DatahubDeviceData;
 import com.chedaojunan.report.model.FixedFrequencyAccessData;
 import com.chedaojunan.report.model.FixedFrequencyAccessGpsData;
 import com.chedaojunan.report.model.FixedFrequencyIntegrationData;
@@ -36,6 +39,7 @@ import com.chedaojunan.report.utils.FixedFrequencyAccessDataTimestampExtractor;
 import com.chedaojunan.report.utils.KafkaConstants;
 import com.chedaojunan.report.utils.ReadProperties;
 import com.chedaojunan.report.utils.SampledDataCleanAndRet;
+import com.chedaojunan.report.utils.WriteDatahubUtil;
 
 public class DataEnrichTest {
 
@@ -53,9 +57,15 @@ public class DataEnrichTest {
 
   private static final Serde<FixedFrequencyAccessData> fixedFrequencyAccessDataSerde;
 
+  private static final Serde<FixedFrequencyIntegrationData> fixedFrequencyIntegrationDataSerde;
+
+
   private static final ArrayListSerde<String> arrayListStringSerde;
 
   private static final ArrayListSerde<FixedFrequencyAccessData> arrayListFixedFrequencyDataSerde;
+
+  private static final ArrayListSerde<FixedFrequencyIntegrationData> arrayListFixedFrequencyIntegrationDataSerde;
+
 
   private static RegeoClient regeoClient;
 
@@ -66,8 +76,10 @@ public class DataEnrichTest {
     stringSerde = Serdes.String();
     Map<String, Object> serdeProp = new HashMap<>();
     fixedFrequencyAccessDataSerde = SerdeFactory.createSerde(FixedFrequencyAccessData.class, serdeProp);
+    fixedFrequencyIntegrationDataSerde = SerdeFactory.createSerde(FixedFrequencyIntegrationData.class, serdeProp);
     arrayListStringSerde = new ArrayListSerde<>(stringSerde);
     arrayListFixedFrequencyDataSerde = new ArrayListSerde<>(fixedFrequencyAccessDataSerde);
+    arrayListFixedFrequencyIntegrationDataSerde = new ArrayListSerde<>(fixedFrequencyIntegrationDataSerde);
     kafkaWindowLengthInSeconds = Integer.parseInt(kafkaProperties.getProperty(KafkaConstants.KAFKA_WINDOW_DURATION));
     autoGraspApiClient = AutoGraspApiClient.getInstance();
     regeoClient = RegeoClient.getInstance();
@@ -75,7 +87,7 @@ public class DataEnrichTest {
 
   public static void main(String[] args) {
     String rawDataTopic = kafkaProperties.getProperty(KafkaConstants.KAFKA_RAW_DATA_TOPIC);
-    //String outputTopic = kafkaProperties.getProperty(KafkaConstants.KAFKA_OUTPUT_TOPIC);
+    String outputTopic = kafkaProperties.getProperty(KafkaConstants.KAFKA_OUTPUT_TOPIC);
 
     /*
      * 1. sample data within the window
@@ -129,6 +141,8 @@ public class DataEnrichTest {
     final Properties streamsConfiguration = getStreamConfig();
 
     StreamsBuilder builder = new StreamsBuilder();
+
+    WriteDatahubUtil writeDatahubUtil = new WriteDatahubUtil();
     /*StoreBuilder<KeyValueStore<String, ArrayList<FixedFrequencyAccessData>>> rawDataStore = Stores.keyValueStoreBuilder(
         Stores.persistentKeyValueStore(dedupStoreName),
         Serdes.String(),
@@ -166,7 +180,7 @@ public class DataEnrichTest {
         .map((windowedString, accessDataList) -> {
           long windowStartTime = windowedString.window().start();
           long windowEndTime = windowedString.window().end();
-          String windowIdString = String.join("-", String.valueOf(windowStartTime), String.valueOf(windowEndTime));
+          String windowIdString = String.join(KafkaConstants.HYPHEN, String.valueOf(windowStartTime), String.valueOf(windowEndTime));
           return new KeyValue<>(windowIdString, accessDataList);
         })
         .flatMapValues(
@@ -175,6 +189,9 @@ public class DataEnrichTest {
                     .stream()
                     .collect(Collectors.toList())
         );
+        //.map((windowedString, rawDataString) -> new KeyValue<>(String.join(KafkaConstants.HYPHEN, windowedString, SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString).getDeviceId()), rawDataString));
+
+    //windowedRawData.print(Printed.toSysOut());
 
     //windowedRawDataDedup: windowStart-windowEnd, rawDataString
     KStream<String, String> windowedRawDataDedup = windowedRawData
@@ -185,10 +202,10 @@ public class DataEnrichTest {
             dedupStoreName
         );
 
-    windowedRawDataDedup.print(Printed.toSysOut());
+    //windowedRawDataDedup.print(Printed.toSysOut());
 
-    /*KStream<String, ArrayList<FixedFrequencyIntegrationData>> test1 = windowedRawDataDedup
-        .mapValues(rawDataString -> SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString))
+    KStream<String, FixedFrequencyIntegrationData> test1 = windowedRawDataDedup
+    //KStream<String, String> test1 = windowedRawDataDedup
         .groupByKey()
         .aggregate(
             () -> new ArrayList<>(),
@@ -197,10 +214,14 @@ public class DataEnrichTest {
                 list.add(record);
               return list;
             },
-            Materialized.with(stringSerde, arrayListFixedFrequencyDataSerde)
+            Materialized.with(stringSerde, arrayListStringSerde)
         )
         .toStream()
-        .map((windowId, accessDataList) -> {
+        .map((windowId, rawDataList) -> {
+            List<FixedFrequencyAccessData> accessDataList = rawDataList
+                .stream()
+                .map(rawDataString -> SampledDataCleanAndRet.convertToFixedAccessDataPojo(rawDataString))
+                .collect(Collectors.toList());
             // 坐标转化接口调用
             List<FixedFrequencyAccessGpsData> coordinateConvertResponseList;
             coordinateConvertResponseList = SampledDataCleanAndRet.getCoordinateConvertResponseList(accessDataList);
@@ -209,11 +230,34 @@ public class DataEnrichTest {
             List<FixedFrequencyIntegrationData> gaodeApiResponseList = new ArrayList<>();
             if (autoGraspRequest != null)
               gaodeApiResponseList = autoGraspApiClient.getTrafficInfoFromAutoGraspResponse(autoGraspRequest);
-            ArrayList<FixedFrequencyIntegrationData> enrichedData = SampledDataCleanAndRet.dataIntegration(coordinateConvertResponseList, sampledDataList, gaodeApiResponseList);
-            return new KeyValue<>(windowId, enrichedData);
-        });
+            ArrayList<FixedFrequencyIntegrationData> enrichedDataList = SampledDataCleanAndRet.dataIntegration(coordinateConvertResponseList, sampledDataList, gaodeApiResponseList);
+          ArrayList<DatahubDeviceData> enrichedDataOver = null;
+          if (enrichedDataList != null) {
+            enrichedDataOver = regeoClient.getRegeoFromResponse(enrichedDataList);
+          }
+          if (enrichedDataOver != null) {
+            try {
+              // 整合数据入库datahub
+              if (CollectionUtils.isNotEmpty(enrichedDataOver)) {
+                System.out.println("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
+                //logger.info("write to DataHub: " + Instant.now().toString() + "enrichedDataOver.size(): " + enrichedDataOver.size());
+                writeDatahubUtil.putRecords(enrichedDataOver);
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+            return new KeyValue<>(windowId, enrichedDataList);
+        })
+        .flatMapValues(
+            enrichedDataList ->
+                enrichedDataList
+                  .stream()
+                  //.map(enrichedData -> enrichedData.toString())
+                  .collect(Collectors.toList())
+        );
 
-    test1.print(Printed.toSysOut());*/
+    test1.print(Printed.toSysOut());
 
     return new KafkaStreams(builder.build(), streamsConfiguration);
   }

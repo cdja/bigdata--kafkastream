@@ -35,13 +35,16 @@ public class KafkaProducerTest005 {
 
     String serverTime = System.currentTimeMillis() + "";
 
-    for (int j = 0; j < 500; j++) {
+    for (int j = 0; j < 1000; j++) {
       FixedFrequencyAccessData accessData;
       accessData = new FixedFrequencyAccessData();
       accessData.setDeviceId("test000000" + j +"");
       accessData.setDeviceImei("test000000");
       accessData.setTripId("8c09580045634d72a9d2912d0a8c6c9b");
-      accessData.setLocalTime("1521478861000");
+      if (i % 2 == 0)
+        accessData.setLocalTime("1521478861000" + i);
+      else
+        accessData.setLocalTime("15214788610000");
       accessData.setServerTime(serverTime);
       accessData.setLatitude(29.999921798706055+0.00001*j);
       accessData.setLongitude(121.2059555053711+0.00001*j);
